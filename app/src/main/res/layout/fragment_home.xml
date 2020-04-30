@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.statistics.StatisticsFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/stats_global_header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:paddingTop="8dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/stats_global_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="Global"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"/>
+        <TextView
+            android:id="@+id/stats_global_last_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:paddingTop="8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/stats_global_header"
+            app:layout_constraintStart_toEndOf="@id/stats_global_header"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <GridLayout
+            android:id="@+id/stats_global_grid_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="5"
+            android:background="@color/colorPrimary"
+            app:layout_constraintTop_toBottomOf="@id/stats_global_header_layout">
+
+            <TextView
+                android:id="@+id/stats_global_confirmed_label"
+                android:layout_marginStart="8dp"
+                android:paddingRight="16dp"
+                android:text="Confirmed: "
+                android:textColor="@color/white" />
+            <TextView
+                android:id="@+id/stats_global_confirmed_value"
+                android:textColor="@color/white"
+                android:textAlignment="textEnd"
+                android:text="x,xxx,xxx"/>
+
+            <ImageView
+                android:id="@+id/stats_global_confirmed_image"
+                android:contentDescription="@string/arrow_content_description"
+                app:srcCompat="@drawable/ic_arrow_drop_down_green_24dp" />
+            <TextView
+                android:id="@+id/stats_global_confirmed_diff"
+                android:textColor="@color/white"
+                android:textAlignment="textEnd"
+                android:text="x,xxx,xxx"/>
+            <TextView/>
+
+
+            <TextView
+                android:id="@+id/stats_global_deaths_label"
+                android:textColor="@color/white"
+                android:layout_marginStart="8dp"
+                android:text="Deaths: "/>
+            <TextView
+                android:id="@+id/stats_global_deaths_value"
+                android:textColor="@color/white"
+                android:textAlignment="textEnd"
+                android:layout_gravity="end"
+                android:text="xxx,xxx"/>
+            <ImageView
+                android:id="@+id/stats_global_deaths_image"
+                android:contentDescription="@string/arrow_content_description"
+                app:srcCompat="@drawable/ic_arrow_drop_down_yellow_24dp"
+                />
+            <TextView
+                android:id="@+id/stats_global_deaths_diff"
+                android:textColor="@color/white"
+                android:textAlignment="textEnd"
+                android:layout_gravity="end"
+                android:gravity="end"
+                android:text="xxx,xxx"/>
+            <TextView/>
+
+            <TextView
+                android:id="@+id/stats_global_recovered_label"
+                android:textColor="@color/white"
+                android:layout_marginStart="8dp"
+                android:text="Recovered: "/>
+
+            <TextView
+                android:id="@+id/stats_global_recovered_value"
+                android:text="xxx,xxx"
+                android:textAlignment="textEnd"
+                android:layout_gravity="end"
+                android:textColor="@color/white" />
+            <ImageView
+                android:id="@+id/stats_global_recovered_image"
+                android:contentDescription="@string/arrow_content_description"
+                app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"
+                />
+            <TextView
+                android:id="@+id/stats_global_recovered_diff"
+                android:textColor="@color/white"
+                android:textAlignment="textEnd"
+                android:layout_gravity="end"
+                android:text="xxx,xxx"/>
+            <TextView/>
+        </GridLayout>
+
+    <ImageView
+        android:id="@+id/stats_global_globe"
+        android:layout_width="89dp"
+        android:layout_height="89dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_globe_white_128px" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/stats_global_location_list_constraint_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="128dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stats_global_grid_layout">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/stats_global_location_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

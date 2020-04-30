@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#D22C2C</color>
+    <color name="colorPrimaryDark">#6E1B09</color>
+    <color name="colorAccent">#F07249</color>
+
+    <color name="ebony">#5D5F5C</color>
+    <color name="Onyx">#393A3C</color>
+
+    <color name="graphLines">#5D5F5C</color>
+    <color name="colorNavDrawerHeader">#5D5F5C</color>
+    <color name="textPrimary">#393A3C</color>
+    <color name="textAccent">#5D5F5C</color>
+    <color name="white">#FFFFFF</color>
+</resources>

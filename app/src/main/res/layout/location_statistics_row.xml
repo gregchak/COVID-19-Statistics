@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/location_list_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="16dp"
+    >
+
+    <TextView
+        android:id="@+id/location_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintEnd_toStartOf="@+id/location_last_updated_value"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/location_last_updated_value"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/location_name"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <!-- first row (confirmed) -->
+    <TextView
+        android:id="@+id/location_confirmed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Confirmed:"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/location_confirmed_value"
+        app:layout_constraintTop_toBottomOf="@+id/location_name" />
+
+    <TextView
+        android:id="@+id/location_confirmed_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="x,xxx,xxx"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintLeft_toRightOf="@id/location_confirmed"
+        app:layout_constraintRight_toRightOf="@+id/location_confirmed_diff"
+        app:layout_constraintTop_toTopOf="@id/location_confirmed" />
+
+    <TextView
+        android:id="@+id/location_confirmed_diff"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:text="Confirmed Diff:"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintLeft_toRightOf="@id/location_confirmed_value"
+        app:layout_constraintRight_toRightOf="@+id/location_confirmed_diff_value"
+        app:layout_constraintTop_toTopOf="@id/location_confirmed_value" />
+
+    <TextView
+        android:id="@+id/location_confirmed_diff_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="x,xxx,xxx"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintLeft_toRightOf="@id/location_confirmed_diff"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/location_confirmed_diff" />
+
+    <!-- second row (deaths) -->
+    <TextView
+        android:id="@+id/location_deaths"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Deaths:"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/location_deaths_value"
+        app:layout_constraintTop_toBottomOf="@+id/location_confirmed" />
+
+    <TextView
+        android:id="@+id/location_deaths_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="x,xxx,xxx"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintLeft_toRightOf="@id/location_deaths"
+        app:layout_constraintRight_toRightOf="@+id/location_deaths_diff"
+        app:layout_constraintTop_toTopOf="@id/location_deaths" />
+
+    <TextView
+        android:id="@+id/location_deaths_diff"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:text="Deaths Diff:"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintLeft_toRightOf="@id/location_deaths_value"
+        app:layout_constraintRight_toRightOf="@+id/location_deaths_diff_value"
+        app:layout_constraintTop_toTopOf="@id/location_deaths_value" />
+
+    <TextView
+        android:id="@+id/location_deaths_diff_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="x,xxx,xxx"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintLeft_toRightOf="@id/location_deaths_diff"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/location_deaths_diff" />
+
+    <!-- third row (recovered) -->
+    <TextView
+        android:id="@+id/location_recovered"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Recovered:"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/location_recovered_value"
+        app:layout_constraintTop_toBottomOf="@+id/location_deaths" />
+
+    <TextView
+        android:id="@+id/location_recovered_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="x,xxx,xxx"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintLeft_toRightOf="@id/location_recovered"
+        app:layout_constraintRight_toRightOf="@+id/location_recovered_diff"
+        app:layout_constraintTop_toTopOf="@id/location_recovered" />
+
+    <TextView
+        android:id="@+id/location_recovered_diff"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:text="Recovered Diff:"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintLeft_toRightOf="@id/location_recovered_value"
+        app:layout_constraintRight_toRightOf="@+id/location_recovered_diff_value"
+        app:layout_constraintTop_toTopOf="@id/location_recovered_value" />
+
+    <TextView
+        android:id="@+id/location_recovered_diff_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="x,xxx,xxx"
+        android:textColor="@color/textPrimary"
+        app:layout_constraintLeft_toRightOf="@id/location_recovered_diff"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/location_recovered_diff" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
