@@ -37,7 +37,7 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    public LocationStatsRecyclerViewAdapter(Context context, List data)
+    public LocationStatsRecyclerViewAdapter(Context context, List<Location> data)
     {
         this.context = context;
         //this.mInflater = LayoutInflater.from(this.context);

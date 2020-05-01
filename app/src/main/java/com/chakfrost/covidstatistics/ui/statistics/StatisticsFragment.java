@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,7 +40,7 @@ public class StatisticsFragment extends Fragment
 {
     private GlobalStats summary;
     private List<Location> locations;
-    private StatisticsViewModel homeViewModel;
+    //private StatisticsViewModel homeViewModel;
     private TextView globalLastUpdate;
     private TextView confirmedValue;
     private TextView confirmedDiff;
@@ -58,7 +57,7 @@ public class StatisticsFragment extends Fragment
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        homeViewModel = ViewModelProviders.of(this).get(StatisticsViewModel.class);
+        //homeViewModel = ViewModelProviders.of(this).get(StatisticsViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         //final TextView textView = root.findViewById(R.id.text_home);
 

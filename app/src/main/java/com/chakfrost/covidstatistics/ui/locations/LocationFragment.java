@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chakfrost.covidstatistics.CovidApplication;
-import com.chakfrost.covidstatistics.CovidDataStore;
 import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationSimpleListRecyclerViewAdapter;

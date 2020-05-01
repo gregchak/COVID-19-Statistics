@@ -1,6 +1,5 @@
 package com.chakfrost.covidstatistics.services;
 
-import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 

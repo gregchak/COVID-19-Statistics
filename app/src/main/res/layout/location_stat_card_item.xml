@@ -34,7 +34,6 @@
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
                 android:textColor="@color/textPrimary"
-                android:text="location name"
                 app:layout_constraintEnd_toStartOf="@+id/stats_location_last_updated"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="parent"
@@ -44,7 +43,6 @@
                 android:id="@+id/stats_location_last_updated"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="date"
                 android:textColor="@color/textPrimary"
                 android:textSize="10sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -55,9 +53,8 @@
             <lecho.lib.hellocharts.view.LineChartView
                 android:id="@+id/stats_location_chart"
                 android:layout_width="128dp"
-                android:layout_height="64dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="6dp"
+                android:layout_height="70dp"
+                android:layout_marginTop="2dp"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/stats_location_last_updated" />
 
@@ -65,7 +62,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="10sp"
-                android:text="7 day trend of confirmed cases"
+                android:layout_marginTop="4dp"
+                android:text="@string/lbl_seven_day_trend"
                 app:layout_constraintTop_toBottomOf="@+id/stats_location_chart"
                 app:layout_constraintRight_toRightOf="parent"/>
 
@@ -82,14 +80,14 @@
                 <!-- first row -->
                 <TextView
                     android:id="@+id/stats_location_confirmed_label"
-                    android:paddingEnd="16dp"
-                    android:text="Confirmed: "
+                    android:paddingEnd="8dp"
+                    android:text="@string/lbl_confirmed"
                     android:textColor="@color/textPrimary" />
                 <TextView
                     android:id="@+id/stats_location_confirmed_value"
                     android:textColor="@color/textPrimary"
                     android:textAlignment="textEnd"
-                    android:text="x,xxx,xxx"/>
+                    android:text="@string/number"/>
                 <ImageView
                     android:id="@+id/stats_location_confirmed_image"
                     android:contentDescription="@string/arrow_content_description"
@@ -98,7 +96,7 @@
                     android:id="@+id/stats_location_confirmed_diff"
                     android:textColor="@color/textPrimary"
                     android:textAlignment="textEnd"
-                    android:text="x,xxx,xxx"/>
+                    android:text="@string/number"/>
 
                 <TextView/> <!-- placeholder needed for alignment -->
 
@@ -106,13 +104,13 @@
                 <TextView
                     android:id="@+id/stats_location_deaths_label"
                     android:textColor="@color/textPrimary"
-                    android:text="Deaths: "/>
+                    android:text="@string/lbl_deaths"/>
                 <TextView
                     android:id="@+id/stats_location_deaths_value"
                     android:textColor="@color/textPrimary"
                     android:textAlignment="textEnd"
                     android:layout_gravity="end"
-                    android:text="xxx,xxx"/>
+                    android:text="@string/number"/>
                 <ImageView
                     android:id="@+id/stats_location_deaths_image"
                     android:contentDescription="@string/arrow_content_description"
@@ -123,7 +121,7 @@
                     android:textAlignment="textEnd"
                     android:layout_gravity="end"
                     android:gravity="end"
-                    android:text="xxx,xxx"/>
+                    android:text="@string/number"/>
 
                 <TextView/> <!-- placeholder needed for alignment -->
 
@@ -131,10 +129,10 @@
                 <TextView
                     android:id="@+id/stats_location_recovered_label"
                     android:textColor="@color/textPrimary"
-                    android:text="Recovered: "/>
+                    android:text="@string/lbl_recovered"/>
                 <TextView
                     android:id="@+id/stats_location_recovered_value"
-                    android:text="xxx,xxx"
+                    android:text="@string/number"
                     android:textAlignment="textEnd"
                     android:layout_gravity="end"
                     android:textColor="@color/textPrimary" />
@@ -147,7 +145,7 @@
                     android:textColor="@color/textPrimary"
                     android:textAlignment="textEnd"
                     android:layout_gravity="end"
-                    android:text="xxx,xxx"/>
+                    android:text="@string/number"/>
 
                 <TextView/> <!-- placeholder needed for alignment -->
 

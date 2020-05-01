@@ -23,7 +23,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
-        android:text="@string/location_municipality"
+        android:text="@string/lbl_municipality"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/location_spProvinces" />
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
-        android:text="@string/location_province"
+        android:text="@string/lbl_province"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/location_spCountries" />
@@ -56,7 +56,7 @@
         android:layout_marginTop="8dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
-        android:text="@string/location_country"
+        android:text="@string/lbl_country"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -72,9 +72,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/location_txtCountries" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -83,7 +81,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/location_btnAdd"
             android:layout_width="wrap_content"
-            android:text="Add Location"
+            android:text="@string/lbl_add_location"
             android:layout_height="wrap_content"
             android:theme="@style/AppTheme.Material"
             android:textColor="@color/white"
@@ -95,10 +93,11 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintTop_toBottomOf="parent"/>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/back_to_main"
             android:layout_width="wrap_content"
-            android:text="Cancel"
+            android:text="@string/lbl_cancel"
             android:layout_height="wrap_content"
             android:theme="@style/AppTheme.Material"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"

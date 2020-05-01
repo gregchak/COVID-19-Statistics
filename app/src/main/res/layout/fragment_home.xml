@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:text="Global"
+            android:text="@string/lbl_global"
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_marginStart="8dp"
@@ -47,18 +47,18 @@
             android:background="@color/colorPrimary"
             app:layout_constraintTop_toBottomOf="@id/stats_global_header_layout">
 
+            <!-- first row -->
             <TextView
                 android:id="@+id/stats_global_confirmed_label"
                 android:layout_marginStart="8dp"
-                android:paddingRight="16dp"
-                android:text="Confirmed: "
+                android:paddingEnd="12dp"
+                android:text="@string/lbl_confirmed"
                 android:textColor="@color/white" />
             <TextView
                 android:id="@+id/stats_global_confirmed_value"
                 android:textColor="@color/white"
                 android:textAlignment="textEnd"
-                android:text="x,xxx,xxx"/>
-
+                android:text="@string/number"/>
             <ImageView
                 android:id="@+id/stats_global_confirmed_image"
                 android:contentDescription="@string/arrow_content_description"
@@ -67,58 +67,59 @@
                 android:id="@+id/stats_global_confirmed_diff"
                 android:textColor="@color/white"
                 android:textAlignment="textEnd"
-                android:text="x,xxx,xxx"/>
+                android:text="@string/number"/>
             <TextView/>
 
-
+            <!-- second row -->
             <TextView
                 android:id="@+id/stats_global_deaths_label"
                 android:textColor="@color/white"
                 android:layout_marginStart="8dp"
-                android:text="Deaths: "/>
+                android:paddingEnd="12dp"
+                android:text="@string/lbl_deaths"/>
             <TextView
                 android:id="@+id/stats_global_deaths_value"
                 android:textColor="@color/white"
                 android:textAlignment="textEnd"
                 android:layout_gravity="end"
-                android:text="xxx,xxx"/>
+                android:text="@string/number"/>
             <ImageView
                 android:id="@+id/stats_global_deaths_image"
                 android:contentDescription="@string/arrow_content_description"
-                app:srcCompat="@drawable/ic_arrow_drop_down_yellow_24dp"
-                />
+                app:srcCompat="@drawable/ic_arrow_drop_down_yellow_24dp" />
             <TextView
                 android:id="@+id/stats_global_deaths_diff"
                 android:textColor="@color/white"
                 android:textAlignment="textEnd"
                 android:layout_gravity="end"
                 android:gravity="end"
-                android:text="xxx,xxx"/>
+                android:text="@string/number"/>
             <TextView/>
 
+            <!-- third row -->
             <TextView
                 android:id="@+id/stats_global_recovered_label"
                 android:textColor="@color/white"
                 android:layout_marginStart="8dp"
-                android:text="Recovered: "/>
+                android:paddingEnd="12dp"
+                android:text="@string/lbl_recovered"/>
 
             <TextView
                 android:id="@+id/stats_global_recovered_value"
-                android:text="xxx,xxx"
+                android:text="@string/number"
                 android:textAlignment="textEnd"
                 android:layout_gravity="end"
                 android:textColor="@color/white" />
             <ImageView
                 android:id="@+id/stats_global_recovered_image"
                 android:contentDescription="@string/arrow_content_description"
-                app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"
-                />
+                app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp" />
             <TextView
                 android:id="@+id/stats_global_recovered_diff"
                 android:textColor="@color/white"
                 android:textAlignment="textEnd"
                 android:layout_gravity="end"
-                android:text="xxx,xxx"/>
+                android:text="@string/number"/>
             <TextView/>
         </GridLayout>
 
@@ -127,7 +128,8 @@
         android:layout_width="89dp"
         android:layout_height="89dp"
         android:layout_marginTop="12dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@string/img_globe"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_globe_white_128px" />
