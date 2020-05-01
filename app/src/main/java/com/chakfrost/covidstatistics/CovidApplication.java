@@ -65,7 +65,7 @@ public class CovidApplication extends Application
 
         // Instantiate PeriodicWorkRequest
         PeriodicWorkRequest refreshStatsRequest =
-                new PeriodicWorkRequest.Builder(RefreshStatsWorker.class, 1, TimeUnit.HOURS)
+                new PeriodicWorkRequest.Builder(RefreshStatsWorker.class, 4, TimeUnit.HOURS)
                         .setConstraints(constraints)
                         .build();
 
@@ -99,7 +99,7 @@ public class CovidApplication extends Application
         SharedPreferences.Editor editor = preferences.edit();
 
         editor.putBoolean(String.valueOf(R.string.prefs_receiveNotifications), notify);
-        editor.commit();
+        editor.apply();
     }
 
     private static boolean retrieveNotificationPreference()

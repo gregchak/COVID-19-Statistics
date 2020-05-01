@@ -24,7 +24,6 @@ import androidx.appcompat.widget.Toolbar;
 
 public class MainActivity extends AppCompatActivity
 {
-
     private AppBarConfiguration mAppBarConfiguration;
 
     @Override
@@ -32,33 +31,31 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
 
         // Set click event for floating "+" to go to Add Location activity
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(v ->
         {
             Intent locationIntent = new Intent(getApplicationContext(), LocationAdd.class);
             startActivity(locationIntent);
         });
-        //fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-        //        .setAction("Action", null).show());
 
+        // Get navigation views
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        Menu menu = navigationView.getMenu();
-        Switch notificationsSwitch = menu.findItem(R.id.app_bar_switch).getActionView().findViewById(R.id.switch_item);
-        notificationsSwitch.setChecked(CovidApplication.getReceiveNotifications());
 
-        notificationsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        // Set change event for Notifications switch in side nav bar
+        //Menu menu = navigationView.getMenu();
+        Switch notificationsSwitch = navigationView.getMenu().findItem(R.id.app_bar_switch)
+                .getActionView().findViewById(R.id.switch_item);
+        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
         {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-            {
-                CovidApplication.setReceiveNotifications(isChecked);
-            }
+            CovidApplication.setReceiveNotifications(isChecked);
         });
+        notificationsSwitch.setChecked(CovidApplication.getReceiveNotifications());
 
 
         // Passing each menu ID as a set of Ids because each
@@ -77,7 +74,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        //getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 

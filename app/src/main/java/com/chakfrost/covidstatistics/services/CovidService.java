@@ -1,5 +1,6 @@
 package com.chakfrost.covidstatistics.services;
 
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -38,7 +39,7 @@ public class CovidService
 {
     private static final String COVID_19_API_URL = "https://api.covid19api.com";
     private static final String COVID_19_STATISTICS_URL = "https://covid-19-statistics.p.rapidapi.com";
-    private static final String RAPID_KEY_COVID_19_STATISTICS = "f1c4b33103mshe843fad99e58b9ep1ae933jsnd1143d9bcb8f";
+    private static final String RAPID_KEY_COVID_19_STATISTICS = "2b0656f909mshf12452ea67727c5p1cdac2jsn392ca7d9ed82";
 
     /**
      * Gets countries from service
@@ -47,7 +48,6 @@ public class CovidService
      */
     public static void countries(final IServiceCallbackList callback)
     {
-       // RequestQueue queue = CovidRequestQueue.getInstance(CovidApplication.getContext()).getRequestQueue();
         String url = MessageFormat.format("{0}/regions", COVID_19_STATISTICS_URL);
 
         JsonObjectRequest jor = new JsonObjectRequest(
@@ -62,7 +62,6 @@ public class CovidService
                     // Set local list
                     List<Country> countries = new ArrayList<>();
 
-                    // COVID-19 Statistics
                     try
                     {
                         // Loop through data array
@@ -80,7 +79,6 @@ public class CovidService
                 error ->
                 {
                     VolleyLog.e("CovidService.Countries()", error.toString());
-                    //Log.e("onErrorResponse", error.toString());
                     callback.onError(error);
                 }
         )
@@ -96,7 +94,6 @@ public class CovidService
 
         // Add request to queue
         CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
-        //queue.add(jor);
     }
 
     /**
@@ -110,7 +107,6 @@ public class CovidService
         if (null == country)
             return;
 
-        //RequestQueue queue = CovidRequestQueue.getInstance(CovidApplication.getContext()).getRequestQueue();
         String url = MessageFormat.format("{0}/provinces?iso={1}", COVID_19_STATISTICS_URL, country.getISO2());
 
         JsonObjectRequest jor = new JsonObjectRequest(
@@ -142,7 +138,6 @@ public class CovidService
                 error ->
                 {
                     VolleyLog.e("CovidService.Provinces()", error.toString());
-                    //Log.e("onErrorResponse", error.getMessage());
                     callback.onError(error);
                 }
         )
@@ -158,7 +153,6 @@ public class CovidService
 
         // Add request to queue
         CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
-        //queue.add(jor);
     }
 
     /**
@@ -169,10 +163,7 @@ public class CovidService
      * @param region    Name of the region/country
      * @param callback  The callback method(s) called after data is received from the service
      */
-    public static void municipalities(final String iso, final String province, final String region, final IServiceCallbackList callback)
-    {
-        //RequestQueue queue = CovidRequestQueue.getInstance(CovidApplication.getContext()).getRequestQueue();
-
+    public static void municipalities(final String iso, final String province, final String region, final IServiceCallbackList callback) {
         String url;
         if (null == province || province.equals(""))
             url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}", COVID_19_STATISTICS_URL, iso, region);
@@ -212,7 +203,6 @@ public class CovidService
                 error ->
                 {
                     VolleyLog.e("CovidService.Municipalities()", error.toString());
-                    //Log.e("onErrorResponse", error.getMessage());
                     callback.onError(error);
                 }
         )
@@ -228,7 +218,6 @@ public class CovidService
 
         // Add request to queue
         CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
-        //queue.add(jor);
     }
 
     /**
@@ -245,26 +234,29 @@ public class CovidService
     public static void report(final String iso, final String province, final String region, final String municipality,
                               final Calendar dateToCheck, final IServiceCallbackCovidStats callback)
     {
-        //RequestQueue queue = CovidRequestQueue.getInstance(CovidApplication.getContext()).getRequestQueue();
         String url;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        if (TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
-            url = MessageFormat.format("{0}/reports?iso={1}&date={2}",
-                    COVID_19_STATISTICS_URL, iso, dateFormat.format(dateToCheck.getTime()));
-        else if (!TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
-            url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}&date={3}&region_province={4}",
-                    COVID_19_STATISTICS_URL, iso, region, dateFormat.format(dateToCheck.getTime()), province);
-        else
-            url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}&date={3}&region_province={4}&city_name={5}",
-                    COVID_19_STATISTICS_URL, iso, region, dateFormat.format(dateToCheck.getTime()), province, municipality);
+        url = MessageFormat.format("{0}/reports?iso={1}",COVID_19_STATISTICS_URL, iso);
+        if (!TextUtils.isEmpty(region))
+            url = MessageFormat.format("{0}&region_name={1}", url, region);
+        if (!TextUtils.isEmpty(province))
+            url = MessageFormat.format("{0}&region_province={1}", url, province);
+        if (!TextUtils.isEmpty(municipality))
+            url = MessageFormat.format("{0}&city_name={1}", url, municipality);
+        if (null != dateToCheck)
+            url = MessageFormat.format("{0}&date={1}", url, dateFormat.format(dateToCheck.getTime()));
 
-//        if (null == province || province.equals(""))
-//            url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}&date={3}",
-//                    COVID_19_STATISTICS_URL, iso, region, dateFormat.format(dateToCheck.getTime()));
-//        else
+//        if (TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
+//            url = MessageFormat.format("{0}/reports?iso={1}&date={2}",
+//                    COVID_19_STATISTICS_URL, iso, dateFormat.format(dateToCheck.getTime()));
+//        else if (!TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
 //            url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}&date={3}&region_province={4}",
 //                    COVID_19_STATISTICS_URL, iso, region, dateFormat.format(dateToCheck.getTime()), province);
+//        else
+//            url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}&date={3}&region_province={4}&city_name={5}",
+//                    COVID_19_STATISTICS_URL, iso, region, dateFormat.format(dateToCheck.getTime()), province, municipality);
+
 
         Log.d("CovidService.Report()", url);
 
@@ -305,15 +297,6 @@ public class CovidService
                                 result.setTotalRecovered(result.getTotalRecovered() + r.Recovered);
                                 result.setDiffRecovered(result.getDiffRecovered() + r.RecoveredDiff);
 
-//                                result.TotalConfirmed += r.Confirmed;
-//                                result.TotalDeaths += r.Deaths;
-//                                result.DiffConfirmed += r.ConfirmedDiff;
-//                                result.DiffDeaths += r.DeathsDiff;
-//
-//                                result.TotalRecovered += r.Recovered;
-//                                result.DiffRecovered += r.RecoveredDiff;
-
-
                             }
                             else // province and municipality are both not null
                             {
@@ -331,10 +314,6 @@ public class CovidService
                                 result.setDiffConfirmed(m.ConfirmedDiff);
                                 result.setDiffDeaths(m.DeathsDiff);
 
-//                                result.TotalConfirmed = r.Confirmed;
-//                                result.TotalDeaths = r.Deaths;
-//                                result.DiffConfirmed = r.ConfirmedDiff;
-//                                result.DiffDeaths = r.DeathsDiff;
                             }
                         }
 
@@ -353,7 +332,6 @@ public class CovidService
                         VolleyLog.e("CovidService.Report()", error.toString());
                     else
                         VolleyLog.e("CovidService.Report()", "Error occurred while executing CovidService.Report()");
-                    //Log.e("onErrorResponse", "Error occurred while executing ConvidService.Report()");
                     callback.onError(error);
                 }
         )
@@ -369,7 +347,6 @@ public class CovidService
 
         // Add request to queue
         CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
-        //queue.add(jor);
     }
 
     /**
@@ -379,7 +356,6 @@ public class CovidService
      */
     public static void summary(IserviceCallbackGlobalStats callback)
     {
-        //RequestQueue queue = CovidRequestQueue.getInstance(CovidApplication.getContext()).getRequestQueue();
         String url = MessageFormat.format("{0}/summary", COVID_19_API_URL);
 
         JsonObjectRequest jor = new JsonObjectRequest(
@@ -401,28 +377,18 @@ public class CovidService
                     result.setNewRecovered(summary.Global.NewRecovered);
                     result.setTotalRecovered(summary.Global.TotalRecovered);
 
-//                    result.StatusDate = new Date();
-//                    result.NewConfirmed = summary.Global.NewConfirmed;
-//                    result.TotalConfirmed = summary.Global.TotalConfirmed;
-//                    result.NewDeaths = summary.Global.NewDeaths;
-//                    result.TotalDeaths = summary.Global.TotalDeaths;
-//                    result.NewRecovered = summary.Global.NewRecovered;
-//                    result.TotalRecovered = summary.Global.TotalRecovered;
-
                     callback.onSuccess(result);
                 },
 
                 error ->
                 {
                     VolleyLog.e("CovidService.Summary()", error.toString());
-                    //Log.e("onErrorResponse", error.toString());
                     callback.onError(error);
                 }
         );
 
         // Add request to queue
         CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
-        //queue.add(jor);
     }
 }
 
