@@ -7,7 +7,7 @@ Locations can be as broad as a country or as specific as a municipality dependin
 https://covid19api.com/  
 https://github.com/axisbits/covid-api
 
-Color scheme recommendations from:
+Color scheme recommendations from: 
 https://www.schemecolor.com/coronavirus-covid-19-color-scheme.php 
 https://www.seas.harvard.edu/office-communications/brand-style-guide/color-palette  
 
