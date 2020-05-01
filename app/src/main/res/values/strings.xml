@@ -3,7 +3,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">COVID-19 Statistics</string>
-    <string name="nav_header_subtitle"></string>
+    <string name="nav_header_subtitle">Coronavirus</string>
     <string name="nav_header_desc">Navigation header</string>
 
     <string name="action_settings">Settings</string>
@@ -31,4 +31,23 @@
 
     <!-- Preferences -->
     <string name="prefs_receiveNotifications">RECEIVE_NOTIFICATIONS</string>
+
+    <!-- Content Descriptions -->
+    <string name="img_globe">Globe</string>
+    <string name="img_trashcan">Delete</string>
+
+    <!-- Placeholders -->
+    <string name="number">x,xxx,xxx</string>
+
+    <!-- Labels -->
+    <string name="lbl_country">Select Country</string>
+    <string name="lbl_province">Select State/Province</string>
+    <string name="lbl_municipality">Select City/Municipality</string>
+    <string name="lbl_add_location">Add Location</string>
+    <string name="lbl_cancel">Cancel</string>
+    <string name="lbl_global">Global</string>
+    <string name="lbl_confirmed">Confirmed:</string>
+    <string name="lbl_deaths">Deaths:</string>
+    <string name="lbl_recovered">Recovered:</string>
+    <string name="lbl_seven_day_trend">7 day trend of confirmed cases</string>
 </resources>

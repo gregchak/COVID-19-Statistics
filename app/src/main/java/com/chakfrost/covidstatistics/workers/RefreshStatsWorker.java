@@ -51,13 +51,13 @@ public class RefreshStatsWorker extends Worker
             RefreshLocationStats();
 
             // If there are location updates, send notification
-            //if (newData.size() > 0)
-            //{
+            if (newData.size() > 0)
+            {
                 CovidApplication.sendNotification
                         ("Location Update",
                                 "Your tracked locations have new COVID-19 stats available",
                                 context);
-            //}
+            }
 
             return Result.success();
         }
@@ -103,8 +103,7 @@ public class RefreshStatsWorker extends Worker
              @Override
              public void onSuccess(GlobalStats stats)
              {
-                 GlobalStats global = stats;
-                 CovidApplication.setGlobalStats(global);
+                 CovidApplication.setGlobalStats(stats);
              }
 
              @Override

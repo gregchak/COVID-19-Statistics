@@ -11,11 +11,11 @@
         android:label="@string/menu_stats"
         tools:layout="@layout/fragment_home">
 
-        <action
+    <!--    <action
             android:id="@+id/action_HomeFragment_to_HomeSecondFragment"
-            app:destination="@id/nav_home_second" />
+            app:destination="@id/nav_home_second" />-->
     </fragment>
-    <fragment
+<!--    <fragment
         android:id="@+id/nav_home_second"
         android:name="com.chakfrost.covidstatistics.ui.statistics.HomeSecondFragment"
         android:label="@string/menu_stats"
@@ -27,7 +27,7 @@
         <argument
             android:name="myArg"
             app:argType="string" />
-    </fragment>
+    </fragment>-->
 
     <fragment
         android:id="@+id/nav_locations"

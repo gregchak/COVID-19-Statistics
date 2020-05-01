@@ -64,14 +64,10 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
 
         MaterialButton back = findViewById(R.id.back_to_main);
         //Button back = findViewById(R.id.back_to_main);
-        back.setOnClickListener(new View.OnClickListener()
+        back.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                Intent backToMain = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(backToMain);
-            }
+            Intent backToMain = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(backToMain);
         });
 
         countrySpinner = findViewById(R.id.location_spCountries);
@@ -300,9 +296,9 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
         loc.setIso(selectedCountry.getISO2());
         loc.setRegion(selectedCountry.getName());
 
-        if (selectedProvince.getName() != ALL_VALUE)
+        if (!selectedProvince.getName().equals(ALL_VALUE))
             loc.setProvince(selectedProvince.getName());
-        if (selectedMunicipality != ALL_VALUE)
+        if (!selectedMunicipality.equals(ALL_VALUE))
             loc.setMunicipality(selectedMunicipality);
 
         // Check if specified Location is already saved
@@ -348,7 +344,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
             }
             catch (Exception ex)
             {
-
+                Log.e("SaveLocations()", ex.toString());
             }
 
         }
@@ -416,13 +412,13 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                 Log.d("Country", selectedCountry.getName());
 
                 // Populate provinces
-                if (selectedCountry.getISO2() != "-SELECT-")
+                if (!selectedCountry.getISO2().equals("-SELECT-"))
                     LoadProvinces(selectedCountry);
 
                 break;
             case R.id.location_spProvinces:
                 selectedProvince = (Province)parent.getItemAtPosition(position);
-                if (selectedProvince.getName() == ALL_VALUE || selectedProvince.getName().equals(""))
+                if (selectedProvince.getName().equals(ALL_VALUE) || selectedProvince.getName().equals(""))
                 {
                     Button b = findViewById(R.id.location_btnAdd);
                     b.setEnabled(true);
