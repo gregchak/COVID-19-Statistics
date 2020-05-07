@@ -7,38 +7,38 @@ import java.util.Date;
 public class ReportStatistics
 {
     @SerializedName("date")
-    public Date StatusDate;
+    public Date date;
 
     @SerializedName("confirmed")
-    public int Confirmed;
+    public int confirmed;
 
     @SerializedName("deaths")
-    public int Deaths;
+    public int deaths;
 
     @SerializedName("recovered")
-    public int Recovered;
+    public int recovered;
 
     @SerializedName("confirmed_diff")
-    public int ConfirmedDiff;
+    public int confirmedDiff;
 
     @SerializedName("deaths_diff")
-    public int DeathsDiff;
+    public int deathsDiff;
 
     @SerializedName("recovered_diff")
-    public int RecoveredDiff;
+    public int recoveredDiff;
 
     @SerializedName("last_update")
-    public Date LastUpdate;
+    public Date lastUpdate;
 
     @SerializedName("active")
-    public int Active;
+    public int active;
 
     @SerializedName("active_diff")
-    public int ActiveDiff;
+    public int activeDiff;
 
     @SerializedName("fatality_rate")
-    public double FatalityRate;
+    public double fatalityRate;
 
     @SerializedName("region")
-    public Province Region;
+    public Province region;
 }

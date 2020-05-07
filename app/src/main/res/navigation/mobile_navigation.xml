@@ -11,9 +11,7 @@
         android:label="@string/menu_stats"
         tools:layout="@layout/fragment_home">
 
-    <!--    <action
-            android:id="@+id/action_HomeFragment_to_HomeSecondFragment"
-            app:destination="@id/nav_home_second" />-->
+
     </fragment>
 <!--    <fragment
         android:id="@+id/nav_home_second"
@@ -36,8 +34,8 @@
         tools:layout="@layout/fragment_locations" />
 
     <fragment
-        android:id="@+id/nav_add_location"
-        android:name="com.chakfrost.covidstatistics.ui.addLocation.AddLocationFragment"
-        android:label="@string/menu_add_location"
-        tools:layout="@layout/fragment_add_location" />
+        android:id="@+id/nav_location_details"
+        android:name="com.chakfrost.covidstatistics.ui.locationDetail.LocationDetailFragment"
+        android:label="@string/menu_location_detail"
+        tools:layout="@layout/fragment_location_detail" />
 </navigation>

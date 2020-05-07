@@ -11,13 +11,13 @@ import com.chakfrost.covidstatistics.models.Country;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.Province;
-import com.chakfrost.covidstatistics.services.covid19Statistics.Municipality;
+import com.chakfrost.covidstatistics.services.covid19Statistics.City;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Provinces;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Region;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Regions;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Report;
 import com.chakfrost.covidstatistics.services.covid19Statistics.ReportStatistics;
-import com.chakfrost.covidstatistics.services.covidApi.Summary;
+import com.chakfrost.covidstatistics.services.covid19Statistics.ReportsTotal;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +37,7 @@ public class CovidService
 {
     private static final String COVID_19_API_URL = "https://api.covid19api.com";
     private static final String COVID_19_STATISTICS_URL = "https://covid-19-statistics.p.rapidapi.com";
+    private static final String COVID_API_URL = "https://covid-api.com/api";
     private static final String RAPID_KEY_COVID_19_STATISTICS = "2b0656f909mshf12452ea67727c5p1cdac2jsn392ca7d9ed82";
 
     /**
@@ -47,7 +47,7 @@ public class CovidService
      */
     public static void countries(final IServiceCallbackList callback)
     {
-        String url = MessageFormat.format("{0}/regions", COVID_19_STATISTICS_URL);
+        String url = MessageFormat.format("{0}/regions", COVID_API_URL);
 
         JsonObjectRequest jor = new JsonObjectRequest(
                 Request.Method.GET, url, null,
@@ -86,7 +86,7 @@ public class CovidService
             public Map<String, String> getHeaders()
             {
                 Map<String, String> params = new HashMap<>();
-                params.put("x-rapidapi-key", RAPID_KEY_COVID_19_STATISTICS);
+                //params.put("x-rapidapi-key", RAPID_KEY_COVID_19_STATISTICS);
                 return params;
             }
         };
@@ -106,7 +106,7 @@ public class CovidService
         if (null == country)
             return;
 
-        String url = MessageFormat.format("{0}/provinces?iso={1}", COVID_19_STATISTICS_URL, country.getISO2());
+        String url = MessageFormat.format("{0}/provinces/{1}", COVID_API_URL, country.getISO2());
 
         JsonObjectRequest jor = new JsonObjectRequest(
                 Request.Method.GET, url, null,
@@ -145,7 +145,7 @@ public class CovidService
             public Map<String, String> getHeaders()
             {
                 Map<String, String> params = new HashMap<>();
-                params.put("x-rapidapi-key", RAPID_KEY_COVID_19_STATISTICS);
+                //params.put("x-rapidapi-key", RAPID_KEY_COVID_19_STATISTICS);
                 return params;
             }
         };
@@ -165,9 +165,9 @@ public class CovidService
     public static void municipalities(final String iso, final String province, final String region, final IServiceCallbackList callback) {
         String url;
         if (null == province || province.equals(""))
-            url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}", COVID_19_STATISTICS_URL, iso, region);
+            url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}", COVID_API_URL, iso, region);
         else
-            url = MessageFormat.format("{0}/reports?iso={1}&region_province={2}&region_name={3}", COVID_19_STATISTICS_URL, iso, province, region);
+            url = MessageFormat.format("{0}/reports?iso={1}&region_province={2}&region_name={3}", COVID_API_URL, iso, province, region);
 
 
         JsonObjectRequest jor = new JsonObjectRequest(
@@ -187,7 +187,7 @@ public class CovidService
                             return;
                         }
 
-                        for(Municipality m: report.Data.get(0).Region.Municipalities)
+                        for(City m: report.Data.get(0).region.Cities)
                             result.add(m.Name);
 
                     }
@@ -210,7 +210,7 @@ public class CovidService
             public Map<String, String> getHeaders()
             {
                 Map<String, String> params = new HashMap<>();
-                params.put("x-rapidapi-key", RAPID_KEY_COVID_19_STATISTICS);
+                //params.put("x-rapidapi-key", RAPID_KEY_COVID_19_STATISTICS);
                 return params;
             }
         };
@@ -236,7 +236,7 @@ public class CovidService
         String url;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        url = MessageFormat.format("{0}/reports?iso={1}",COVID_19_STATISTICS_URL, iso);
+        url = MessageFormat.format("{0}/reports?iso={1}",COVID_API_URL, iso);
         if (!TextUtils.isEmpty(region))
             url = MessageFormat.format("{0}&region_name={1}", url, region);
         if (!TextUtils.isEmpty(province))
@@ -245,16 +245,6 @@ public class CovidService
             url = MessageFormat.format("{0}&city_name={1}", url, municipality);
         if (null != dateToCheck)
             url = MessageFormat.format("{0}&date={1}", url, dateFormat.format(dateToCheck.getTime()));
-
-//        if (TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
-//            url = MessageFormat.format("{0}/reports?iso={1}&date={2}",
-//                    COVID_19_STATISTICS_URL, iso, dateFormat.format(dateToCheck.getTime()));
-//        else if (!TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
-//            url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}&date={3}&region_province={4}",
-//                    COVID_19_STATISTICS_URL, iso, region, dateFormat.format(dateToCheck.getTime()), province);
-//        else
-//            url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}&date={3}&region_province={4}&city_name={5}",
-//                    COVID_19_STATISTICS_URL, iso, region, dateFormat.format(dateToCheck.getTime()), province, municipality);
 
 
         Log.d("CovidService.Report()", url);
@@ -284,35 +274,37 @@ public class CovidService
                         // Loop through data array
                         for(ReportStatistics r: report.Data)
                         {
-                            result.setStatusDate(r.StatusDate);
+                            result.setStatusDate(r.date);
+                            result.setLastUpdate(r.lastUpdate);
 
                             if (TextUtils.isEmpty(municipality))
                             {
-                                result.setTotalConfirmed(result.getTotalConfirmed() + r.Confirmed);
-                                result.setTotalDeaths(result.getTotalDeaths() + r.Deaths);
-                                result.setDiffConfirmed(result.getDiffConfirmed() + r.ConfirmedDiff);
-                                result.setDiffDeaths(result.getDiffDeaths() + r.DeathsDiff);
+                                result.setTotalConfirmed(result.getTotalConfirmed() + r.confirmed);
+                                result.setTotalDeaths(result.getTotalDeaths() + r.deaths);
+                                result.setDiffConfirmed(result.getDiffConfirmed() + r.confirmedDiff);
+                                result.setDiffDeaths(result.getDiffDeaths() + r.deathsDiff);
 
-                                result.setTotalRecovered(result.getTotalRecovered() + r.Recovered);
-                                result.setDiffRecovered(result.getDiffRecovered() + r.RecoveredDiff);
+                                result.setTotalRecovered(result.getTotalRecovered() + r.recovered);
+                                result.setDiffRecovered(result.getDiffRecovered() + r.recoveredDiff);
 
+                                result.setTotalactive(result.getTotalactive() + r.active);
+                                result.setDiffActive(result.getDiffActive() + r.activeDiff);
                             }
                             else // province and municipality are both not null
                             {
-                                Municipality m = r.Region.Municipalities.get(0);
+                                City c = r.region.Cities.get(0);
 //                                Municipality filtered = r.Region.Municipalities.stream()
 //                                        .filter(m -> m.Name.equals(municipality))
 //                                        .findFirst()
 //                                        .orElse(null);
 
-                                if (null == m)
+                                if (null == c)
                                     throw new RuntimeException("Municipality not found");
 
-                                result.setTotalConfirmed(m.Confirmed);
-                                result.setTotalDeaths(m.Deaths);
-                                result.setDiffConfirmed(m.ConfirmedDiff);
-                                result.setDiffDeaths(m.DeathsDiff);
-
+                                result.setTotalConfirmed(c.Confirmed);
+                                result.setTotalDeaths(c.Deaths);
+                                result.setDiffConfirmed(c.ConfirmedDiff);
+                                result.setDiffDeaths(c.DeathsDiff);
                             }
                         }
 
@@ -339,7 +331,7 @@ public class CovidService
             public Map<String, String> getHeaders()
             {
                 Map<String, String> params = new HashMap<>();
-                params.put("x-rapidapi-key", RAPID_KEY_COVID_19_STATISTICS);
+                //params.put("x-rapidapi-key", RAPID_KEY_COVID_19_STATISTICS);
                 return params;
             }
         };
@@ -355,7 +347,7 @@ public class CovidService
      */
     public static void summary(IserviceCallbackGlobalStats callback)
     {
-        String url = MessageFormat.format("{0}/summary", COVID_19_API_URL);
+/*        String url = MessageFormat.format("{0}/summary", COVID_19_API_URL);
 
         JsonObjectRequest jor = new JsonObjectRequest(
                 Request.Method.GET, url, null,
@@ -382,6 +374,40 @@ public class CovidService
                 error ->
                 {
                     VolleyLog.e("CovidService.Summary()", error.toString());
+                    callback.onError(error);
+                }
+        );*/
+
+        String url = MessageFormat.format("{0}/reports/total", COVID_API_URL);
+        JsonObjectRequest jor = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+
+                response ->
+                {
+                    // Transform response to service object
+                    Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                    ReportsTotal totals = g.fromJson(response.toString(), ReportsTotal.class);
+
+                    GlobalStats result = new GlobalStats();
+
+                    result.setStatusDate(totals.data.date);
+                    result.setLastUpdate(totals.data.lastUpdate);
+                    result.setNewConfirmed(totals.data.confirmedDiff);
+                    result.setTotalConfirmed(totals.data.confirmed);
+                    result.setNewDeaths(totals.data.deathsDiff);
+                    result.setTotalDeaths(totals.data.deaths);
+                    result.setNewRecovered(totals.data.recoveredDiff);
+                    result.setTotalRecovered(totals.data.recovered);
+                    result.setNewActive(totals.data.activeDiff);
+                    result.setTotalActive(totals.data.active);
+                    result.setFatalityRate(totals.data.fatalityRate);
+
+                    callback.onSuccess(result);
+                },
+
+                error ->
+                {
+                    VolleyLog.e("CovidService.Summary()", error.getStackTrace());
                     callback.onError(error);
                 }
         );

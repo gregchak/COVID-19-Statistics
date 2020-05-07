@@ -1,4 +1,4 @@
-package com.chakfrost.covidstatistics.ui.addLocation;
+package com.chakfrost.covidstatistics.ui.locationDetail;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -7,24 +7,22 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.chakfrost.covidstatistics.R;
 
-public class AddLocationFragment extends Fragment
+public class LocationDetailFragment extends Fragment
 {
 
-    private AddLocationViewModel slideshowViewModel;
+    private LocationDetailViewModel slideshowViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState)
     {
         slideshowViewModel =
-                ViewModelProviders.of(this).get(AddLocationViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_add_location, container, false);
+                ViewModelProviders.of(this).get(LocationDetailViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_location_detail, container, false);
         final TextView textView = root.findViewById(R.id.text_slideshow);
         slideshowViewModel.getText().observe(getViewLifecycleOwner(), s -> textView.setText(s));
         return root;

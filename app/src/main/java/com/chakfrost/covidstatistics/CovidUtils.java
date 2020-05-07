@@ -5,7 +5,13 @@ import android.animation.AnimatorListenerAdapter;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.Location;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class CovidUtils
 {
@@ -65,5 +71,31 @@ public class CovidUtils
 //            sb.append(", " + loc.getMunicipality());
 
         return result;
+    }
+
+    /**
+     * Checks if a CovidStat exists in the list for today - 1 day
+     *
+     * @param stats List<> of CovidStat objects
+     * @return boolean true if CovidStat exists for today - 1, false if not
+     */
+    public static boolean statExists(List<CovidStats> stats)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        Date dte = cal.getTime();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String dateString = dateFormat.format(dte);
+
+        CovidStats found = stats.stream()
+                .filter(s -> dateFormat.format(s.getStatusDate()).equals(dateString))
+                .findFirst()
+                .orElse(null);
+
+        if (null == found)
+            return false;
+        else
+            return true;
     }
 }
