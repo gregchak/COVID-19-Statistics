@@ -292,7 +292,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
 
         // Initialize report data
         Location loc = new Location(selectedCountry.getName());
-        loc.setStatusDate(new Date());
+        loc.setLastUpdated(new Date());
         loc.setIso(selectedCountry.getISO2());
         loc.setRegion(selectedCountry.getName());
 

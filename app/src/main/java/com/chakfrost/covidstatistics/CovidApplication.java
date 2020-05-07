@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -65,7 +66,7 @@ public class CovidApplication extends Application
 
         // Instantiate PeriodicWorkRequest
         PeriodicWorkRequest refreshStatsRequest =
-                new PeriodicWorkRequest.Builder(RefreshStatsWorker.class, 4, TimeUnit.HOURS)
+                new PeriodicWorkRequest.Builder(RefreshStatsWorker.class, 1, TimeUnit.HOURS)
                         .setConstraints(constraints)
                         .build();
 
@@ -139,6 +140,12 @@ public class CovidApplication extends Application
             // Notify
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(instance);
             notificationManager.notify(1, builder.build());
+        }
+        else
+        {
+            Log.d("sendNotification()", "Not in background && receiveNotifications is false");
+            Log.d("sendNotification()", Boolean.toString(isAppIsInBackground()));
+            Log.d("sendNotification()", receiveNotifications.toString());
         }
     }
 

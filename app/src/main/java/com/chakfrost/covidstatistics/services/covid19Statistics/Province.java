@@ -22,5 +22,5 @@ public class Province
     public String Longitude;
 
     @SerializedName("cities")
-    public List<Municipality> Municipalities;
+    public List<City> Cities;
 }

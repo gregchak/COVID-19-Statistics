@@ -1,9 +1,5 @@
 package com.chakfrost.covidstatistics.models;
 
-//import com.chakfrost.covidnotifier.deserializers.DateHandler;
-//import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-//import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

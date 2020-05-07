@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
-public class Municipality
+public class City
 {
     @SerializedName("name")
     public String Name;

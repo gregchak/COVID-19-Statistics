@@ -16,6 +16,7 @@ import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationSimpleListRecyclerViewAdapter;
 import com.chakfrost.covidstatistics.models.Location;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Collections;
@@ -36,6 +37,9 @@ public class LocationFragment extends Fragment
         //final TextView textView = root.findViewById(R.id.text_gallery);
 
         //locationViewModel.getText().observe(getViewLifecycleOwner(), s -> textView.setText(s));
+
+        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
+        fab.hide();
 
         locationsSimpleListView = root.findViewById(R.id.locations_recycler_view);
         locationsSimpleListView.addItemDecoration(new DividerItemDecoration(

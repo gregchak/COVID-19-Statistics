@@ -11,9 +11,11 @@ import androidx.work.WorkerParameters;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.chakfrost.covidstatistics.CovidApplication;
+import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.Location;
+import com.chakfrost.covidstatistics.services.CovidRequestQueue;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
 import com.chakfrost.covidstatistics.services.IserviceCallbackGlobalStats;
@@ -21,6 +23,7 @@ import com.chakfrost.covidstatistics.services.IserviceCallbackGlobalStats;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +33,7 @@ public class RefreshStatsWorker extends Worker
     private Context context;
     private List<Location> locations;
     private List<Location> newData;
+    private int locationQueue;
 
     public RefreshStatsWorker(@NonNull Context context, @NonNull WorkerParameters params)
     {
@@ -43,16 +47,24 @@ public class RefreshStatsWorker extends Worker
     {
         try
         {
+            Log.d("RefreshStatsWorker.doWork()", "starting job...");
+
             // Instantiate collection of updated locations
             newData = new ArrayList<>();
+            locationQueue = 0;
 
             // Update stats
             RefreshGlobalStats();
             RefreshLocationStats();
 
+            // Wait for RequestQueue to clear
+            while (locationQueue > 0);
+
             // If there are location updates, send notification
+            Log.d("RefreshStatsWorker.doWork()", "number of changes found: " + newData.size());
             if (newData.size() > 0)
             {
+                SetLocation(newData);
                 CovidApplication.sendNotification
                         ("Location Update",
                                 "Your tracked locations have new COVID-19 stats available",
@@ -63,7 +75,7 @@ public class RefreshStatsWorker extends Worker
         }
         catch (Exception ex)
         {
-            Log.e("Errors occurred in RefreshStatsWorker.doWork()", ex.toString());
+            Log.e("Errors occurred in RefreshStatsWorker.doWork()", ex.getStackTrace().toString());
             return Result.failure();
         }
     }
@@ -86,12 +98,12 @@ public class RefreshStatsWorker extends Worker
                 hours = 6;
             else
             {
-                diff = currentDate.getTime() - global.getStatusDate().getTime();
+                diff = currentDate.getTime() - global.getLastUpdate().getTime();
                 hours = TimeUnit.MILLISECONDS.toHours(diff);
             }
 
             // Only refresh data if more than 11 hours old
-            if (hours > 5)
+            if (hours >= 6)
                 RetrieveSummaryData();
         }
     }
@@ -125,30 +137,35 @@ public class RefreshStatsWorker extends Worker
 
         for (Location loc : locations)
         {
-            if (null == loc.getStatusDate())
+            if (null == loc.getLastUpdated())
             {
-                hours = 12;
+                hours = 6;
             }
             else
             {
-                diff = currentDate.getTime() - loc.getStatusDate().getTime();
+                diff = currentDate.getTime() - loc.getLastUpdated().getTime();
                 hours = TimeUnit.MILLISECONDS.toHours(diff);
             }
 
-            if (hours > 11)
+            if (hours >= 6)
             {
-                // Populate report information
-                Calendar startDate = Calendar.getInstance();
-                startDate.add(Calendar.DATE, -1);
+                // Debugging
+                //List<CovidStats> c = loc.getStatistics();
+                //Collections.sort(c);
+                //c.remove(0);
+                //loc.setStatistics(c);
 
-                CovidStats found = loc.getStatistics().stream()
-                        .filter(s -> s.getStatusDate().getTime() == startDate.getTimeInMillis())
-                        .findFirst()
-                        .orElse(null);
-
-                if (null == found)
+                if (!CovidUtils.statExists(loc.getStatistics()))
                 {
-                    loc.setStatusDate(new Date());
+                    // Increase location queue
+                    locationQueue++;
+
+                    // Set the date
+                    Calendar startDate = Calendar.getInstance();
+                    startDate.add(Calendar.DATE, -1);
+                    loc.setLastUpdated(new Date());
+
+                    // Get new stats
                     RetrieveLocationStats(loc, startDate);
                 }
             }
@@ -177,7 +194,10 @@ public class RefreshStatsWorker extends Worker
 
                             if (null != found)
                             {
-                                SetLocation(loc);
+                                loc.setLastUpdated(new Date());
+                                newData.add(loc);
+
+                                locationQueue--;
                             }
                             else
                             {
@@ -187,7 +207,10 @@ public class RefreshStatsWorker extends Worker
                         else
                         {
                             Log.d("Finished loading location", Integer.toString(loc.getStatistics().size()));
-                            SetLocation(loc);
+                            loc.setLastUpdated(new Date());
+                            newData.add(loc);
+
+                            locationQueue--;
                         }
                     }
 
@@ -197,36 +220,59 @@ public class RefreshStatsWorker extends Worker
                         if(!TextUtils.isEmpty(error.getMessage()))
                             VolleyLog.e("GetReportData.onError()", error.getMessage());
                         else
-                            VolleyLog.e("GetREportData.onError()", "Errors occurred while getting report.");
+                            VolleyLog.e("GetReportData.onError()", "Errors occurred while getting report.");
+
+                        locationQueue--;
                     }
                 }
         );
     }
 
-    private void SetLocation(Location loc)
+    private void SetLocation(List<Location> locationsToUpdate)
     {
-        loc.setStatusDate(new Date());
-        if (null == locations)
-            locations = CovidApplication.getLocations();
-
-        Location found = locations.stream()
+        // Loop through each updated location
+        // and update main List<Location>
+        locationsToUpdate.forEach((loc) ->
+        {
+            Location found = locations.stream()
                 .filter(l -> l.getCountry().equals(loc.getCountry())
                         && l.getProvince().equals(loc.getProvince())
                         && l.getMunicipality().equals(loc.getMunicipality()))
                 .findFirst()
                 .orElse(null);
 
-        if (null == found)
-        {
+            // If found, remove
+            if (null != found)
+                locations.remove(found);
+
+            // Add new/updated location to List<Location>
             locations.add(loc);
-        }
-        else
-        {
-            locations.remove(found);
-            locations.add(loc);
-        }
-        newData.add(loc);
+        });
+
+        // Save updated Locations
         CovidApplication.setLocations(locations);
+
+//        if (null == locations)
+//            locations = CovidApplication.getLocations();
+
+//        Location found = locations.stream()
+//                .filter(l -> l.getCountry().equals(loc.getCountry())
+//                        && l.getProvince().equals(loc.getProvince())
+//                        && l.getMunicipality().equals(loc.getMunicipality()))
+//                .findFirst()
+//                .orElse(null);
+//
+//        if (null == found)
+//        {
+//            locations.add(loc);
+//        }
+//        else
+//        {
+//            locations.remove(found);
+//            locations.add(loc);
+//        }
+
+        //CovidApplication.setLocations(locations);
     }
 
 }

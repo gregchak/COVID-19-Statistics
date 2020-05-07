@@ -20,8 +20,7 @@ public class Location implements Comparable<Location>
     @SerializedName("Region")
     private String region;
     private List<CovidStats> statistics;
-    //@JsonDeserialize(using = DateHandler.class)
-    private Date statusDate;
+    private Date lastUpdated;
 
     public Location() {}
 
@@ -118,7 +117,7 @@ public class Location implements Comparable<Location>
     public String getIso() { return iso; }
     public String getRegion() { return region; }
     public List<CovidStats> getStatistics() { return statistics; }
-    public Date getStatusDate() { return statusDate; }
+    public Date getLastUpdated() { return lastUpdated; }
 
     /* Setters */
     public void setCountry(String val) { country = val; }
@@ -127,7 +126,7 @@ public class Location implements Comparable<Location>
     public void setIso(String val) { iso = val; }
     public void setRegion(String val) { region = val; }
     public void setStatistics(List<CovidStats> val) { statistics = val; }
-    public void setStatusDate(Date val) { statusDate = val; }
+    public void setLastUpdated(Date val) { lastUpdated = val; }
 
 
 }

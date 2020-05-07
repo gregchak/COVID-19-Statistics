@@ -218,8 +218,8 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             else
                 recoveredImage.setImageResource(R.drawable.ic_remove_black_24dp);
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            lastUpdated.setText(MessageFormat.format("as of {0}", dateFormat.format(stat.getStatusDate())));
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+            lastUpdated.setText(MessageFormat.format("as of {0}", dateFormat.format(stat.getLastUpdate())));
 
             buildChart(location.getStatistics());
         }

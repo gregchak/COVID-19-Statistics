@@ -12,11 +12,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.VolleyError;
 import com.chakfrost.covidstatistics.CovidApplication;
+import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationStatsRecyclerViewAdapter;
 import com.chakfrost.covidstatistics.models.CovidStats;
@@ -25,6 +28,8 @@ import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
 import com.chakfrost.covidstatistics.services.IserviceCallbackGlobalStats;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -78,8 +83,12 @@ public class StatisticsFragment extends Fragment
 
         locationsView = root.findViewById(R.id.stats_global_location_recycler_view);
 
+        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
+        fab.show();
+
         loadGlobals();
         loadLocations(locationsView, true);
+
         return root;
     }
 
@@ -98,16 +107,16 @@ public class StatisticsFragment extends Fragment
             long diff, hours;
 
             // Account for statusDate being null
-            if (null == summary.getStatusDate())
+            if (null == summary.getLastUpdate())
                 hours = 6;
             else
             {
-                diff = currentDate.getTime() - summary.getStatusDate().getTime();
+                diff = currentDate.getTime() - summary.getLastUpdate().getTime();
                 hours = TimeUnit.MILLISECONDS.toHours(diff);
             }
 
             // Only refresh data if more than 11 hours old
-            if (hours > 5)
+            if (hours >= 6)
                 retrieveGlobalStatsData();
             else
                 populateGlobalStats();
@@ -117,7 +126,7 @@ public class StatisticsFragment extends Fragment
     private void populateGlobalStats()
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-        globalLastUpdate.setText(MessageFormat.format("as of {0}", dateFormat.format(summary.getStatusDate())));
+        globalLastUpdate.setText(MessageFormat.format("as of {0}", dateFormat.format(summary.getLastUpdate())));
 
         confirmedValue.setText(NumberFormat.getInstance().format(summary.getTotalConfirmed()));
         confirmedDiff.setText(NumberFormat.getInstance().format(summary.getNewConfirmed()));
@@ -173,9 +182,13 @@ public class StatisticsFragment extends Fragment
                                  public void onSuccess(GlobalStats stats)
                                  {
                                      summary = stats;
+                                     summary.setLastUpdate(new Date());
                                      CovidApplication.setGlobalStats(summary);
+
                                      populateGlobalStats();
-                                     Toast.makeText(getActivity(), "Global stats have been updated", Toast.LENGTH_SHORT).show();
+                                     Snackbar.make(getView(), "Global stats updated", Snackbar.LENGTH_SHORT)
+                                             .setAction("Action", null).show();
+                                     //Toast.makeText(getActivity(), "Global stats have been updated", Toast.LENGTH_SHORT).show();
                                  }
 
                                  @Override
@@ -190,12 +203,9 @@ public class StatisticsFragment extends Fragment
 
     private void loadLocations(RecyclerView recyclerView, boolean refreshLocations)
     {
+        // Get saved locations
         locations = CovidApplication.getLocations();
-
-
         Collections.sort(locations);
-
-        Log.d("Locations found", String.valueOf(locations.size()));
 
         // Set the layout
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -223,30 +233,23 @@ public class StatisticsFragment extends Fragment
 
         for (Location loc : locations)
         {
-            if (null == loc.getStatusDate())
+            if (null == loc.getLastUpdated())
             {
                 hours = 6;
             }
             else
             {
-                diff = currentDate.getTime() - loc.getStatusDate().getTime();
+                diff = currentDate.getTime() - loc.getLastUpdated().getTime();
                 hours = TimeUnit.MILLISECONDS.toHours(diff);
             }
 
-            if (hours > 5)
+            if (hours >= 6)
             {
-                // Populate report information
-                Calendar startDate = Calendar.getInstance();
-                startDate.add(Calendar.DATE, -1);
-
-                CovidStats found = loc.getStatistics().stream()
-                        .filter(s -> s.getStatusDate().getTime() == startDate.getTimeInMillis())
-                        .findFirst()
-                        .orElse(null);
-
-                if (null == found)
+                if (!CovidUtils.statExists(loc.getStatistics()))
                 {
-                    loc.setStatusDate(new Date());
+                    Calendar startDate = Calendar.getInstance();
+                    startDate.add(Calendar.DATE, -1);
+                    loc.setLastUpdated(new Date());
                     LoadReportData(loc, startDate);
                 }
             }
@@ -277,7 +280,9 @@ public class StatisticsFragment extends Fragment
                             {
                                 SetLocation(loc);
                                 loadLocations(locationsView, false);
-                                Toast.makeText(getActivity(), "Location stats have been updated", Toast.LENGTH_SHORT).show();
+                                Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
+                                        .setAction("Action", null).show();
+                                //Toast.makeText(getActivity(), "Location stats have been updated", Toast.LENGTH_SHORT).show();
                             }
                             else
                             {
@@ -297,7 +302,7 @@ public class StatisticsFragment extends Fragment
                         if(!TextUtils.isEmpty(error.getMessage()))
                             Log.e("GetReportData.onError()", error.getMessage());
                         else
-                            Log.e("GetREportData.onError()", "Errors occurred while getting report.");
+                            Log.e("GetReportData.onError()", "Errors occurred while getting report.");
                         Toast.makeText(getActivity().getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -306,7 +311,7 @@ public class StatisticsFragment extends Fragment
 
     private void SetLocation(Location loc)
     {
-        loc.setStatusDate(new Date());
+        loc.setLastUpdated(new Date());
         if (null == locations)
             locations = CovidApplication.getLocations();
 
