@@ -182,9 +182,13 @@ public class StatisticsFragment extends Fragment
                                  public void onSuccess(GlobalStats stats)
                                  {
                                      summary = stats;
+                                     summary.setLastUpdate(new Date());
                                      CovidApplication.setGlobalStats(summary);
+
                                      populateGlobalStats();
-                                     Toast.makeText(getActivity(), "Global stats have been updated", Toast.LENGTH_SHORT).show();
+                                     Snackbar.make(getView(), "Global stats updated", Snackbar.LENGTH_SHORT)
+                                             .setAction("Action", null).show();
+                                     //Toast.makeText(getActivity(), "Global stats have been updated", Toast.LENGTH_SHORT).show();
                                  }
 
                                  @Override

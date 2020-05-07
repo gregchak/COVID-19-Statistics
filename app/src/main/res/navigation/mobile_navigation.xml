@@ -38,4 +38,10 @@
         android:name="com.chakfrost.covidstatistics.ui.locationDetail.LocationDetailFragment"
         android:label="@string/menu_location_detail"
         tools:layout="@layout/fragment_location_detail" />
+
+    <fragment
+        android:id="@+id/nav_about"
+        android:name="com.chakfrost.covidstatistics.ui.about.AboutFragment"
+        android:label="@string/menu_about"
+        tools:layout="@layout/about_fragment" />
 </navigation>

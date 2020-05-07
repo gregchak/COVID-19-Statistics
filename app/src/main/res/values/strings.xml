@@ -51,4 +51,14 @@
     <string name="lbl_deaths">Deaths:</string>
     <string name="lbl_recovered">Recovered:</string>
     <string name="lbl_seven_day_trend">7 day trend of confirmed cases</string>
+
+    <string name="about_text">
+        All data for this application is supplied by COVID-19 Statistics API
+        (<a href="https://covid-api.com">https://covid-api.com/</a>).
+        Data is sourced from COVID-19 Data Repository by the Center for Systems Science and Engineering
+        (CSSE) at Johns Hopkins University (<a href="https://systems.jhu.edu/">https://systems.jhu.edu/</a>).
+        The Johns Hopkins University hereby disclaims any and all
+        representations and warranties with respect to the Website, including accuracy, fitness for use,
+        reliability, completeness, and non-infringement of third party rights.
+    </string>
 </resources>
