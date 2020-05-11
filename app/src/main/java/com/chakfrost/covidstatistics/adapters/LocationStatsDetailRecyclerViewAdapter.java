@@ -157,7 +157,7 @@ public class LocationStatsDetailRecyclerViewAdapter
             Collections.sort(stats);
             StatDatePair stat;
             SimpleDateFormat dayAbv = new SimpleDateFormat("E");
-            SimpleDateFormat dateAbv = new SimpleDateFormat("MM/dd");
+            SimpleDateFormat dateAbv = new SimpleDateFormat("M/dd");
 
             int numberOfDays = CovidApplication.DAYS_TO_DISPLAY_DETAILS;
             int[] yAxisData = new int[stats.size()];
@@ -247,24 +247,6 @@ public class LocationStatsDetailRecyclerViewAdapter
 
 
 
-        }
-
-        private int determineExtraYValue(int currentValue)
-        {
-            if (currentValue < 10)
-                return 2;
-            else if (currentValue < 25)
-                return 5;
-            else if (currentValue < 100)
-                return 10;
-            else if (currentValue < 500)
-                return 50;
-            else if (currentValue < 1000)
-                return 75;
-            else if (currentValue < 5000)
-                return 100;
-            else
-                return 100;
         }
     }
 }

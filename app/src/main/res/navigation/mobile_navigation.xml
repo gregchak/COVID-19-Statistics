@@ -9,7 +9,7 @@
         android:id="@+id/nav_home"
         android:name="com.chakfrost.covidstatistics.ui.statistics.StatisticsFragment"
         android:label="@string/menu_stats"
-        tools:layout="@layout/fragment_home">
+        tools:layout="@layout/fragment_statistics">
 
 
     </fragment>

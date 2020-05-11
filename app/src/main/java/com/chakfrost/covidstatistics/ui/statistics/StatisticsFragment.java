@@ -12,12 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.BundleCompat;
 import androidx.fragment.app.Fragment;
 
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.VolleyError;
 import com.chakfrost.covidstatistics.CovidApplication;
 import com.chakfrost.covidstatistics.CovidUtils;
-import com.chakfrost.covidstatistics.MainActivity;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationStatsRecyclerViewAdapter;
 import com.chakfrost.covidstatistics.models.CovidStats;
@@ -63,6 +58,9 @@ public class StatisticsFragment extends Fragment
     private TextView recoveredValue;
     private TextView recoveredDiff;
     private ImageView recoveredArrow;
+    private TextView activeValue;
+    private TextView activeDiff;
+    private ImageView activeArrow;
 
     private RecyclerView locationsView;
     private LocationStatsRecyclerViewAdapter locationsListAdapter;
@@ -71,7 +69,7 @@ public class StatisticsFragment extends Fragment
     {
         statisticsViewModel = ViewModelProviders.of(requireActivity()).get(StatisticsViewModel.class);
 
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
+        View root = inflater.inflate(R.layout.fragment_statistics, container, false);
 
         globalLastUpdate = root.findViewById(R.id.stats_global_last_update);
         confirmedValue = root.findViewById(R.id.stats_global_confirmed_value);
@@ -85,6 +83,10 @@ public class StatisticsFragment extends Fragment
         recoveredValue = root.findViewById(R.id.stats_global_recovered_value);
         recoveredDiff = root.findViewById(R.id.stats_global_recovered_diff);
         recoveredArrow = root.findViewById(R.id.stats_global_recovered_image);
+
+        activeValue = root.findViewById(R.id.stats_global_active_value);
+        activeDiff = root.findViewById(R.id.stats_global_active_diff);
+        activeArrow = root.findViewById(R.id.stats_global_active_image);
 
         locationsView = root.findViewById(R.id.stats_global_location_recycler_view);
 
@@ -150,6 +152,7 @@ public class StatisticsFragment extends Fragment
         else
             confirmedArrow.setVisibility(View.INVISIBLE);
 
+
         deathsValue.setText(NumberFormat.getInstance().format(summary.getTotalDeaths()));
         deathsDiff.setText(NumberFormat.getInstance().format(summary.getNewDeaths()));
         if (summary.getNewDeaths() > 0)
@@ -163,7 +166,8 @@ public class StatisticsFragment extends Fragment
             deathsArrow.setVisibility(View.VISIBLE);
         }
         else
-            confirmedArrow.setVisibility(View.INVISIBLE);
+            deathsArrow.setVisibility(View.INVISIBLE);
+
 
         recoveredValue.setText(NumberFormat.getInstance().format(summary.getTotalRecovered()));
         recoveredDiff.setText(NumberFormat.getInstance().format(summary.getNewRecovered()));
@@ -174,11 +178,28 @@ public class StatisticsFragment extends Fragment
         }
         else if (summary.getNewRecovered() < 0)
         {
-            confirmedArrow.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
-            confirmedArrow.setVisibility(View.VISIBLE);
+            recoveredArrow.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
+            recoveredArrow.setVisibility(View.VISIBLE);
         }
         else
-            confirmedArrow.setVisibility(View.INVISIBLE);
+            recoveredArrow.setVisibility(View.INVISIBLE);
+
+
+        activeValue.setText(NumberFormat.getInstance().format(summary.getTotalActive()));
+        activeDiff.setText(NumberFormat.getInstance().format(summary.getNewActive()));
+        if (summary.getNewActive() > 0)
+        {
+            activeArrow.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
+            activeArrow.setVisibility(View.VISIBLE);
+        }
+        else if (summary.getNewActive() < 0)
+        {
+            activeArrow.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
+            activeArrow.setVisibility(View.VISIBLE);
+        }
+        else
+            activeArrow.setVisibility(View.INVISIBLE);
+
     }
 
     private void retrieveGlobalStatsData()
