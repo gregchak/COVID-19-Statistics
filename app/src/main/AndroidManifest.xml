@@ -13,10 +13,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.LocationAdd"
-            android:label="Add Location">
+            android:name=".ui.LocationStatsDetail"
+            android:label="Location details">
 
         </activity>
+        <activity
+            android:name=".ui.LocationAdd"
+            android:label="Add Location"></activity>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

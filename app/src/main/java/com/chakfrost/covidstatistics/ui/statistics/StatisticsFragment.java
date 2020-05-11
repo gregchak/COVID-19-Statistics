@@ -1,5 +1,6 @@
 package com.chakfrost.covidstatistics.ui.statistics;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,15 +12,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.BundleCompat;
 import androidx.fragment.app.Fragment;
 
-import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.VolleyError;
 import com.chakfrost.covidstatistics.CovidApplication;
 import com.chakfrost.covidstatistics.CovidUtils;
+import com.chakfrost.covidstatistics.MainActivity;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationStatsRecyclerViewAdapter;
 import com.chakfrost.covidstatistics.models.CovidStats;
@@ -28,6 +34,7 @@ import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
 import com.chakfrost.covidstatistics.services.IserviceCallbackGlobalStats;
+import com.chakfrost.covidstatistics.ui.LocationStatsDetail;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -45,7 +52,7 @@ public class StatisticsFragment extends Fragment
 {
     private GlobalStats summary;
     private List<Location> locations;
-    //private StatisticsViewModel homeViewModel;
+    private StatisticsViewModel statisticsViewModel;
     private TextView globalLastUpdate;
     private TextView confirmedValue;
     private TextView confirmedDiff;
@@ -62,11 +69,9 @@ public class StatisticsFragment extends Fragment
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        //homeViewModel = ViewModelProviders.of(this).get(StatisticsViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        //final TextView textView = root.findViewById(R.id.text_home);
+        statisticsViewModel = ViewModelProviders.of(requireActivity()).get(StatisticsViewModel.class);
 
-        //homeViewModel.getText().observe(getViewLifecycleOwner(), s -> textView.setText(s));
+        View root = inflater.inflate(R.layout.fragment_home, container, false);
 
         globalLastUpdate = root.findViewById(R.id.stats_global_last_update);
         confirmedValue = root.findViewById(R.id.stats_global_confirmed_value);
@@ -85,6 +90,8 @@ public class StatisticsFragment extends Fragment
 
         FloatingActionButton fab = getActivity().findViewById(R.id.fab);
         fab.show();
+
+        //((MainActivity)getActivity()).setAppBarText(R.id.nav_home);
 
         loadGlobals();
         loadLocations(locationsView, true);
@@ -218,11 +225,34 @@ public class StatisticsFragment extends Fragment
         {
             // Set adapter
             locationsListAdapter = new LocationStatsRecyclerViewAdapter(getContext(), locationsForDisplay);
+            locationsListAdapter.setClickListener(this::locationListAdapterClick);
             recyclerView.setAdapter(locationsListAdapter);
         }
 
         if (refreshLocations && locations.size() > 0)
             RefreshLocations();
+    }
+
+    private void locationListAdapterClick(Location selectedLocation)
+    {
+        Log.d("locationListAdapterClick()", CovidUtils.formatLocation(selectedLocation));
+        statisticsViewModel.setLocation(selectedLocation);
+
+        Log.d("statisticsViewModel.Location", CovidUtils.formatLocation(statisticsViewModel.getLocation().getValue()));
+
+        Intent details = new Intent(getActivity(), LocationStatsDetail.class);
+        details.putExtra("location", selectedLocation);
+
+        startActivity(details);
+
+        //((MainActivity)getActivity()).displaySelectedFragment(R.id.nav_location_details);
+
+//        LocationDetailFragment locationDetailFragment = new LocationDetailFragment();
+//        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+//        fragmentTransaction.replace(R.id.fragment_container, locationDetailFragment);
+//        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//        fragmentTransaction.addToBackStack(null);
+//        fragmentTransaction.commit();
     }
 
     private void RefreshLocations()

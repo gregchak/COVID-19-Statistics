@@ -8,6 +8,8 @@ import android.widget.Switch;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+//import androidx.fragment.app.Fragment;
+//import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_locations, R.id.nav_location_details, R.id.nav_about)
+                R.id.nav_home, R.id.nav_locations, R.id.nav_about)
                 .setDrawerLayout(drawer)
                 .build();
 
@@ -80,4 +82,48 @@ public class MainActivity extends AppCompatActivity
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+    /*
+    public void displaySelectedFragment(int itemId)
+    {
+        //creating fragment object
+        Fragment fragment;
+
+        //initializing the fragment object which is selected
+        switch (itemId) {
+            case R.id.nav_location_details:
+                fragment = new LocationDetailFragment();
+                break;
+            default:
+                fragment = null;
+        }
+
+        if (fragment != null) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            //ft.add(fragment, "location_details");
+            //ft.add(R.id.fragment_container, fragment);
+            ft.replace(R.id.fragment_container, fragment);
+            ft.addToBackStack(null);
+            ft.commit();
+        }
+
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        drawer.closeDrawer(GravityCompat.START);
+    }
+    public void setAppBarText(int itemId)
+    {
+        Toolbar tb = findViewById(R.id.toolbar);
+        switch (itemId)
+        {
+            case R.id.nav_about:
+                tb.setTitle(R.string.menu_about);
+                break;
+            case R.id.nav_home:
+                tb.setTitle(R.string.menu_stats);
+                break;
+            case R.id.nav_locations:
+                tb.setTitle(R.string.menu_locations);
+        }
+    }
+    */
 }
