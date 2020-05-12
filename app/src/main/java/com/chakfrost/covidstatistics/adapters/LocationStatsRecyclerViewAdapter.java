@@ -246,14 +246,17 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             {
                 active.setText(NumberFormat.getInstance().format(stat.getTotalActive()));
                 activeDiff.setText(NumberFormat.getInstance().format(stat.getDiffActive()));
-                if (stat.getDiffActive() > 0)
+                if (stat.getDiffDeaths() > 0)
                 {
-                    activeImage.setImageResource(R.drawable.ic_arrow_drop_up_green_24dp);
-                } else if (stat.getDiffActive() < 0)
+                    activeImage.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
+                }
+                else if (stat.getDiffDeaths() < 0)
                 {
-                    activeImage.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
-                } else
+                    activeImage.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
+                }
+                else
                     activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
+
             }
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
