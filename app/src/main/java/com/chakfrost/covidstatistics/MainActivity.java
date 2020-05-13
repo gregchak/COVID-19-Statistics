@@ -2,9 +2,11 @@ package com.chakfrost.covidstatistics;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.widget.Switch;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -15,6 +17,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.chakfrost.covidstatistics.interfaces.IFragmentRefreshListener;
+import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.ui.LocationAdd;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -22,6 +26,10 @@ import com.google.android.material.navigation.NavigationView;
 public class MainActivity extends AppCompatActivity
 {
     private AppBarConfiguration mAppBarConfiguration;
+    private IFragmentRefreshListener fragmentRefreshListener;
+    //private static final int RESULT_LOCATION_CANCEL = 100;
+    private static final int RESULT_LOCATION_ADD = 110;
+    private static final int REQUEST_CODE_LOCATION_ADD = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -37,7 +45,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(v ->
         {
             Intent locationIntent = new Intent(getApplicationContext(), LocationAdd.class);
-            startActivity(locationIntent);
+            startActivityForResult(locationIntent, REQUEST_CODE_LOCATION_ADD);
         });
 
         // Get navigation views
@@ -81,6 +89,29 @@ public class MainActivity extends AppCompatActivity
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    public IFragmentRefreshListener getFragmentRefreshListener() {
+        return fragmentRefreshListener;
+    }
+
+    public void setFragmentRefreshListener(IFragmentRefreshListener fragmentRefreshListener) {
+        this.fragmentRefreshListener = fragmentRefreshListener;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == REQUEST_CODE_LOCATION_ADD)
+        {
+            if (resultCode == RESULT_LOCATION_ADD)
+            {
+                if (getFragmentRefreshListener() != null)
+                    getFragmentRefreshListener().onRefresh(resultCode, data);
+            }
+        }
     }
 
     /*
