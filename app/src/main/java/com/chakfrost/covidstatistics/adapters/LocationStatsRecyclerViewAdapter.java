@@ -100,7 +100,8 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener
     {
-        void onItemClick(View view, int position);
+        //void onItemClick(View view, int position);
+        void onItemClick(Location location);
     }
 
 
@@ -120,11 +121,14 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
         private TextView deathsDiff;
         private TextView recovered;
         private TextView recoveredDiff;
+        private TextView active;
+        private TextView activeDiff;
         private TextView lastUpdated;
 
         private ImageView confirmedImage;
         private ImageView deathsImage;
         private ImageView recoveredImage;
+        private ImageView activeImage;
 
         private LineChartView lineChartView;
 
@@ -141,6 +145,10 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             recovered = itemView.findViewById(R.id.stats_location_recovered_value);
             recoveredDiff = itemView.findViewById(R.id.stats_location_recovered_diff);
             recoveredImage = itemView.findViewById(R.id.stats_location_recovered_image);
+            active = itemView.findViewById(R.id.stats_location_active_value);
+            activeDiff = itemView.findViewById(R.id.stats_location_active_diff);
+            activeImage = itemView.findViewById(R.id.stats_location_active_image);
+
             lastUpdated = itemView.findViewById(R.id.stats_location_last_updated);
 
             lineChartView = itemView.findViewById(R.id.stats_location_chart);
@@ -160,7 +168,8 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
 
 
             if (mClickListener != null)
-                mClickListener.onItemClick(view, getAdapterPosition());
+                mClickListener.onItemClick(data.get(getAdapterPosition()));
+                //mClickListener.onItemClick(view, getAdapterPosition());
         }
 
         /**
@@ -204,19 +213,51 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             else
                 deathsImage.setImageResource(R.drawable.ic_remove_black_24dp);
 
+
             // Recovered data
-            recovered.setText(NumberFormat.getInstance().format(stat.getTotalRecovered()));
-            recoveredDiff.setText(NumberFormat.getInstance().format(stat.getDiffRecovered()));
-            if (stat.getDiffRecovered() > 0)
+            if (stat.getTotalRecovered() == 0)
             {
-                recoveredImage.setImageResource(R.drawable.ic_arrow_drop_up_green_24dp);
-            }
-            else if (stat.getDiffRecovered() < 0)
-            {
-                recoveredImage.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
+                recovered.setText("N/A");
+                recoveredDiff.setText("N/A");
+                recoveredImage.setImageResource(R.drawable.ic_remove_black_24dp);
             }
             else
-                recoveredImage.setImageResource(R.drawable.ic_remove_black_24dp);
+            {
+                recovered.setText(NumberFormat.getInstance().format(stat.getTotalRecovered()));
+                recoveredDiff.setText(NumberFormat.getInstance().format(stat.getDiffRecovered()));
+                if (stat.getDiffRecovered() > 0)
+                {
+                    recoveredImage.setImageResource(R.drawable.ic_arrow_drop_up_green_24dp);
+                } else if (stat.getDiffRecovered() < 0)
+                {
+                    recoveredImage.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
+                } else
+                    recoveredImage.setImageResource(R.drawable.ic_remove_black_24dp);
+            }
+
+            // Active data
+            if (stat.getTotalActive() == 0)
+            {
+                active.setText("N/A");
+                activeDiff.setText("N/A");
+                activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
+            }
+            else
+            {
+                active.setText(NumberFormat.getInstance().format(stat.getTotalActive()));
+                activeDiff.setText(NumberFormat.getInstance().format(stat.getDiffActive()));
+                if (stat.getDiffDeaths() > 0)
+                {
+                    activeImage.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
+                }
+                else if (stat.getDiffDeaths() < 0)
+                {
+                    activeImage.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
+                }
+                else
+                    activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
+
+            }
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
             lastUpdated.setText(MessageFormat.format("as of {0}", dateFormat.format(stat.getLastUpdate())));

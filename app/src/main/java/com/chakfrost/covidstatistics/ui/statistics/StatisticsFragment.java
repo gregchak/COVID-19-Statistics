@@ -1,5 +1,6 @@
 package com.chakfrost.covidstatistics.ui.statistics;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -7,27 +8,32 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.VolleyError;
 import com.chakfrost.covidstatistics.CovidApplication;
 import com.chakfrost.covidstatistics.CovidUtils;
+import com.chakfrost.covidstatistics.MainActivity;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationStatsRecyclerViewAdapter;
+import com.chakfrost.covidstatistics.interfaces.IFragmentRefreshListener;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
 import com.chakfrost.covidstatistics.services.IserviceCallbackGlobalStats;
+import com.chakfrost.covidstatistics.ui.LocationStatsDetail;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -45,7 +51,7 @@ public class StatisticsFragment extends Fragment
 {
     private GlobalStats summary;
     private List<Location> locations;
-    //private StatisticsViewModel homeViewModel;
+    private StatisticsViewModel statisticsViewModel;
     private TextView globalLastUpdate;
     private TextView confirmedValue;
     private TextView confirmedDiff;
@@ -56,18 +62,21 @@ public class StatisticsFragment extends Fragment
     private TextView recoveredValue;
     private TextView recoveredDiff;
     private ImageView recoveredArrow;
+    private TextView activeValue;
+    private TextView activeDiff;
+    private ImageView activeArrow;
 
+    private ProgressBar progressBar;
     private RecyclerView locationsView;
     private LocationStatsRecyclerViewAdapter locationsListAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        //homeViewModel = ViewModelProviders.of(this).get(StatisticsViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        //final TextView textView = root.findViewById(R.id.text_home);
+        statisticsViewModel = ViewModelProviders.of(requireActivity()).get(StatisticsViewModel.class);
 
-        //homeViewModel.getText().observe(getViewLifecycleOwner(), s -> textView.setText(s));
+        View root = inflater.inflate(R.layout.fragment_statistics, container, false);
 
+        // Instantiate UI elements
         globalLastUpdate = root.findViewById(R.id.stats_global_last_update);
         confirmedValue = root.findViewById(R.id.stats_global_confirmed_value);
         confirmedDiff = root.findViewById(R.id.stats_global_confirmed_diff);
@@ -81,19 +90,30 @@ public class StatisticsFragment extends Fragment
         recoveredDiff = root.findViewById(R.id.stats_global_recovered_diff);
         recoveredArrow = root.findViewById(R.id.stats_global_recovered_image);
 
+        activeValue = root.findViewById(R.id.stats_global_active_value);
+        activeDiff = root.findViewById(R.id.stats_global_active_diff);
+        activeArrow = root.findViewById(R.id.stats_global_active_image);
+
+        progressBar = root.findViewById(R.id.statistics_progress_bar);
         locationsView = root.findViewById(R.id.stats_global_location_recycler_view);
 
+        // Show Floating button for Adding a new Location
         FloatingActionButton fab = getActivity().findViewById(R.id.fab);
         fab.show();
 
+        // Load data
         loadGlobals();
         loadLocations(locationsView, true);
+
+        // Set parent refresh listener
+        ((MainActivity)getActivity()).setFragmentRefreshListener(this::parentOnRefresh);
 
         return root;
     }
 
     private void loadGlobals()
     {
+        // Populate summary variable
         summary = CovidApplication.getGlobalStats();
 
         // If summary is null, get it
@@ -115,7 +135,7 @@ public class StatisticsFragment extends Fragment
                 hours = TimeUnit.MILLISECONDS.toHours(diff);
             }
 
-            // Only refresh data if more than 11 hours old
+            // Only refresh data if 6+ hours old
             if (hours >= 6)
                 retrieveGlobalStatsData();
             else
@@ -143,6 +163,7 @@ public class StatisticsFragment extends Fragment
         else
             confirmedArrow.setVisibility(View.INVISIBLE);
 
+
         deathsValue.setText(NumberFormat.getInstance().format(summary.getTotalDeaths()));
         deathsDiff.setText(NumberFormat.getInstance().format(summary.getNewDeaths()));
         if (summary.getNewDeaths() > 0)
@@ -156,7 +177,8 @@ public class StatisticsFragment extends Fragment
             deathsArrow.setVisibility(View.VISIBLE);
         }
         else
-            confirmedArrow.setVisibility(View.INVISIBLE);
+            deathsArrow.setVisibility(View.INVISIBLE);
+
 
         recoveredValue.setText(NumberFormat.getInstance().format(summary.getTotalRecovered()));
         recoveredDiff.setText(NumberFormat.getInstance().format(summary.getNewRecovered()));
@@ -167,34 +189,60 @@ public class StatisticsFragment extends Fragment
         }
         else if (summary.getNewRecovered() < 0)
         {
-            confirmedArrow.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
-            confirmedArrow.setVisibility(View.VISIBLE);
+            recoveredArrow.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
+            recoveredArrow.setVisibility(View.VISIBLE);
         }
         else
-            confirmedArrow.setVisibility(View.INVISIBLE);
+            recoveredArrow.setVisibility(View.INVISIBLE);
+
+
+        activeValue.setText(NumberFormat.getInstance().format(summary.getTotalActive()));
+        activeDiff.setText(NumberFormat.getInstance().format(summary.getNewActive()));
+        if (summary.getNewActive() > 0)
+        {
+            activeArrow.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
+            activeArrow.setVisibility(View.VISIBLE);
+        }
+        else if (summary.getNewActive() < 0)
+        {
+            activeArrow.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
+            activeArrow.setVisibility(View.VISIBLE);
+        }
+        else
+            activeArrow.setVisibility(View.INVISIBLE);
+
     }
 
     private void retrieveGlobalStatsData()
     {
+        progressBar.setVisibility(View.VISIBLE);
         CovidService.summary(new IserviceCallbackGlobalStats()
                              {
                                  @Override
                                  public void onSuccess(GlobalStats stats)
                                  {
+                                     // Set local variables
                                      summary = stats;
                                      summary.setLastUpdate(new Date());
+
+                                     // Save Global stats
                                      CovidApplication.setGlobalStats(summary);
 
+                                     // Hide progress
+                                     progressBar.setVisibility(View.GONE);
+
+                                     // Display
                                      populateGlobalStats();
+
+                                     // Notify
                                      Snackbar.make(getView(), "Global stats updated", Snackbar.LENGTH_SHORT)
                                              .setAction("Action", null).show();
-                                     //Toast.makeText(getActivity(), "Global stats have been updated", Toast.LENGTH_SHORT).show();
                                  }
 
                                  @Override
                                  public void onError(VolleyError error)
                                  {
-                                     //Log.e("LoadCountries.onError()", error.getMessage());
+                                     Log.e("LoadCountries.onError()", error.getStackTrace().toString());
                                      Toast.makeText(getActivity().getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                                  }
                              }
@@ -210,19 +258,37 @@ public class StatisticsFragment extends Fragment
         // Set the layout
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        // Check for Location Statistics
         List<Location> locationsForDisplay = locations.stream()
                 .filter(l -> l.getStatistics().size() > 0)
                 .collect(Collectors.toList());
 
+        // Set adapter if there are valid Locations
         if (locationsForDisplay.size() > 0)
         {
             // Set adapter
             locationsListAdapter = new LocationStatsRecyclerViewAdapter(getContext(), locationsForDisplay);
+            locationsListAdapter.setClickListener(this::locationListAdapterClick);
+            locationsListAdapter.notifyDataSetChanged();
             recyclerView.setAdapter(locationsListAdapter);
         }
 
+        // If there are Locations and refresh is true
         if (refreshLocations && locations.size() > 0)
             RefreshLocations();
+    }
+
+    private void locationListAdapterClick(Location selectedLocation)
+    {
+        // Set selected Loation
+        statisticsViewModel.setSelectedLocation(selectedLocation);
+
+        // Build Intent for LocationStatDetail Activity
+        Intent details = new Intent(getActivity(), LocationStatsDetail.class);
+        details.putExtra("location", selectedLocation);
+
+        // Start LocationStatDetail Activity
+        startActivity(details);
     }
 
     private void RefreshLocations()
@@ -231,8 +297,10 @@ public class StatisticsFragment extends Fragment
         long hours;
         Date currentDate = new Date();
 
+        // Loop through each Location checking for stale LastUpdated value
         for (Location loc : locations)
         {
+            // Account for a null value
             if (null == loc.getLastUpdated())
             {
                 hours = 6;
@@ -243,13 +311,18 @@ public class StatisticsFragment extends Fragment
                 hours = TimeUnit.MILLISECONDS.toHours(diff);
             }
 
+            // If 6+ hours stale, check for new stats
             if (hours >= 6)
             {
+                // Check if Location's current date state is present
                 if (!CovidUtils.statExists(loc.getStatistics()))
                 {
+                    // Set date
                     Calendar startDate = Calendar.getInstance();
                     startDate.add(Calendar.DATE, -1);
                     loc.setLastUpdated(new Date());
+
+                    // Load report
                     LoadReportData(loc, startDate);
                 }
             }
@@ -258,18 +331,20 @@ public class StatisticsFragment extends Fragment
 
     private void LoadReportData(Location loc, Calendar dateToCheck)
     {
+        progressBar.setVisibility(View.VISIBLE);
         CovidService.report(loc.getIso(), loc.getProvince(), loc.getRegion(), loc.getMunicipality(), dateToCheck, new IServiceCallbackCovidStats()
                 {
                     @Override
                     public void onSuccess(CovidStats stat)
                     {
-                        if (null != stat) // && loc.getStatistics().size() < 5)
+                        // If stat is null then there is no data for requested Location and Date
+                        if (null != stat)
                         {
                             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                             loc.getStatistics().add(stat);
                             dateToCheck.add(Calendar.DATE, -1);
 
-                            // Check if we already have stats for next day to check
+                            // Check if we already have stats for next dayToCheck
                             // If so, stop.  Stats won't change.
                             CovidStats found = loc.getStatistics().stream()
                                     .filter(s -> dateFormat.format(s.getStatusDate().getTime()).equals(dateFormat.format(dateToCheck.getTimeInMillis())))
@@ -278,31 +353,41 @@ public class StatisticsFragment extends Fragment
 
                             if (null != found)
                             {
+                                // Stat for next day found, stop
                                 SetLocation(loc);
                                 loadLocations(locationsView, false);
+                                progressBar.setVisibility(View.GONE);
+
+                                // Notify
                                 Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
                                         .setAction("Action", null).show();
-                                //Toast.makeText(getActivity(), "Location stats have been updated", Toast.LENGTH_SHORT).show();
                             }
                             else
                             {
+                                // Stat needed for next day
                                 LoadReportData(loc, dateToCheck);
                             }
                         }
                         else
                         {
-                            Log.d("Finished loading location", Integer.toString(loc.getStatistics().size()));
                             SetLocation(loc);
+                            loadLocations(locationsView, false);
+                            progressBar.setVisibility(View.GONE);
+
+                            // Notify
+                            Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
+                                    .setAction("Action", null).show();
                         }
                     }
 
                     @Override
                     public void onError(VolleyError error)
                     {
-                        if(!TextUtils.isEmpty(error.getMessage()))
-                            Log.e("GetReportData.onError()", error.getMessage());
-                        else
-                            Log.e("GetReportData.onError()", "Errors occurred while getting report.");
+                        Log.e("GetReportData.onError()", error.getStackTrace().toString());
+//                        if(!TextUtils.isEmpty(error.getMessage()))
+//                            Log.e("GetReportData.onError()", error.getMessage());
+//                        else
+//                            Log.e("GetReportData.onError()", "Errors occurred while getting report.");
                         Toast.makeText(getActivity().getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -315,6 +400,7 @@ public class StatisticsFragment extends Fragment
         if (null == locations)
             locations = CovidApplication.getLocations();
 
+        // Check if location is already part of the List
         Location found = locations.stream()
                 .filter(l -> l.getCountry().equals(loc.getCountry())
                         && l.getProvince().equals(loc.getProvince())
@@ -322,15 +408,41 @@ public class StatisticsFragment extends Fragment
                 .findFirst()
                 .orElse(null);
 
+
         if (null == found)
         {
+            // Location is new, add to List
             locations.add(loc);
         }
         else
         {
+            // Location is being updated
             locations.remove(found);
             locations.add(loc);
         }
+
+        // Save to local storage
         CovidApplication.setLocations(locations);
+    }
+
+    private void parentOnRefresh(int resultCode, Intent data)
+    {
+        // Adding Location
+        if (resultCode == 110)
+        {
+            // Get Location from Intent
+            Location loc = (Location)data.getSerializableExtra("location");
+
+            // Notify
+            Snackbar.make(getView(), "Retrieving location statistics...", Snackbar.LENGTH_SHORT)
+                    .setAction("Action", null).show();
+
+            // Set date to start getting report
+            Calendar startDate = Calendar.getInstance();
+            startDate.add(Calendar.DATE, -1);
+
+            // Load report
+            LoadReportData(loc, startDate);
+        }
     }
 }

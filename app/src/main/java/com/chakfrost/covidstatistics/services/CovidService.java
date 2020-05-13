@@ -287,7 +287,7 @@ public class CovidService
                                 result.setTotalRecovered(result.getTotalRecovered() + r.recovered);
                                 result.setDiffRecovered(result.getDiffRecovered() + r.recoveredDiff);
 
-                                result.setTotalactive(result.getTotalactive() + r.active);
+                                result.setTotalactive(result.getTotalActive() + r.active);
                                 result.setDiffActive(result.getDiffActive() + r.activeDiff);
                             }
                             else // province and municipality are both not null
@@ -407,7 +407,7 @@ public class CovidService
 
                 error ->
                 {
-                    VolleyLog.e("CovidService.Summary()", error.getStackTrace());
+                    VolleyLog.e("CovidService.Summary()", error.getStackTrace().toString());
                     callback.onError(error);
                 }
         );

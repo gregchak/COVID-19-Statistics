@@ -6,11 +6,12 @@ import android.text.TextUtils;
 //import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Location implements Comparable<Location>
+public class Location implements Comparable<Location>, Serializable
 {
     @SerializedName("country")
     private String country;

@@ -3,10 +3,11 @@ package com.chakfrost.covidstatistics.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.Date;
 
 //@JsonIgnoreProperties
-public class CovidStats implements Comparable<CovidStats>
+public class CovidStats implements Comparable<CovidStats>, Serializable
 {
     @Expose
     @SerializedName("NewConfirmed")
@@ -113,7 +114,7 @@ public class CovidStats implements Comparable<CovidStats>
     public int getDiffConfirmed() { return DiffConfirmed; }
     public int getDiffDeaths() { return DiffDeaths; }
     public int getDiffRecovered() { return DiffRecovered; }
-    public int getTotalactive() { return TotalActive; }
+    public int getTotalActive() { return TotalActive; }
     public int getNewActive() { return NewActive; }
     public int getDiffActive() { return DiffActive; }
     public double getFatalityRate() { return FatalityRate; }

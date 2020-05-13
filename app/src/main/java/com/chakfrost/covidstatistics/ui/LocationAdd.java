@@ -49,7 +49,6 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
     private Spinner provinceSpinner;
     private String selectedMunicipality;
     private Spinner municipalitySpinner;
-    //private Button addLocation;
     private MaterialButton addLocation;
 
     private final String ALL_VALUE = "-ALL-";
@@ -67,7 +66,8 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
         back.setOnClickListener(v ->
         {
             Intent backToMain = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(backToMain);
+            setResult(100, backToMain);
+            finish();
         });
 
         countrySpinner = findViewById(R.id.location_spCountries);
@@ -112,7 +112,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                                        @Override
                                        public void onError(VolleyError error)
                                        {
-                                           Log.e("LoadCountries.onError()", error.getMessage());
+                                           Log.e("LoadCountries.onError()", error.getStackTrace().toString());
                                            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                                        }
                                    }
@@ -142,7 +142,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
         }
         catch (Exception ex)
         {
-            Log.e("PopulateCountries", ex.getMessage());
+            Log.e("PopulateCountries", ex.getStackTrace().toString());
             Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
@@ -177,7 +177,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                     @Override
                     public void onError(VolleyError error)
                     {
-                        Log.e("LoadProvinces.onError()", error.getMessage());
+                        Log.e("LoadProvinces.onError()", error.getStackTrace().toString());
                         Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -230,7 +230,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                     @Override
                     public void onError(VolleyError err)
                     {
-                        Log.e("LoadMunicipalities", err.getMessage());
+                        Log.e("LoadMunicipalities", err.getStackTrace().toString());
                         Toast.makeText(getApplicationContext(), err.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -326,21 +326,23 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
             {
                 Date end = dtf.parse(inputString1);
                 Date now = new Date();
-                //long diffMs = end.getTime() - now.getTime();
-                //long diffD = (end.getTime()- now.getTime())/86400000;
                 long diffMs = now.getTime() - end.getTime();
                 long diffD = TimeUnit.MILLISECONDS.toDays(diffMs);
-                //int diffi = (int)( (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
 
                 // Populate report information
                 Calendar startDate = Calendar.getInstance();
                 startDate.add(Calendar.DATE, -1);
 
 
+                // Set result
+                Intent backToMain = new Intent(getApplicationContext(), MainActivity.class);
+                backToMain.putExtra("location", loc);
+                setResult(110, backToMain);
+                finish();
+
                 //CovidUtils.animateView(progressOverlay, View.VISIBLE, 0.4f, 200);
-                LoadReportData(loc, startDate, diffD);
-                updateProgressBar(diffD, 1);
+                //LoadReportData(loc, startDate, diffD);
+                //updateProgressBar(diffD, 1);
             }
             catch (Exception ex)
             {
@@ -383,7 +385,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                     @Override
                     public void onError(VolleyError error)
                     {
-                        Log.e("GetReportData.onError()", error.getMessage());
+                        Log.e("GetReportData.onError()", error.getStackTrace().toString());
                         Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }

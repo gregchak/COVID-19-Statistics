@@ -41,6 +41,7 @@ public class CovidApplication extends Application
     private final static String CHANNEL_ID = "COVID_STATISTICS";
     private final static String UNIQUE_WORK = "STATUS_REFRESH";
     private final static String PREFERENCES_NAME = "COVID_STATISTICS_PREFERENCES";
+    public final static int DAYS_TO_DISPLAY_DETAILS = 90;
 
     @Override
     public void onCreate()

@@ -3,13 +3,14 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
+    archivesBaseName = "COVID-19 Statistics"
 
     defaultConfig {
         applicationId "com.chakfrost.covidstatistics"
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
-        versionName '1.0.1.0'
+        versionName '1.1.1.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +49,9 @@ dependencies {
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
 
     testImplementation 'junit:junit:4.12'
+
+    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
+
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
