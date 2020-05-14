@@ -34,8 +34,6 @@ public class LocationStatsDetail extends AppCompatActivity
     private RecyclerView locationStatDetailView;
     private LocationStatsDetailRecyclerViewAdapter locationsListAdapter;
 
-    private int DAYS_TO_DISPLAY = 90;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -47,11 +45,13 @@ public class LocationStatsDetail extends AppCompatActivity
 
         locationStatDetailView = findViewById(R.id.location_stat_detail_recycler_view);
 
+        // Set the title of activity to Location name
         setTitle(CovidUtils.formatLocation(location));
-        DAYS_TO_DISPLAY = CovidApplication.DAYS_TO_DISPLAY_DETAILS;
 
+        // Build the data to be displayed
         buildLocationStats();
 
+        // Bind stats to adapter for display
         bindLocationStats();
     }
 
@@ -72,10 +72,11 @@ public class LocationStatsDetail extends AppCompatActivity
         Collections.sort(statsForDisplay);
 
         // Loop through all the Location's statistics
-        for (int i = 0; i < statsForDisplay.size() && i < DAYS_TO_DISPLAY; i++)
+        for (int i = 0; i < statsForDisplay.size(); i++)
         {
             statTemp  = statsForDisplay.get(i);
 
+            // Set confirmed values
             if (confirmedZeroCount < 5)
                 confirmed.addValue(statTemp.getStatusDate(), statTemp.getTotalConfirmed());
 
@@ -84,7 +85,7 @@ public class LocationStatsDetail extends AppCompatActivity
             else if (statTemp.getTotalConfirmed() != 0 && confirmedZeroCount < 5)
                 confirmedZeroCount = 0;
 
-
+            // Set death values
             if (deathZeroCount < 5)
                 deaths.addValue(statTemp.getStatusDate(), statTemp.getTotalDeaths());
 
@@ -93,7 +94,7 @@ public class LocationStatsDetail extends AppCompatActivity
             else if (statTemp.getTotalDeaths() != 0 && deathZeroCount < 5)
                 deathZeroCount = 0;
 
-
+            // Set recovered values
             if(recoveredZeroCount < 5)
                 recovered.addValue(statTemp.getStatusDate(), statTemp.getTotalRecovered());
 
@@ -102,7 +103,7 @@ public class LocationStatsDetail extends AppCompatActivity
             else if (statTemp.getTotalRecovered() != 0 && recoveredZeroCount < 5)
                 recoveredZeroCount = 0;
 
-
+            // Set active values
             if (activeZeroCount < 5)
             active.addValue(statTemp.getStatusDate(), statTemp.getTotalActive());
 
@@ -112,26 +113,12 @@ public class LocationStatsDetail extends AppCompatActivity
                 activeZeroCount = 0;
         }
 
-        // Loop through all the Location's statistics
-//        for (CovidStats stat: location.getStatistics())
-//        {
-//            confirmed.addValue(stat.getStatusDate(), stat.getTotalConfirmed());
-//            deaths.addValue(stat.getStatusDate(), stat.getTotalDeaths());
-//
-//            // Only add if Recovered has a value
-//            if (stat.getTotalRecovered() != 0)
-//                recovered.addValue(stat.getStatusDate(), stat.getTotalRecovered());
-//
-//            // Only add if Active has a value
-//            if (stat.getTotalActive() != 0)
-//            active.addValue(stat.getStatusDate(), stat.getTotalActive());
-//        }
-
         // Populate LocationStats List<>
         locationStats = new ArrayList<>();
         locationStats.add(confirmed);
         locationStats.add(deaths);
 
+        // Not all locations have Recovered values, verify this has data
         StatDatePair findRecovered = recovered.getValues().stream()
                 .filter(s -> s.getValue() != 0)
                 .findFirst()
@@ -141,7 +128,8 @@ public class LocationStatsDetail extends AppCompatActivity
         if (null != findRecovered)
             locationStats.add(recovered);
 
-        StatDatePair findActive = recovered.getValues().stream()
+        // Not all locations have Active values, verify this has data
+        StatDatePair findActive = active.getValues().stream()
                 .filter(s -> s.getValue() != 0)
                 .findFirst()
                 .orElse(null);
@@ -160,7 +148,6 @@ public class LocationStatsDetail extends AppCompatActivity
         {
             // Set adapter
             locationsListAdapter = new LocationStatsDetailRecyclerViewAdapter(locationStats);
-            //locationsListAdapter.setClickListener(this::locationListAdapterClick);
             locationStatDetailView.setAdapter(locationsListAdapter);
         }
     }
