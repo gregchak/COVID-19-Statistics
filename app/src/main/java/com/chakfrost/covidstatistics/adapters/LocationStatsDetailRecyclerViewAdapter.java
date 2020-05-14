@@ -22,10 +22,14 @@ import java.util.List;
 
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
+import lecho.lib.hellocharts.model.Column;
+import lecho.lib.hellocharts.model.ColumnChartData;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
+import lecho.lib.hellocharts.model.SubcolumnValue;
 import lecho.lib.hellocharts.model.Viewport;
+import lecho.lib.hellocharts.view.ColumnChartView;
 import lecho.lib.hellocharts.view.LineChartView;
 
 public class LocationStatsDetailRecyclerViewAdapter
@@ -38,8 +42,6 @@ public class LocationStatsDetailRecyclerViewAdapter
     // data is passed into the constructor
     public LocationStatsDetailRecyclerViewAdapter(List<LocationStats> data)
     {
-        //this.context = context;
-        //this.mInflater = LayoutInflater.from(this.context);
         this.data = data;
     }
 
@@ -70,7 +72,7 @@ public class LocationStatsDetailRecyclerViewAdapter
         }
         catch (Exception ex)
         {
-            Log.e("onBindViewHolder()", ex.toString());
+            Log.e("onBindViewHolder()", ex.getStackTrace().toString());
         }
 
         holder.getAdapterPosition();
@@ -114,12 +116,15 @@ public class LocationStatsDetailRecyclerViewAdapter
     {
         private TextView statName;
         private LineChartView lineChartView;
+        private ColumnChartView columnChartView;
+        private ColumnChartData columnChartData;
 
         public LocationStatsDetailHolder(View itemView)
         {
             super(itemView);
             statName = itemView.findViewById(R.id.location_stat_name);
-            lineChartView = itemView.findViewById(R.id.location_stat_chart);
+            lineChartView = itemView.findViewById(R.id.location_stat_line_chart);
+            columnChartView = itemView.findViewById(R.id.location_stat_bar_chart);
 
             itemView.setOnClickListener(this);
         }
@@ -149,12 +154,16 @@ public class LocationStatsDetailRecyclerViewAdapter
         {
             statName.setText(locationStat.getName());
 
-            buildChart(locationStat.getValues());
+            //buildLineChart(locationStat.getValues());
+            buildColumnChart(locationStat.getValues());
         }
 
-        private void buildChart(List<StatDatePair> stats)
+        /**
+         * Creates a line chart
+         * @param stats List of StatDatePair objects to be used as chart's data
+         */
+        private void buildLineChart(List<StatDatePair> stats)
         {
-            Collections.sort(stats);
             StatDatePair stat;
             SimpleDateFormat dayAbv = new SimpleDateFormat("E");
             SimpleDateFormat dateAbv = new SimpleDateFormat("M/dd");
@@ -244,9 +253,74 @@ public class LocationStatsDetailRecyclerViewAdapter
             lineChartView.setCurrentViewport(v);
             //Optional step: disable viewport recalculations, thanks to this animations will not change viewport automatically.
             lineChartView.setViewportCalculationEnabled(false);
+        }
 
+        /**
+         * Creates a bar chart (column chart)
+         * @param stats List of StatDatePair objects to be used as chart's data
+         */
+        private void buildColumnChart(List<StatDatePair> stats)
+        {
+            StatDatePair stat;
+            List<Column> columns = new ArrayList<>();
+            List<SubcolumnValue> values;
+            List axisValues = new ArrayList();
+            String[] xAxisDataPoints = new String[stats.size()];
+            SimpleDateFormat dateAbv = new SimpleDateFormat("M/dd");
 
+            // Set number of columns based on stats size
+            int numColumns = stats.size();
 
+            // Displaying from past to present so sort list ASC
+            Collections.reverse(stats);
+
+            // Loop stats to add columns
+            for (int i = 0; i < numColumns; ++i)
+            {
+                stat = stats.get(i);
+
+                xAxisDataPoints[i] = dateAbv.format(stat.getDate());
+                axisValues.add(i, new AxisValue(i).setLabel(dateAbv.format(stat.getDate())));
+
+                // Create 1 subcolumn, all columns need at least 1 subcolumn
+                values = new ArrayList<>();
+                values.add(new SubcolumnValue(stat.getValue(), Color.parseColor("#6E1B09")));
+
+                // Setup column with subcolumn data
+                Column column = new Column(values);
+                column.setHasLabels(false);
+                column.setHasLabelsOnlyForSelected(false);
+                columns.add(column);
+            }
+
+            // Set data with Columns
+            columnChartData = new ColumnChartData(columns);
+
+            // Setup X axis
+            Axis axisX = new Axis();
+            axisX.setTextColor(R.color.Onyx);
+            axisX.setTextSize(9);
+            axisX.setMaxLabelChars(5);
+            axisX.setValues(axisValues);
+            axisX.setHasTiltedLabels(true);
+            columnChartData.setAxisXBottom(axisX);
+
+            // Setup Y axis
+            Axis axisY = new Axis().setHasLines(true);
+            axisY.setTextColor(R.color.Onyx);
+            axisY.setTextSize(9);
+            axisY.setMaxLabelChars(7);
+            columnChartData.setAxisYLeft(axisY);
+
+            // Apply data to chart
+            columnChartView.setColumnChartData(columnChartData);
+
+            // Update viewpoint to give Y axis some "height"
+            final Viewport v = new Viewport(columnChartView.getMaximumViewport());
+            v.top = (float) (v.top + (v.top * 0.15));
+            columnChartView.setMaximumViewport(v);
+            columnChartView.setCurrentViewport(v);
+            columnChartView.setViewportCalculationEnabled(false);
         }
     }
 }
