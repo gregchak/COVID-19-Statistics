@@ -49,6 +49,7 @@
     <string name="lbl_deaths">Deaths:</string>
     <string name="lbl_recovered">Recovered:</string>
     <string name="lbl_active">Active:</string>
+    <string name="lbl_fatality">Fatality Rate:</string>
     <string name="lbl_seven_day_trend">7 day trend of confirmed cases</string>
 
     <string name="about_text">
