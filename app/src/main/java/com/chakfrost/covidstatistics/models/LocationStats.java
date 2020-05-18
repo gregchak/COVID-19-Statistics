@@ -20,7 +20,7 @@ public class LocationStats
         this.values = new ArrayList<>();
     }
 
-    public void addValue(Date dateOfValue, int value)
+    public void addValue(Date dateOfValue, double value)
     {
         StatDatePair p = new StatDatePair(dateOfValue, value);
         addValue(p);

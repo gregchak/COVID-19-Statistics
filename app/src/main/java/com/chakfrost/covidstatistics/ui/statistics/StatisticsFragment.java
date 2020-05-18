@@ -282,6 +282,25 @@ public class StatisticsFragment extends Fragment
         // If there are Locations and refresh is true
         if (refreshLocations && locations.size() > 0)
             RefreshLocations();
+/*        else
+        {
+            // Version 1.2.0.0 update: add fatality rate
+            Date currentDate = new Date(2020,4,14);
+            long diff;
+            long hours;
+            for (Location loc : locations)
+            {
+                diff = currentDate.getTime() - loc.getLastUpdated().getTime();
+                hours = TimeUnit.MILLISECONDS.toHours(diff);
+
+                long count = loc.getStatistics().stream()
+                        .filter(s -> s.getFatalityRate() > 0 && s.getStatusDate().before(currentDate))
+                        .count();
+
+                if (count == 0)
+                    LoadReportData(loc, startDate);
+            }
+        }*/
     }
 
     private void locationListAdapterClick(Location selectedLocation)

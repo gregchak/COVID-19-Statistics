@@ -169,7 +169,7 @@ public class LocationStatsDetailRecyclerViewAdapter
             SimpleDateFormat dateAbv = new SimpleDateFormat("M/dd");
 
             int numberOfDays = CovidApplication.DAYS_TO_DISPLAY_DETAILS;
-            int[] yAxisData = new int[stats.size()];
+            double[] yAxisData = new double[stats.size()];
             String[] axisData = new String[stats.size()];
 
 //            Collections.sort(stats, (s1, s2) -> {
@@ -214,7 +214,7 @@ public class LocationStatsDetailRecyclerViewAdapter
             counter = 0;
             for (int i = axisData.length-1; i >= 0; i--)
             {
-                yAxisValues.add(new PointValue(counter, yAxisData[i]));
+                yAxisValues.add(new PointValue(counter, (float)yAxisData[i]));
                 counter++;
             }
 
@@ -284,7 +284,7 @@ public class LocationStatsDetailRecyclerViewAdapter
 
                 // Create 1 subcolumn, all columns need at least 1 subcolumn
                 values = new ArrayList<>();
-                values.add(new SubcolumnValue(stat.getValue(), Color.parseColor("#6E1B09")));
+                values.add(new SubcolumnValue((float)stat.getValue(), Color.parseColor("#6E1B09")));
 
                 // Setup column with subcolumn data
                 Column column = new Column(values);
