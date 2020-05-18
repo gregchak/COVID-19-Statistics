@@ -1,8 +1,8 @@
 package com.chakfrost.covidstatistics.services;
 
-import com.android.volley.VolleyError;
+        import com.android.volley.VolleyError;
 
-import java.util.List;
+        import java.util.List;
 
 public interface IServiceCallbackList
 {

@@ -174,6 +174,31 @@
 
                 <TextView/> <!-- placeholder needed for alignment -->
 
+                <!-- fifth row -->
+                <TextView
+                    android:id="@+id/stats_location_fatality_label"
+                    android:textColor="@color/textPrimary"
+                    android:paddingRight="4dp"
+                    android:text="@string/lbl_fatality"/>
+                <TextView
+                    android:id="@+id/stats_location_fatality_value"
+                    android:text="@string/number"
+                    android:textAlignment="textEnd"
+                    android:layout_gravity="end"
+                    android:textColor="@color/textPrimary" />
+                <ImageView
+                    android:id="@+id/stats_location_fatality_image"
+                    android:contentDescription="@string/arrow_content_description"
+                    app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"/>
+                <TextView
+                    android:id="@+id/stats_location_fatality_diff"
+                    android:textColor="@color/textPrimary"
+                    android:textAlignment="textEnd"
+                    android:layout_gravity="end"
+                    android:text="@string/number"/>
+
+                <TextView/> <!-- placeholder needed for alignment -->
+
             </GridLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

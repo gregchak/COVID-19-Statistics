@@ -124,11 +124,14 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
         private TextView active;
         private TextView activeDiff;
         private TextView lastUpdated;
+        private TextView fatality;
+        private TextView fatalityDiff;
 
         private ImageView confirmedImage;
         private ImageView deathsImage;
         private ImageView recoveredImage;
         private ImageView activeImage;
+        private ImageView fatalityImage;
 
         private LineChartView lineChartView;
 
@@ -148,6 +151,9 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             active = itemView.findViewById(R.id.stats_location_active_value);
             activeDiff = itemView.findViewById(R.id.stats_location_active_diff);
             activeImage = itemView.findViewById(R.id.stats_location_active_image);
+            fatality = itemView.findViewById(R.id.stats_location_fatality_value);
+            fatalityDiff = itemView.findViewById(R.id.stats_location_fatality_diff);
+            fatalityImage = itemView.findViewById(R.id.stats_location_fatality_image);
 
             lastUpdated = itemView.findViewById(R.id.stats_location_last_updated);
 
@@ -182,6 +188,10 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             List<CovidStats> stats = location.getStatistics();
             Collections.sort(stats, (s1, s2) -> s2.getStatusDate().compareTo(s1.getStatusDate()));
             CovidStats stat = stats.get(0);
+            CovidStats previousStat = null;
+
+            if (stats.size() > 0)
+                previousStat = stats.get(1);
 
             locationName.setText(CovidUtils.formatLocation(location));
 
@@ -258,6 +268,33 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
                     activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
 
             }
+
+            // Fatality
+            if (stat.getFatalityRate() == 0)
+            {
+                fatality.setText("N/A");
+                fatalityDiff.setText("N/A");
+                fatalityImage.setImageResource(R.drawable.ic_remove_black_24dp);
+            }
+            else
+            {
+                fatality.setText(MessageFormat.format("{0}%", NumberFormat.getInstance().format(stat.getFatalityRate() * 100)));
+                if (null != previousStat)
+                {
+                    double fatalityDifference = stat.getFatalityRate() - previousStat.getFatalityRate();
+                    fatalityDiff.setText(MessageFormat.format("{0}%", NumberFormat.getInstance().format(fatalityDifference * 100)));
+
+                    if (stat.getFatalityRate() > previousStat.getFatalityRate())
+                    {
+                        fatalityImage.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
+                    } else if (stat.getFatalityRate() < previousStat.getFatalityRate())
+                    {
+                        fatalityImage.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
+                    } else
+                        fatalityImage.setImageResource(R.drawable.ic_remove_black_24dp);
+                }
+            }
+
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
             lastUpdated.setText(MessageFormat.format("as of {0}", dateFormat.format(stat.getLastUpdate())));

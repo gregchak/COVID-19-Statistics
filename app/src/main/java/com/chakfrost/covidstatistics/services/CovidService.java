@@ -289,6 +289,8 @@ public class CovidService
 
                                 result.setTotalactive(result.getTotalActive() + r.active);
                                 result.setDiffActive(result.getDiffActive() + r.activeDiff);
+
+                                result.setFatalityRate(r.fatalityRate);
                             }
                             else // province and municipality are both not null
                             {

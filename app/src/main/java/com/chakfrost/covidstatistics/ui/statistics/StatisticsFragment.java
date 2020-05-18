@@ -65,6 +65,7 @@ public class StatisticsFragment extends Fragment
     private TextView activeValue;
     private TextView activeDiff;
     private ImageView activeArrow;
+    private TextView fatalityValue;
 
     private ProgressBar progressBar;
     private RecyclerView locationsView;
@@ -93,6 +94,8 @@ public class StatisticsFragment extends Fragment
         activeValue = root.findViewById(R.id.stats_global_active_value);
         activeDiff = root.findViewById(R.id.stats_global_active_diff);
         activeArrow = root.findViewById(R.id.stats_global_active_image);
+
+        fatalityValue = root.findViewById(R.id.stats_global_fatality_value);
 
         progressBar = root.findViewById(R.id.statistics_progress_bar);
         locationsView = root.findViewById(R.id.stats_global_location_recycler_view);
@@ -210,6 +213,9 @@ public class StatisticsFragment extends Fragment
         }
         else
             activeArrow.setVisibility(View.INVISIBLE);
+
+        // Fatality
+        fatalityValue.setText(MessageFormat.format("{0}%", NumberFormat.getInstance().format(summary.getFatalityRate() * 100)));
 
     }
 
