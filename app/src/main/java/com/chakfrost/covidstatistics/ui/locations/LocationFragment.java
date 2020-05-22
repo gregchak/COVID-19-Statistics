@@ -30,6 +30,7 @@ public class LocationFragment extends Fragment
     private RecyclerView locationsSimpleListView;
     private LocationSimpleListRecyclerViewAdapter locationsSimpleListAdapter;
 
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         //locationViewModel = ViewModelProviders.of(this).get(LocationViewModel.class);

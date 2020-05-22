@@ -2,7 +2,6 @@ package com.chakfrost.covidstatistics.ui.statistics;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import androidx.lifecycle.ViewModelProviders;
@@ -26,7 +24,6 @@ import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.MainActivity;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationStatsRecyclerViewAdapter;
-import com.chakfrost.covidstatistics.interfaces.IFragmentRefreshListener;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.Location;
@@ -36,6 +33,7 @@ import com.chakfrost.covidstatistics.services.IserviceCallbackGlobalStats;
 import com.chakfrost.covidstatistics.ui.LocationStatsDetail;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -71,6 +69,9 @@ public class StatisticsFragment extends Fragment
     private RecyclerView locationsView;
     private LocationStatsRecyclerViewAdapter locationsListAdapter;
 
+    private FirebaseAnalytics firebaseAnalytics;
+
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         statisticsViewModel = ViewModelProviders.of(requireActivity()).get(StatisticsViewModel.class);
@@ -100,6 +101,8 @@ public class StatisticsFragment extends Fragment
         progressBar = root.findViewById(R.id.statistics_progress_bar);
         locationsView = root.findViewById(R.id.stats_global_location_recycler_view);
 
+        firebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
+
         // Show Floating button for Adding a new Location
         FloatingActionButton fab = getActivity().findViewById(R.id.fab);
         fab.show();
@@ -110,6 +113,12 @@ public class StatisticsFragment extends Fragment
 
         // Set parent refresh listener
         ((MainActivity)getActivity()).setFragmentRefreshListener(this::parentOnRefresh);
+
+//        Bundle bundle = new Bundle();
+//        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "111");
+//        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "test");
+//        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
+//        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
 
         return root;
     }
@@ -250,6 +259,11 @@ public class StatisticsFragment extends Fragment
                                  {
                                      Log.e("LoadCountries.onError()", error.getStackTrace().toString());
                                      Toast.makeText(getActivity().getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+
+                                     Bundle bundle = new Bundle();
+                                     bundle.putString(FirebaseAnalytics.Param.METHOD, "retrieveGlobalStatsData.onError");
+                                     bundle.putString("Global_Stats_Error", error.getStackTrace().toString());
+                                     firebaseAnalytics.logEvent("ERROR", bundle);
                                  }
                              }
         );
@@ -305,7 +319,7 @@ public class StatisticsFragment extends Fragment
 
     private void locationListAdapterClick(Location selectedLocation)
     {
-        // Set selected Loation
+        // Set selected Location
         statisticsViewModel.setSelectedLocation(selectedLocation);
 
         // Build Intent for LocationStatDetail Activity
@@ -314,6 +328,28 @@ public class StatisticsFragment extends Fragment
 
         // Start LocationStatDetail Activity
         startActivity(details);
+
+
+        // Load Fragment
+//        Fragment locationDetails = new LocationDetailsFragment();
+//        FragmentManager fm = getParentFragmentManager();
+//        FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+//
+//        if (locationDetails.isAdded())
+//        {
+//            fm.beginTransaction()
+//                    .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+//                    .show(locationDetails)
+//                    .commit();
+//        }
+//        else
+//        {
+//            ft.add(locationDetails, "details");
+//            ft.show(locationDetails);
+//            ft.addToBackStack("details");
+//            ft.commit();
+//        }
+
     }
 
     private void RefreshLocations()

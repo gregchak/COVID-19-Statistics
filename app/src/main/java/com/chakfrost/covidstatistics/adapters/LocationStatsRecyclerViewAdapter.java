@@ -227,8 +227,8 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             // Recovered data
             if (stat.getTotalRecovered() == 0)
             {
-                recovered.setText("N/A");
-                recoveredDiff.setText("N/A");
+                recovered.setText("N/R");
+                recoveredDiff.setText("N/R");
                 recoveredImage.setImageResource(R.drawable.ic_remove_black_24dp);
             }
             else
@@ -248,8 +248,8 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             // Active data
             if (stat.getTotalActive() == 0)
             {
-                active.setText("N/A");
-                activeDiff.setText("N/A");
+                active.setText("N/R");
+                activeDiff.setText("N/R");
                 activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
             }
             else
@@ -272,8 +272,8 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             // Fatality
             if (stat.getFatalityRate() == 0)
             {
-                fatality.setText("N/A");
-                fatalityDiff.setText("N/A");
+                fatality.setText("N/R");
+                fatalityDiff.setText("N/R");
                 fatalityImage.setImageResource(R.drawable.ic_remove_black_24dp);
             }
             else

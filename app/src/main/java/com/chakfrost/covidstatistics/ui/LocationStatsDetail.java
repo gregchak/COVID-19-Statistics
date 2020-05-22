@@ -3,9 +3,11 @@ package com.chakfrost.covidstatistics.ui;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toolbar;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NavUtils;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,6 +46,9 @@ public class LocationStatsDetail extends AppCompatActivity
         Intent i = getIntent();
         location = (Location)i.getSerializableExtra("location");
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         locationStatDetailView = findViewById(R.id.location_stat_detail_recycler_view);
 
         // Set the title of activity to Location name
@@ -54,6 +59,13 @@ public class LocationStatsDetail extends AppCompatActivity
 
         // Bind stats to adapter for display
         bindLocationStats();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp()
+    {
+        onBackPressed();
+        return true;
     }
 
     private void buildLocationStats()
