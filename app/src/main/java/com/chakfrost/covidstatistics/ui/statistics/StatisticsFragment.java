@@ -64,6 +64,8 @@ public class StatisticsFragment extends Fragment
     private TextView activeDiff;
     private ImageView activeArrow;
     private TextView fatalityValue;
+    private TextView fatalityDiff;
+    private ImageView fatalityArrow;
 
     private ProgressBar progressBar;
     private RecyclerView locationsView;
@@ -97,6 +99,8 @@ public class StatisticsFragment extends Fragment
         activeArrow = root.findViewById(R.id.stats_global_active_image);
 
         fatalityValue = root.findViewById(R.id.stats_global_fatality_value);
+        fatalityDiff = root.findViewById(R.id.stats_global_fatality_diff);
+        fatalityArrow = root.findViewById(R.id.stats_global_fatality_image);
 
         progressBar = root.findViewById(R.id.statistics_progress_bar);
         locationsView = root.findViewById(R.id.stats_global_location_recycler_view);
@@ -162,80 +166,111 @@ public class StatisticsFragment extends Fragment
 
         confirmedValue.setText(NumberFormat.getInstance().format(summary.getTotalConfirmed()));
         confirmedDiff.setText(NumberFormat.getInstance().format(summary.getNewConfirmed()));
-        if (summary.getNewConfirmed() > 0)
-        {
-            confirmedArrow.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
-            confirmedArrow.setVisibility(View.VISIBLE);
-        }
-        else if (summary.getNewConfirmed() < 0)
-        {
-            confirmedArrow.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
-            confirmedArrow.setVisibility(View.VISIBLE);
-        }
-        else
-            confirmedArrow.setVisibility(View.INVISIBLE);
+        confirmedArrow.setImageResource(CovidUtils.determineArrow(summary.getTotalConfirmed(), summary.getNewConfirmed(), false));
+//        if (summary.getNewConfirmed() > 0)
+//        {
+//            confirmedArrow.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
+//            confirmedArrow.setVisibility(View.VISIBLE);
+//        }
+//        else if (summary.getNewConfirmed() < 0)
+//        {
+//            confirmedArrow.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
+//            confirmedArrow.setVisibility(View.VISIBLE);
+//        }
+//        else
+//            confirmedArrow.setVisibility(View.INVISIBLE);
 
 
         deathsValue.setText(NumberFormat.getInstance().format(summary.getTotalDeaths()));
         deathsDiff.setText(NumberFormat.getInstance().format(summary.getNewDeaths()));
-        if (summary.getNewDeaths() > 0)
-        {
-            deathsArrow.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
-            deathsArrow.setVisibility(View.VISIBLE);
-        }
-        else if (summary.getNewDeaths() < 0)
-        {
-            deathsArrow.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
-            deathsArrow.setVisibility(View.VISIBLE);
-        }
-        else
-            deathsArrow.setVisibility(View.INVISIBLE);
+        deathsArrow.setImageResource(CovidUtils.determineArrow(summary.getTotalDeaths(), summary.getNewDeaths(), false));
+//        if (summary.getNewDeaths() > 0)
+//        {
+//            deathsArrow.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
+//            deathsArrow.setVisibility(View.VISIBLE);
+//        }
+//        else if (summary.getNewDeaths() < 0)
+//        {
+//            deathsArrow.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
+//            deathsArrow.setVisibility(View.VISIBLE);
+//        }
+//        else
+//            deathsArrow.setVisibility(View.INVISIBLE);
 
 
         recoveredValue.setText(NumberFormat.getInstance().format(summary.getTotalRecovered()));
         recoveredDiff.setText(NumberFormat.getInstance().format(summary.getNewRecovered()));
-        if (summary.getNewRecovered() > 0)
-        {
-            recoveredArrow.setImageResource(R.drawable.ic_arrow_drop_up_green_24dp);
-            recoveredArrow.setVisibility(View.VISIBLE);
-        }
-        else if (summary.getNewRecovered() < 0)
-        {
-            recoveredArrow.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
-            recoveredArrow.setVisibility(View.VISIBLE);
-        }
-        else
-            recoveredArrow.setVisibility(View.INVISIBLE);
+        recoveredArrow.setImageResource(CovidUtils.determineArrow(summary.getTotalRecovered(), summary.getNewRecovered(), true));
+//        if (summary.getNewRecovered() > 0)
+//        {
+//            recoveredArrow.setImageResource(R.drawable.ic_arrow_drop_up_green_24dp);
+//            recoveredArrow.setVisibility(View.VISIBLE);
+//        }
+//        else if (summary.getNewRecovered() < 0)
+//        {
+//            recoveredArrow.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
+//            recoveredArrow.setVisibility(View.VISIBLE);
+//        }
+//        else
+//            recoveredArrow.setVisibility(View.INVISIBLE);
 
 
         activeValue.setText(NumberFormat.getInstance().format(summary.getTotalActive()));
         activeDiff.setText(NumberFormat.getInstance().format(summary.getNewActive()));
-        if (summary.getNewActive() > 0)
-        {
-            activeArrow.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
-            activeArrow.setVisibility(View.VISIBLE);
-        }
-        else if (summary.getNewActive() < 0)
-        {
-            activeArrow.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
-            activeArrow.setVisibility(View.VISIBLE);
-        }
-        else
-            activeArrow.setVisibility(View.INVISIBLE);
+        activeArrow.setImageResource(CovidUtils.determineArrow(summary.getTotalRecovered(), summary.getNewRecovered(), false));
+//        if (summary.getNewActive() > 0)
+//        {
+//            activeArrow.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
+//            activeArrow.setVisibility(View.VISIBLE);
+//        }
+//        else if (summary.getNewActive() < 0)
+//        {
+//            activeArrow.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
+//            activeArrow.setVisibility(View.VISIBLE);
+//        }
+//        else
+//            activeArrow.setVisibility(View.INVISIBLE);
 
         // Fatality
         fatalityValue.setText(MessageFormat.format("{0}%", NumberFormat.getInstance().format(summary.getFatalityRate() * 100)));
+        double fatalityDifference = summary.getFatalityRate() - summary.getPreviousFatalityRate();
+        fatalityDiff.setText(MessageFormat.format("{0}%", NumberFormat.getInstance().format(fatalityDifference * 100)));
+        fatalityArrow.setImageResource(CovidUtils.determineArrow(summary.getFatalityRate(), summary.getPreviousFatalityRate(), false));
+//        if (fatalityDifference > 0)
+//        {
+//            fatalityArrow.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
+//            fatalityArrow.setVisibility(View.VISIBLE);
+//        }
+//        else if (fatalityDifference < 0)
+//        {
+//            fatalityArrow.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
+//            fatalityArrow.setVisibility(View.VISIBLE);
+//        }
+//        else
+//            fatalityArrow.setVisibility(View.INVISIBLE);
 
     }
 
     private void retrieveGlobalStatsData()
     {
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "0");
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "GlobalStatistics refresh");
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+
         progressBar.setVisibility(View.VISIBLE);
         CovidService.summary(new IserviceCallbackGlobalStats()
                              {
                                  @Override
                                  public void onSuccess(GlobalStats stats)
                                  {
+                                     // Set the previous fatality rate value based on stat date
+                                     // since stats are only updated once a day
+                                     if (summary.getStatusDate() != stats.getStatusDate())
+                                         stats.setPreviousFatalityRate(summary.getFatalityRate());
+                                     else
+                                         stats.setPreviousFatalityRate(summary.getPreviousFatalityRate());
+
                                      // Set local variables
                                      summary = stats;
                                      summary.setLastUpdate(new Date());
@@ -493,6 +528,12 @@ public class StatisticsFragment extends Fragment
         {
             // Get Location from Intent
             Location loc = (Location)data.getSerializableExtra("location");
+
+            // Log statistics to Firebase
+            Bundle bundle = new Bundle();
+            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, CovidUtils.formatLocation(loc));
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "New Location");
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
 
             // Notify
             Snackbar.make(getView(), "Retrieving location statistics...", Snackbar.LENGTH_SHORT)

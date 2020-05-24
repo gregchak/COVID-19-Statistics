@@ -98,4 +98,21 @@ public class CovidUtils
         else
             return true;
     }
+
+    public static int determineArrow(double current, double previous, boolean upIsGood)
+    {
+        //Log.d("determineArrow()", "Comparing " + String.valueOf(current) + " with previous value of " + String.valueOf(previous));
+        if (current > previous)
+        {
+            return upIsGood ? R.drawable.ic_arrow_drop_up_green_24dp : R.drawable.ic_arrow_drop_up_yellow_24dp;
+        }
+        else if (current < previous)
+        {
+            return upIsGood ? R.drawable.ic_arrow_drop_down_yellow_24dp : R.drawable.ic_arrow_drop_down_green_24dp;
+        }
+        else
+        {
+            return R.drawable.ic_remove_black_24dp;
+        }
+    }
 }

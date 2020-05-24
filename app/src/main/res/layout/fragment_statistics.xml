@@ -164,8 +164,15 @@
             android:textAlignment="textEnd"
             android:layout_gravity="end"
             android:textColor="@color/white" />
-        <ImageView />
-        <TextView/>
+        <ImageView
+            android:id="@+id/stats_global_fatality_image"
+            android:contentDescription="@string/arrow_content_description"
+            app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp" />
+        <TextView
+            android:id="@+id/stats_global_fatality_diff"
+            android:textColor="@color/white"
+            android:textAlignment="textEnd"
+            android:layout_gravity="end"/>
         <TextView/>
         </GridLayout>
 
