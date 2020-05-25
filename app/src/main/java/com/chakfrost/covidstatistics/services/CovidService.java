@@ -1,5 +1,6 @@
 package com.chakfrost.covidstatistics.services;
 
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ import com.chakfrost.covidstatistics.services.covid19Statistics.Regions;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Report;
 import com.chakfrost.covidstatistics.services.covid19Statistics.ReportStatistics;
 import com.chakfrost.covidstatistics.services.covid19Statistics.ReportsTotal;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

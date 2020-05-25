@@ -5,9 +5,9 @@ import java.util.Date;
 public class StatDatePair implements Comparable<StatDatePair>
 {
     private Date date;
-    private int value;
+    private double value;
 
-    public StatDatePair(Date date, int value)
+    public StatDatePair(Date date, double value)
     {
         this.date = date;
         this.value = value;
@@ -18,13 +18,13 @@ public class StatDatePair implements Comparable<StatDatePair>
     {
         return date;
     }
-    public int getValue()
+    public double getValue()
     {
         return value;
     }
 
     /** Setters **/
-    public void setValue(int value)
+    public void setValue(double value)
     {
         this.value = value;
     }

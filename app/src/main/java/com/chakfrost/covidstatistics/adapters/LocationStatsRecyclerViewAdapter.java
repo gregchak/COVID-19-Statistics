@@ -84,6 +84,19 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
         return data.size();
     }
 
+    // Clean all elements of the recycler
+    public void clear()
+    {
+        data.clear();
+        notifyDataSetChanged();
+    }
+
+    // Add a list of items -- change to type used
+    public void addAll(List<Location> list)
+    {
+        data.addAll(list);
+        notifyDataSetChanged();
+    }
 
     // convenience method for getting data at click position
     public Location getItem(int id)
@@ -198,82 +211,48 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             // Confirmed data
             confirmed.setText(NumberFormat.getInstance().format(stat.getTotalConfirmed()));
             confirmedDiff.setText(NumberFormat.getInstance().format(stat.getDiffConfirmed()));
-            if (stat.getDiffConfirmed() > 0)
-            {
-                confirmedImage.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
-            }
-            else if (stat.getDiffConfirmed() < 0)
-            {
-                confirmedImage.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
-            }
-            else
-                confirmedImage.setImageResource(R.drawable.ic_remove_black_24dp);
+            confirmedImage.setImageResource(CovidUtils.determineArrow(stat.getDiffConfirmed(), previousStat.getDiffConfirmed(), false));
+
 
             // Death data
             deaths.setText(NumberFormat.getInstance().format(stat.getTotalDeaths()));
             deathsDiff.setText(NumberFormat.getInstance().format(stat.getDiffDeaths()));
-            if (stat.getDiffDeaths() > 0)
-            {
-                deathsImage.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
-            }
-            else if (stat.getDiffDeaths() < 0)
-            {
-                deathsImage.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
-            }
-            else
-                deathsImage.setImageResource(R.drawable.ic_remove_black_24dp);
+            deathsImage.setImageResource(CovidUtils.determineArrow(stat.getDiffDeaths(), previousStat.getDiffDeaths(), false));
 
 
             // Recovered data
             if (stat.getTotalRecovered() == 0)
             {
-                recovered.setText("N/A");
-                recoveredDiff.setText("N/A");
+                recovered.setText("N/R");
+                recoveredDiff.setText("N/R");
                 recoveredImage.setImageResource(R.drawable.ic_remove_black_24dp);
             }
             else
             {
                 recovered.setText(NumberFormat.getInstance().format(stat.getTotalRecovered()));
                 recoveredDiff.setText(NumberFormat.getInstance().format(stat.getDiffRecovered()));
-                if (stat.getDiffRecovered() > 0)
-                {
-                    recoveredImage.setImageResource(R.drawable.ic_arrow_drop_up_green_24dp);
-                } else if (stat.getDiffRecovered() < 0)
-                {
-                    recoveredImage.setImageResource(R.drawable.ic_arrow_drop_down_yellow_24dp);
-                } else
-                    recoveredImage.setImageResource(R.drawable.ic_remove_black_24dp);
+                recoveredImage.setImageResource(CovidUtils.determineArrow(stat.getDiffRecovered(), previousStat.getDiffRecovered(), true));
             }
 
             // Active data
             if (stat.getTotalActive() == 0)
             {
-                active.setText("N/A");
-                activeDiff.setText("N/A");
+                active.setText("N/R");
+                activeDiff.setText("N/R");
                 activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
             }
             else
             {
                 active.setText(NumberFormat.getInstance().format(stat.getTotalActive()));
                 activeDiff.setText(NumberFormat.getInstance().format(stat.getDiffActive()));
-                if (stat.getDiffDeaths() > 0)
-                {
-                    activeImage.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
-                }
-                else if (stat.getDiffDeaths() < 0)
-                {
-                    activeImage.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
-                }
-                else
-                    activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
-
+                activeImage.setImageResource(CovidUtils.determineArrow(stat.getDiffActive(), previousStat.getDiffActive(), false));
             }
 
             // Fatality
             if (stat.getFatalityRate() == 0)
             {
-                fatality.setText("N/A");
-                fatalityDiff.setText("N/A");
+                fatality.setText("N/R");
+                fatalityDiff.setText("N/R");
                 fatalityImage.setImageResource(R.drawable.ic_remove_black_24dp);
             }
             else
@@ -283,18 +262,9 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
                 {
                     double fatalityDifference = stat.getFatalityRate() - previousStat.getFatalityRate();
                     fatalityDiff.setText(MessageFormat.format("{0}%", NumberFormat.getInstance().format(fatalityDifference * 100)));
-
-                    if (stat.getFatalityRate() > previousStat.getFatalityRate())
-                    {
-                        fatalityImage.setImageResource(R.drawable.ic_arrow_drop_up_yellow_24dp);
-                    } else if (stat.getFatalityRate() < previousStat.getFatalityRate())
-                    {
-                        fatalityImage.setImageResource(R.drawable.ic_arrow_drop_down_green_24dp);
-                    } else
-                        fatalityImage.setImageResource(R.drawable.ic_remove_black_24dp);
+                    fatalityImage.setImageResource(CovidUtils.determineArrow(stat.getFatalityRate(), fatalityDifference, false));
                 }
             }
-
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
             lastUpdated.setText(MessageFormat.format("as of {0}", dateFormat.format(stat.getLastUpdate())));

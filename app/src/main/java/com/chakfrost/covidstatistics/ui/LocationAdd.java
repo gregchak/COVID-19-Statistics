@@ -102,7 +102,18 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                                        {
                                            countries = (ArrayList<Country>) list;
                                            countries.add(new Country("-SELECT-", "-SELECT-"));
-                                           Collections.sort(countries, (s1, s2) -> s2.getName().compareToIgnoreCase(s1.getName()));
+                                           Collections.sort(countries, (s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
+
+                                           Country us = countries.stream()
+                                                   .filter(c -> c.getName().equals("US"))
+                                                   .findFirst()
+                                                   .orElse(null);
+
+                                           if (null != us)
+                                           {
+                                               //countries.remove(us);
+                                               countries.add(1, us);
+                                           }
 
                                            CovidApplication.setCountries(countries);
 

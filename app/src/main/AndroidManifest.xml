@@ -14,12 +14,10 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".ui.LocationStatsDetail"
-            android:label="Location details">
-
-        </activity>
+            android:label="Location details" />
         <activity
             android:name=".ui.LocationAdd"
-            android:label="Add Location"></activity>
+            android:label="Add Location" />
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

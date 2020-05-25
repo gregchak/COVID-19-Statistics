@@ -2,7 +2,6 @@ package com.chakfrost.covidstatistics;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.widget.Switch;
 
@@ -10,16 +9,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
-//import androidx.fragment.app.Fragment;
-//import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.chakfrost.covidstatistics.interfaces.IFragmentRefreshListener;
-import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.ui.LocationAdd;
+import com.chakfrost.covidstatistics.ui.about.AboutFragment;
+import com.chakfrost.covidstatistics.ui.locations.LocationFragment;
+import com.chakfrost.covidstatistics.ui.statistics.StatisticsFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -27,15 +26,17 @@ public class MainActivity extends AppCompatActivity
 {
     private AppBarConfiguration mAppBarConfiguration;
     private IFragmentRefreshListener fragmentRefreshListener;
-    //private static final int RESULT_LOCATION_CANCEL = 100;
+
     private static final int RESULT_LOCATION_ADD = 110;
     private static final int REQUEST_CODE_LOCATION_ADD = 200;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -114,8 +115,8 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    /*
-    public void displaySelectedFragment(int itemId)
+
+/*    public void displaySelectedFragment(int itemId)
     {
         //creating fragment object
         Fragment fragment;
@@ -141,6 +142,7 @@ public class MainActivity extends AppCompatActivity
 //        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 //        drawer.closeDrawer(GravityCompat.START);
     }
+
     public void setAppBarText(int itemId)
     {
         Toolbar tb = findViewById(R.id.toolbar);

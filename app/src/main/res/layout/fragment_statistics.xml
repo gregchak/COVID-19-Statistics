@@ -164,8 +164,15 @@
             android:textAlignment="textEnd"
             android:layout_gravity="end"
             android:textColor="@color/white" />
-        <ImageView />
-        <TextView/>
+        <ImageView
+            android:id="@+id/stats_global_fatality_image"
+            android:contentDescription="@string/arrow_content_description"
+            app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp" />
+        <TextView
+            android:id="@+id/stats_global_fatality_diff"
+            android:textColor="@color/white"
+            android:textAlignment="textEnd"
+            android:layout_gravity="end"/>
         <TextView/>
         </GridLayout>
 
@@ -193,20 +200,31 @@
         android:id="@+id/stats_global_location_list_constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="148dp"
+        android:paddingBottom="168dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/statistics_progress_bar">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/stats_global_location_recycler_view"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/stats_global_swipe_refresh_layout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintRight_toRightOf="parent"
+            >
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/stats_global_location_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
