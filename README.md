@@ -11,6 +11,6 @@ https://www.seas.harvard.edu/office-communications/brand-style-guide/color-palet
 
 # Version History
 
-1.2.3.0 - 2020-05-21  
+**1.2.3.0** - 2020-05-21  
 Added pull-down refresh to manually fetch global stats and check for location updates
 
