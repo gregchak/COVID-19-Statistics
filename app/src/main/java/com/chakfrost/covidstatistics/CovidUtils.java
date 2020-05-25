@@ -99,6 +99,15 @@ public class CovidUtils
             return true;
     }
 
+    /**
+     * Determines the arrow that should be displayed by comparing current and previous values.
+     * The parameter upIsGood determines whether increase or decrease is good or bad.
+     *
+     * @param current   Current value to be compared
+     * @param previous  Previous value to be compared to
+     * @param upIsGood  Whether an increase is considered "good" or not
+     * @return  R.drawable ID of the determined arrow or dash
+     */
     public static int determineArrow(double current, double previous, boolean upIsGood)
     {
         //Log.d("determineArrow()", "Comparing " + String.valueOf(current) + " with previous value of " + String.valueOf(previous));

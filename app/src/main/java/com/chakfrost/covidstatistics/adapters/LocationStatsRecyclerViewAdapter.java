@@ -84,6 +84,19 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
         return data.size();
     }
 
+    // Clean all elements of the recycler
+    public void clear()
+    {
+        data.clear();
+        notifyDataSetChanged();
+    }
+
+    // Add a list of items -- change to type used
+    public void addAll(List<Location> list)
+    {
+        data.addAll(list);
+        notifyDataSetChanged();
+    }
 
     // convenience method for getting data at click position
     public Location getItem(int id)
