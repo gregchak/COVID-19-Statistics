@@ -1,11 +1,13 @@
 package com.chakfrost.covidstatistics.ui.locations;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -65,7 +67,28 @@ public class LocationFragment extends Fragment
         // Bind the adapter
         locationsSimpleListAdapter = new LocationSimpleListRecyclerViewAdapter(locations);
         locationsSimpleListView.setAdapter(locationsSimpleListAdapter);
-        locationsSimpleListAdapter.setClickListener(this::deleteLocation);
+        locationsSimpleListAdapter.setClickListener(this::locationSelected);
+    }
+
+    private void locationSelected(View view, int position)
+    {
+        // Get Location to delete
+        Location toDelete = locations.get(position);
+
+        // 1. Instantiate an AlertDialog.Builder with its constructor
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        // Set buttons
+        builder.setPositiveButton("Remove", (dialog, id) -> deleteLocation(view, position));
+        builder.setNegativeButton("Cancel", (dialog, id) -> { });
+
+        // 2. Chain together various setter methods to set the dialog characteristics
+        builder.setMessage("Are you sure you want to remove " + CovidUtils.formatLocation(toDelete) + "?")
+                .setTitle("Remove location?");
+
+        // 3. Get the AlertDialog from create()
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void deleteLocation(View view, int position)
