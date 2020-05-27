@@ -117,8 +117,7 @@ public class StatisticsFragment extends Fragment
         // Configure the refreshing colors
         swipeContainer.setColorSchemeResources(R.color.colorPrimaryDark);
 
-
-
+        // Instantiate Firebase Analytics
         firebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
         // Show Floating button for Adding a new Location
@@ -131,12 +130,6 @@ public class StatisticsFragment extends Fragment
 
         // Set parent refresh listener
         ((MainActivity)getActivity()).setFragmentRefreshListener(this::parentOnRefresh);
-
-//        Bundle bundle = new Bundle();
-//        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "111");
-//        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "test");
-//        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
-//        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
 
         return root;
     }
@@ -218,8 +211,8 @@ public class StatisticsFragment extends Fragment
     {
         Bundle bundle = new Bundle();
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "0");
-        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "GlobalStatistics refresh");
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Refresh");
+        firebaseAnalytics.logEvent("GLOBAL_STATS", bundle);
 
         if (!manualRefresh)
             progressBar.setVisibility(View.VISIBLE);
@@ -543,7 +536,7 @@ public class StatisticsFragment extends Fragment
             Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.ITEM_ID, CovidUtils.formatLocation(loc));
             bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "New Location");
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+            firebaseAnalytics.logEvent("ADD_LOCATION", bundle);
 
             // Notify
             Snackbar.make(getView(), "Retrieving location statistics...", Snackbar.LENGTH_SHORT)
