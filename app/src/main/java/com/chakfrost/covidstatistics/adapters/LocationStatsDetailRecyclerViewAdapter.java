@@ -154,8 +154,19 @@ public class LocationStatsDetailRecyclerViewAdapter
         {
             statName.setText(locationStat.getName());
 
-            //buildLineChart(locationStat.getValues());
-            buildColumnChart(locationStat.getValues());
+            //Log.d("Graphing", locationStat.getName());
+            //if (locationStat.getName().contains("New"))
+            //{
+            //    lineChartView.setVisibility(View.VISIBLE);
+            //    columnChartView.setVisibility(View.INVISIBLE);
+            //    buildLineChart(locationStat.getValues());
+            //}
+            //else
+            //{
+                lineChartView.setVisibility(View.INVISIBLE);
+                columnChartView.setVisibility(View.VISIBLE);
+                buildColumnChart(locationStat.getValues());
+            //}
         }
 
         /**
@@ -247,12 +258,12 @@ public class LocationStatsDetailRecyclerViewAdapter
             axisY.setMaxLabelChars(7);
             data.setAxisYLeft(axisY);
 
-            final Viewport v = new Viewport(lineChartView.getMaximumViewport());
-            v.top = (float) (v.top + (v.top * 0.15)); //example max value
-            lineChartView.setMaximumViewport(v);
-            lineChartView.setCurrentViewport(v);
-            //Optional step: disable viewport recalculations, thanks to this animations will not change viewport automatically.
-            lineChartView.setViewportCalculationEnabled(false);
+//            final Viewport v = new Viewport(lineChartView.getMaximumViewport());
+//            v.top = (float) (v.top + (v.top * 0.15)); //example max value
+//            lineChartView.setMaximumViewport(v);
+//            lineChartView.setCurrentViewport(v);
+//            //Optional step: disable viewport recalculations, thanks to this animations will not change viewport automatically.
+//            lineChartView.setViewportCalculationEnabled(false);
         }
 
         /**
@@ -262,6 +273,7 @@ public class LocationStatsDetailRecyclerViewAdapter
         private void buildColumnChart(List<StatDatePair> stats)
         {
             StatDatePair stat;
+            double maxValForYAxis = -1;
             List<Column> columns = new ArrayList<>();
             List<SubcolumnValue> values;
             List axisValues = new ArrayList();
@@ -272,12 +284,14 @@ public class LocationStatsDetailRecyclerViewAdapter
             int numColumns = stats.size();
 
             // Displaying from past to present so sort list ASC
-            Collections.reverse(stats);
+            //Collections.reverse(stats);
 
             // Loop stats to add columns
             for (int i = 0; i < numColumns; ++i)
             {
                 stat = stats.get(i);
+                if (stat.getValue() > maxValForYAxis)
+                    maxValForYAxis = stat.getValue();
 
                 xAxisDataPoints[i] = dateAbv.format(stat.getDate());
                 axisValues.add(i, new AxisValue(i).setLabel(dateAbv.format(stat.getDate())));
@@ -285,6 +299,8 @@ public class LocationStatsDetailRecyclerViewAdapter
                 // Create 1 subcolumn, all columns need at least 1 subcolumn
                 values = new ArrayList<>();
                 values.add(new SubcolumnValue((float)stat.getValue(), Color.parseColor("#6E1B09")));
+
+                //Log.d("",String.valueOf(stat.getValue()));
 
                 // Setup column with subcolumn data
                 Column column = new Column(values);
@@ -316,11 +332,12 @@ public class LocationStatsDetailRecyclerViewAdapter
             columnChartView.setColumnChartData(columnChartData);
 
             // Update viewpoint to give Y axis some "height"
-            final Viewport v = new Viewport(columnChartView.getMaximumViewport());
-            v.top = (float) (v.top + (v.top * 0.15));
-            columnChartView.setMaximumViewport(v);
-            columnChartView.setCurrentViewport(v);
-            columnChartView.setViewportCalculationEnabled(false);
+            //final Viewport v = new Viewport(columnChartView.getMaximumViewport());
+            //v.top = (float) (v.top + (v.top * 0.15));
+            //v.top = (float) (maxValForYAxis * 0.15);
+            //columnChartView.setMaximumViewport(v);
+            //columnChartView.setCurrentViewport(v);
+            //columnChartView.setViewportCalculationEnabled(false);
         }
     }
 }

@@ -19,6 +19,7 @@ import com.chakfrost.covidstatistics.services.covid19Statistics.Regions;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Report;
 import com.chakfrost.covidstatistics.services.covid19Statistics.ReportStatistics;
 import com.chakfrost.covidstatistics.services.covid19Statistics.ReportsTotal;
+import com.chakfrost.covidstatistics.services.covidApi.Summary;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,6 +28,7 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,9 +40,11 @@ import javax.inject.Singleton;
 public class CovidService
 {
     private static final String COVID_19_API_URL = "https://api.covid19api.com";
-    private static final String COVID_19_STATISTICS_URL = "https://covid-19-statistics.p.rapidapi.com";
+    //private static final String COVID_19_STATISTICS_URL = "https://covid-19-statistics.p.rapidapi.com";
     private static final String COVID_API_URL = "https://covid-api.com/api";
-    private static final String RAPID_KEY_COVID_19_STATISTICS = "2b0656f909mshf12452ea67727c5p1cdac2jsn392ca7d9ed82";
+    //private static final String RAPID_KEY_COVID_19_STATISTICS = "2b0656f909mshf12452ea67727c5p1cdac2jsn392ca7d9ed82";
+
+    private static final String COVID_SUMMARY_TO_USE = "COVID_API_URL";
 
     /**
      * Gets countries from service
@@ -351,73 +355,80 @@ public class CovidService
      */
     public static void summary(IserviceCallbackGlobalStats callback)
     {
-/*        String url = MessageFormat.format("{0}/summary", COVID_19_API_URL);
+        if (COVID_SUMMARY_TO_USE == "COVID_19_API_URL")
+        {
+            String url = MessageFormat.format("{0}/summary", COVID_19_API_URL);
 
-        JsonObjectRequest jor = new JsonObjectRequest(
-                Request.Method.GET, url, null,
+            JsonObjectRequest jor = new JsonObjectRequest(
+                    Request.Method.GET, url, null,
 
-                response ->
-                {
-                    // Transform response to service object
-                    Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
-                    Summary summary = g.fromJson(response.toString(), Summary.class);
+                    response ->
+                    {
+                        // Transform response to service object
+                        Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
+                        Summary summary = g.fromJson(response.toString(), Summary.class);
 
-                    GlobalStats result = new GlobalStats();
+                        GlobalStats result = new GlobalStats();
 
-                    result.setStatusDate(new Date());
-                    result.setNewConfirmed(summary.Global.NewConfirmed);
-                    result.setTotalConfirmed(summary.Global.TotalConfirmed);
-                    result.setNewDeaths(summary.Global.NewDeaths);
-                    result.setTotalDeaths(summary.Global.TotalDeaths);
-                    result.setNewRecovered(summary.Global.NewRecovered);
-                    result.setTotalRecovered(summary.Global.TotalRecovered);
+                        result.setStatusDate(new Date());
+                        result.setNewConfirmed(summary.Global.NewConfirmed);
+                        result.setTotalConfirmed(summary.Global.TotalConfirmed);
+                        result.setNewDeaths(summary.Global.NewDeaths);
+                        result.setTotalDeaths(summary.Global.TotalDeaths);
+                        result.setNewRecovered(summary.Global.NewRecovered);
+                        result.setTotalRecovered(summary.Global.TotalRecovered);
 
-                    callback.onSuccess(result);
-                },
+                        callback.onSuccess(result);
+                    },
+                    error ->
+                    {
+                        VolleyLog.e("CovidService.Summary()" + COVID_SUMMARY_TO_USE, error.toString());
+                        callback.onError(error);
+                    }
+            );
 
-                error ->
-                {
-                    VolleyLog.e("CovidService.Summary()", error.toString());
-                    callback.onError(error);
-                }
-        );*/
+            // Add request to queue
+            CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+        }
+        else if (COVID_SUMMARY_TO_USE == "COVID_API_URL")
+        {
 
-        String url = MessageFormat.format("{0}/reports/total", COVID_API_URL);
-        JsonObjectRequest jor = new JsonObjectRequest(
-                Request.Method.GET, url, null,
+            String url = MessageFormat.format("{0}/reports/total", COVID_API_URL);
+            JsonObjectRequest jor = new JsonObjectRequest(
+                    Request.Method.GET, url, null,
 
-                response ->
-                {
-                    // Transform response to service object
-                    Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-                    ReportsTotal totals = g.fromJson(response.toString(), ReportsTotal.class);
+                    response ->
+                    {
+                        // Transform response to service object
+                        Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                        ReportsTotal totals = g.fromJson(response.toString(), ReportsTotal.class);
 
-                    GlobalStats result = new GlobalStats();
+                        GlobalStats result = new GlobalStats();
 
-                    result.setStatusDate(totals.data.date);
-                    result.setLastUpdate(totals.data.lastUpdate);
-                    result.setNewConfirmed(totals.data.confirmedDiff);
-                    result.setTotalConfirmed(totals.data.confirmed);
-                    result.setNewDeaths(totals.data.deathsDiff);
-                    result.setTotalDeaths(totals.data.deaths);
-                    result.setNewRecovered(totals.data.recoveredDiff);
-                    result.setTotalRecovered(totals.data.recovered);
-                    result.setNewActive(totals.data.activeDiff);
-                    result.setTotalActive(totals.data.active);
-                    result.setFatalityRate(totals.data.fatalityRate);
+                        result.setStatusDate(totals.data.date);
+                        result.setLastUpdate(totals.data.lastUpdate);
+                        result.setNewConfirmed(totals.data.confirmedDiff);
+                        result.setTotalConfirmed(totals.data.confirmed);
+                        result.setNewDeaths(totals.data.deathsDiff);
+                        result.setTotalDeaths(totals.data.deaths);
+                        result.setNewRecovered(totals.data.recoveredDiff);
+                        result.setTotalRecovered(totals.data.recovered);
+                        result.setNewActive(totals.data.activeDiff);
+                        result.setTotalActive(totals.data.active);
+                        result.setFatalityRate(totals.data.fatalityRate);
 
-                    callback.onSuccess(result);
-                },
+                        callback.onSuccess(result);
+                    },
+                    error ->
+                    {
+                        VolleyLog.e("CovidService.Summary()" + COVID_SUMMARY_TO_USE, error.getStackTrace().toString());
+                        callback.onError(error);
+                    }
+            );
 
-                error ->
-                {
-                    VolleyLog.e("CovidService.Summary()", error.getStackTrace().toString());
-                    callback.onError(error);
-                }
-        );
-
-        // Add request to queue
-        CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+            // Add request to queue
+            CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+        }
     }
 }
 
