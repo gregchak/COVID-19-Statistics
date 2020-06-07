@@ -15,6 +15,7 @@ public class GlobalStats
     private int TotalActive;
     private Date StatusDate;
     private Date LastUpdate;
+    private Date LastChecked;
     private double fatalityRate;
     private double previousFatalityRate;
 
@@ -32,6 +33,7 @@ public class GlobalStats
     public Date getLastUpdate() { return LastUpdate; }
     public double getFatalityRate() { return fatalityRate; }
     public double getPreviousFatalityRate() { return previousFatalityRate; }
+    public Date getLastChecked() { return LastChecked; }
 
     /* Setters */
     public void setNewConfirmed(int val) { NewConfirmed = val; }
@@ -46,4 +48,5 @@ public class GlobalStats
     public void setLastUpdate(Date lastUpdate) { LastUpdate = lastUpdate; }
     public void setFatalityRate(double fatalityRate) { this.fatalityRate = fatalityRate; }
     public void setPreviousFatalityRate(double fatalityRate) { this.previousFatalityRate = fatalityRate; }
+    public void setLastChecked(Date val) { this.LastChecked = val; }
 }

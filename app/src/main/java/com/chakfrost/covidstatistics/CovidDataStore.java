@@ -65,6 +65,7 @@ public class CovidDataStore
         //SaveLocations(context, new ArrayList<>());
 
         List<Location> locations = new ArrayList<>();
+
         try
         {
             // Read JSON file from internal storage
@@ -159,11 +160,12 @@ public class CovidDataStore
     public static GlobalStats retrieveGlobalStats(Context context)
     {
         GlobalStats stats = null;
+
         try
         {
             File file = new File(context.getFilesDir(),SUMMARY_FILENAME);
             if (!file.exists())
-                return stats;
+                return null;
 
             // Read JSON file from internal storage
             FileInputStream fis = context.openFileInput(SUMMARY_FILENAME);
