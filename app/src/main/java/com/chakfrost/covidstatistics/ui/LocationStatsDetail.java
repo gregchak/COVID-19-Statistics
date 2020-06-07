@@ -98,7 +98,8 @@ public class LocationStatsDetail extends AppCompatActivity
             if (confirmedZeroCount < 3)
             {
                 confirmed.addValue(statTemp.getStatusDate(), statTemp.getTotalConfirmed());
-                newConfirmed.addValue(statTemp.getStatusDate(), statTemp.getDiffConfirmed());
+                if (statTemp.getDiffConfirmed() >= 0)
+                    newConfirmed.addValue(statTemp.getStatusDate(), statTemp.getDiffConfirmed());
             }
 
             if (statTemp.getTotalConfirmed() == 0)
@@ -110,7 +111,8 @@ public class LocationStatsDetail extends AppCompatActivity
             if (deathZeroCount < 3)
             {
                 deaths.addValue(statTemp.getStatusDate(), statTemp.getTotalDeaths());
-                newDeaths.addValue(statTemp.getStatusDate(), statTemp.getDiffDeaths());
+                if (statTemp.getDiffDeaths() >= 0)
+                    newDeaths.addValue(statTemp.getStatusDate(), statTemp.getDiffDeaths());
             }
 
             if (statTemp.getTotalDeaths() == 0)
@@ -122,7 +124,8 @@ public class LocationStatsDetail extends AppCompatActivity
             if(recoveredZeroCount < 3)
             {
                 recovered.addValue(statTemp.getStatusDate(), statTemp.getTotalRecovered());
-                newRecovered.addValue(statTemp.getStatusDate(), statTemp.getDiffRecovered());
+                if (statTemp.getDiffRecovered() >= 0)
+                    newRecovered.addValue(statTemp.getStatusDate(), statTemp.getDiffRecovered());
             }
 
             if (statTemp.getTotalRecovered() == 0)
@@ -134,7 +137,8 @@ public class LocationStatsDetail extends AppCompatActivity
             if (activeZeroCount < 3)
             {
                 active.addValue(statTemp.getStatusDate(), statTemp.getTotalActive());
-                newActive.addValue(statTemp.getStatusDate(), statTemp.getDiffActive());
+                if (statTemp.getDiffActive() >= 0)
+                    newActive.addValue(statTemp.getStatusDate(), statTemp.getDiffActive());
             }
 
             if (statTemp.getTotalActive() == 0)
@@ -142,6 +146,7 @@ public class LocationStatsDetail extends AppCompatActivity
             else if (statTemp.getTotalActive() != 0 && activeZeroCount < 4)
                 activeZeroCount = 0;
 
+            // Set fatality rates
             if (fatalityZeroCount < 3)
                 fatalityRate.addValue(statTemp.getStatusDate(), statTemp.getFatalityRate() * 100);
 
