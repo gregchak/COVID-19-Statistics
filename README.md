@@ -11,6 +11,9 @@ https://www.seas.harvard.edu/office-communications/brand-style-guide/color-palet
 
 # Version History
 
+**1.3.1.0 - 2020-06-06  
+Resolved issues 11 and 12 
+
 **1.2.4.0** - 2020-05-25  
 Added confiramtion when removing a location
 
