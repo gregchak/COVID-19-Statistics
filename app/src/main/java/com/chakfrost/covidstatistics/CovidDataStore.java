@@ -27,6 +27,7 @@ public class CovidDataStore
 {
     private final static String LOCATION_FILENAME = "locations";
     private final static String SUMMARY_FILENAME = "summary";
+    private static String[] usStates;
 
     public CovidDataStore() { }
 
@@ -38,6 +39,7 @@ public class CovidDataStore
         Log.d("CovidDataStore.SaveLocations()", "json = " + json);
         System.out.println("json = " + json);
 
+        // Verify file/directory exists
         File file = context.getFilesDir();
         if(!file.exists())
         {
@@ -46,22 +48,23 @@ public class CovidDataStore
 
         try
         {
+            // Write to disk
             File locationFile = new File(file, LOCATION_FILENAME);
             FileWriter writer = new FileWriter(locationFile);
             writer.write(json);
             writer.flush();
             writer.close();
-
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-
+            Log.e("CovidDataStore.saveLocations()",
+                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
     }
 
     public static List<Location> retrieveLocations(Context context)
     {
+        // FOR DEBUGGING:
         //SaveLocations(context, new ArrayList<>());
 
         List<Location> locations = new ArrayList<>();
@@ -118,8 +121,8 @@ public class CovidDataStore
         }
         catch(Exception e)
         {
-            e.printStackTrace();
-            Log.e("CovidDataStore.RetrieveLocations()", e.toString());
+            Log.e("CovidDataStore.RetrieveLocations()",
+                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
         finally
         {
@@ -152,8 +155,8 @@ public class CovidDataStore
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-
+            Log.e("CovidDataStore.RetrieveLocations()",
+                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
     }
 
@@ -188,8 +191,8 @@ public class CovidDataStore
         }
         catch(Exception e)
         {
-            e.printStackTrace();
-            Log.e("CovidDataStore.RetrieveGlobalStats()", e.toString());
+            Log.e("CovidDataStore.RetrieveGlobalStats()",
+                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
         finally
         {

@@ -305,7 +305,7 @@ public class LocationStatsDetailRecyclerViewAdapter
                 // Setup column with subcolumn data
                 Column column = new Column(values);
                 column.setHasLabels(false);
-                column.setHasLabelsOnlyForSelected(false);
+                column.setHasLabelsOnlyForSelected(true);
                 columns.add(column);
             }
 

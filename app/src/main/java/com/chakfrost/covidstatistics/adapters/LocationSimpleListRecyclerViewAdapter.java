@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.models.Location;
+import com.chakfrost.covidstatistics.models.OperationActions;
 
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class LocationSimpleListRecyclerViewAdapter extends RecyclerView.Adapter<
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener
     {
-        void onItemClick(View view, int position);
+        void onItemClick(OperationActions action, View view, int position);
     }
 
     /**
@@ -90,6 +91,8 @@ public class LocationSimpleListRecyclerViewAdapter extends RecyclerView.Adapter<
         private TextView countryName;
         private TextView provinceName;
         private TextView municipalityName;
+        private ImageView refreshImage;
+        private ImageView deleteImage;
 
         public LocationSimpleListViewHolder(View itemView)
         {
@@ -97,8 +100,11 @@ public class LocationSimpleListRecyclerViewAdapter extends RecyclerView.Adapter<
             countryName = itemView.findViewById(R.id.location_simple_list_country);
             //provinceName = itemView.findViewById(R.id.location_simple_list_province);
             //municipalityName = itemView.findViewById(R.id.location_simple_list_municipality);
-            ImageView deleteImage = itemView.findViewById(R.id.location_simple_list_delete);
 
+            refreshImage = itemView.findViewById(R.id.location_simple_list_refresh);
+            refreshImage.setOnClickListener(this::refreshClick);
+
+            deleteImage = itemView.findViewById(R.id.location_simple_list_delete);
             deleteImage.setOnClickListener(this::deleteClick);
             //itemView.setOnClickListener(this);
         }
@@ -123,11 +129,24 @@ public class LocationSimpleListRecyclerViewAdapter extends RecyclerView.Adapter<
          *
          * @param view  Calling view
          */
+        public void refreshClick(View view)
+        {
+            // Fire ClickListener
+            if (mClickListener != null)
+                mClickListener.onItemClick(OperationActions.REFRESH, view, getAdapterPosition());
+
+        }
+
+        /**
+         * Starts the operation to remove a Location
+         *
+         * @param view  Calling view
+         */
         public void deleteClick(View view)
         {
             // Fire ClickListener
             if (mClickListener != null)
-                mClickListener.onItemClick(view, getAdapterPosition());
+                mClickListener.onItemClick(OperationActions.DELETE, view, getAdapterPosition());
 
         }
 

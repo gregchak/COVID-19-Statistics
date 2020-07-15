@@ -60,6 +60,17 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     //@JsonDeserialize(using = DateHandler.class)
     private Date LastUpdate;
 
+    @Expose(serialize = false)
+    private int hospitalizationsTotal;
+    @Expose(serialize = false)
+    private int hospitalizationsDiff;
+    @Expose(serialize = false)
+    private int hospitalizationsCurrent;
+    @Expose(serialize = false)
+    private int ICUTotal;
+    @Expose(serialize = false)
+    private int ICUCurrent;
+
     public CovidStats()
     {
         NewConfirmed = 0;
@@ -140,5 +151,54 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     public void setStatusDate(Date val) { StatusDate = val; }
     public void setLastUpdate(Date val) { LastUpdate = val; }
 
+    public int getHospitalizationsTotal()
+    {
+        return hospitalizationsTotal;
+    }
+
+    public void setHospitalizationsTotal(int hospitalizationsTotal)
+    {
+        this.hospitalizationsTotal = hospitalizationsTotal;
+    }
+
+    public int getHospitalizationsDiff()
+    {
+        return hospitalizationsDiff;
+    }
+
+    public void setHospitalizationsDiff(int hospitalizationsDiff)
+    {
+        this.hospitalizationsDiff = hospitalizationsDiff;
+    }
+
+    public int getHospitalizationsCurrent()
+    {
+        return hospitalizationsCurrent;
+    }
+
+    public void setHospitalizationsCurrent(int hospitalizationsCurrent)
+    {
+        this.hospitalizationsCurrent = hospitalizationsCurrent;
+    }
+
+    public int getICUTotal()
+    {
+        return ICUTotal;
+    }
+
+    public void setICUTotal(int ICUTotal)
+    {
+        this.ICUTotal = ICUTotal;
+    }
+
+    public int getICUCurrent()
+    {
+        return ICUCurrent;
+    }
+
+    public void setICUCurrent(int ICUCurrent)
+    {
+        this.ICUCurrent = ICUCurrent;
+    }
 
 }

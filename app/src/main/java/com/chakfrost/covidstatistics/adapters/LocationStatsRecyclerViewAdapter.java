@@ -17,6 +17,7 @@ import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.Location;
 
+import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -132,8 +133,8 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
         private TextView confirmedDiff;
         private TextView deaths;
         private TextView deathsDiff;
-        private TextView recovered;
-        private TextView recoveredDiff;
+        private TextView hospitalization;
+        private TextView hospitalizationDiff;
         private TextView active;
         private TextView activeDiff;
         private TextView lastUpdated;
@@ -142,7 +143,7 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
 
         private ImageView confirmedImage;
         private ImageView deathsImage;
-        private ImageView recoveredImage;
+        private ImageView hospitalizationImage;
         private ImageView activeImage;
         private ImageView fatalityImage;
 
@@ -158,9 +159,9 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             deaths = itemView.findViewById(R.id.stats_location_deaths_value);
             deathsDiff = itemView.findViewById(R.id.stats_location_deaths_diff);
             deathsImage = itemView.findViewById(R.id.stats_location_deaths_image);
-            recovered = itemView.findViewById(R.id.stats_location_recovered_value);
-            recoveredDiff = itemView.findViewById(R.id.stats_location_recovered_diff);
-            recoveredImage = itemView.findViewById(R.id.stats_location_recovered_image);
+            hospitalization = itemView.findViewById(R.id.stats_location_hospitalization_value);
+            hospitalizationDiff = itemView.findViewById(R.id.stats_location_hospitalization_diff);
+            hospitalizationImage = itemView.findViewById(R.id.stats_location_hospitalization_image);
             active = itemView.findViewById(R.id.stats_location_active_value);
             activeDiff = itemView.findViewById(R.id.stats_location_active_diff);
             activeImage = itemView.findViewById(R.id.stats_location_active_image);
@@ -202,6 +203,10 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             Collections.sort(stats, (s1, s2) -> s2.getStatusDate().compareTo(s1.getStatusDate()));
             CovidStats stat = stats.get(0);
             CovidStats previousStat = null;
+            DecimalFormat df2 = new DecimalFormat("#.##");
+            double fatalityRateCalculation;
+            double previousFatalityRateCalculation;
+            double fatalityDifference;
 
             if (stats.size() > 0)
                 previousStat = stats.get(1);
@@ -211,27 +216,37 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             // Confirmed data
             confirmed.setText(NumberFormat.getInstance().format(stat.getTotalConfirmed()));
             confirmedDiff.setText(NumberFormat.getInstance().format(stat.getDiffConfirmed()));
-            confirmedImage.setImageResource(CovidUtils.determineArrow(stat.getDiffConfirmed(), previousStat.getDiffConfirmed(), false));
+            confirmedImage.setImageResource(CovidUtils.determineArrow(stat.getTotalConfirmed(), previousStat.getTotalConfirmed(), false));
 
 
             // Death data
             deaths.setText(NumberFormat.getInstance().format(stat.getTotalDeaths()));
             deathsDiff.setText(NumberFormat.getInstance().format(stat.getDiffDeaths()));
-            deathsImage.setImageResource(CovidUtils.determineArrow(stat.getDiffDeaths(), previousStat.getDiffDeaths(), false));
+            deathsImage.setImageResource(CovidUtils.determineArrow(stat.getTotalDeaths(), previousStat.getTotalDeaths(), false));
 
 
-            // Recovered data
-            if (stat.getTotalRecovered() == 0)
+            // Hospitalization data
+            if (stat.getHospitalizationsCurrent() == 0)
             {
-                recovered.setText("N/R");
-                recoveredDiff.setText("N/R");
-                recoveredImage.setImageResource(R.drawable.ic_remove_black_24dp);
+                hospitalization.setText("N/R");
+                hospitalizationDiff.setText("N/R");
+                hospitalizationImage.setImageResource(R.drawable.ic_remove_black_24dp);
             }
             else
             {
-                recovered.setText(NumberFormat.getInstance().format(stat.getTotalRecovered()));
-                recoveredDiff.setText(NumberFormat.getInstance().format(stat.getDiffRecovered()));
-                recoveredImage.setImageResource(CovidUtils.determineArrow(stat.getDiffRecovered(), previousStat.getDiffRecovered(), true));
+                hospitalization.setText(NumberFormat.getInstance().format(stat.getHospitalizationsCurrent()));
+                if (stat.getHospitalizationsDiff() == 0 && CovidUtils.isUSState(location))
+                {
+                    if (stat.getHospitalizationsCurrent() == previousStat.getHospitalizationsCurrent())
+                        hospitalizationDiff.setText("0");
+                    else
+                        hospitalizationDiff.setText(NumberFormat.getInstance().format( (stat.getHospitalizationsCurrent() - previousStat.getHospitalizationsCurrent()) ));
+                }
+                else
+                {
+                    hospitalizationDiff.setText(NumberFormat.getInstance().format(stat.getHospitalizationsDiff()));
+                }
+                hospitalizationImage.setImageResource(CovidUtils.determineArrow(stat.getHospitalizationsCurrent(), previousStat.getHospitalizationsCurrent(), false));
             }
 
             // Active data
@@ -245,24 +260,32 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             {
                 active.setText(NumberFormat.getInstance().format(stat.getTotalActive()));
                 activeDiff.setText(NumberFormat.getInstance().format(stat.getDiffActive()));
-                activeImage.setImageResource(CovidUtils.determineArrow(stat.getDiffActive(), previousStat.getDiffActive(), false));
+                activeImage.setImageResource(CovidUtils.determineArrow(stat.getTotalActive(), previousStat.getTotalActive(), false));
             }
 
             // Fatality
             if (stat.getFatalityRate() == 0)
             {
-                fatality.setText("N/R");
-                fatalityDiff.setText("N/R");
-                fatalityImage.setImageResource(R.drawable.ic_remove_black_24dp);
+                fatalityRateCalculation = (double)stat.getTotalDeaths() / (double)stat.getTotalConfirmed();
+                previousFatalityRateCalculation = (double)previousStat.getTotalDeaths() / (double)previousStat.getTotalConfirmed();
+                fatalityDifference = fatalityRateCalculation - previousFatalityRateCalculation;
+
+                fatality.setText(MessageFormat.format("{0}%", df2.format(fatalityRateCalculation * 100)));
+                fatalityDiff.setText(MessageFormat.format("{0}%", df2.format(Math.abs(fatalityDifference * 100))));
+                fatalityImage.setImageResource(CovidUtils.determineArrow(fatalityRateCalculation, previousFatalityRateCalculation, false));
+
+                //fatality.setText("N/R");
+                //fatalityDiff.setText("N/R");
+                //fatalityImage.setImageResource(R.drawable.ic_remove_black_24dp);
             }
             else
             {
-                fatality.setText(MessageFormat.format("{0}%", NumberFormat.getInstance().format(stat.getFatalityRate() * 100)));
+                fatality.setText(MessageFormat.format("{0}%", df2.format(stat.getFatalityRate() * 100)));
                 if (null != previousStat)
                 {
-                    double fatalityDifference = stat.getFatalityRate() - previousStat.getFatalityRate();
-                    fatalityDiff.setText(MessageFormat.format("{0}%", NumberFormat.getInstance().format(fatalityDifference * 100)));
-                    fatalityImage.setImageResource(CovidUtils.determineArrow(stat.getFatalityRate(), fatalityDifference, false));
+                    fatalityDifference = stat.getFatalityRate() - previousStat.getFatalityRate();
+                    fatalityDiff.setText(MessageFormat.format("{0}%", df2.format(Math.abs(fatalityDifference * 100))));
+                    fatalityImage.setImageResource(CovidUtils.determineArrow(stat.getFatalityRate(), previousStat.getFatalityRate(), false));
                 }
             }
 

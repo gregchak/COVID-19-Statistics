@@ -1,18 +1,22 @@
 package com.chakfrost.covidstatistics.services;
 
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.Request;
+import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.chakfrost.covidstatistics.CovidApplication;
+import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.models.Country;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
+import com.chakfrost.covidstatistics.models.HospitalizationStat;
+import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.models.Province;
-import com.chakfrost.covidstatistics.services.covid19Statistics.City;
+import com.chakfrost.covidstatistics.services.covid19Statistics.*;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Provinces;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Region;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Regions;
@@ -20,7 +24,8 @@ import com.chakfrost.covidstatistics.services.covid19Statistics.Report;
 import com.chakfrost.covidstatistics.services.covid19Statistics.ReportStatistics;
 import com.chakfrost.covidstatistics.services.covid19Statistics.ReportsTotal;
 import com.chakfrost.covidstatistics.services.covidApi.Summary;
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.chakfrost.covidstatistics.services.covidTracking.*;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -35,16 +40,18 @@ import java.util.Map;
 
 import javax.inject.Singleton;
 
-
 @Singleton
 public class CovidService
 {
+    private static int errorCounter;
+    private static int callCounter;
     private static final String COVID_19_API_URL = "https://api.covid19api.com";
-    //private static final String COVID_19_STATISTICS_URL = "https://covid-19-statistics.p.rapidapi.com";
     private static final String COVID_API_URL = "https://covid-api.com/api";
-    //private static final String RAPID_KEY_COVID_19_STATISTICS = "2b0656f909mshf12452ea67727c5p1cdac2jsn392ca7d9ed82";
-
+    private static final String COVID_TRACKING_API_URL = "https://covidtracking.com/api/v1";
     private static final String COVID_SUMMARY_TO_USE = "COVID_API_URL";
+    private static final String THE_VIRUS_TRACKER = "https://api.thevirustracker.com";
+    //private static final String COVID_19_STATISTICS_URL = "https://covid-19-statistics.p.rapidapi.com";
+    //private static final String RAPID_KEY_COVID_19_STATISTICS = "2b0656f909mshf12452ea67727c5p1cdac2jsn392ca7d9ed82";
 
     /**
      * Gets countries from service
@@ -83,7 +90,8 @@ public class CovidService
 
                 error ->
                 {
-                    VolleyLog.e("CovidService.Countries()", error.toString());
+                    VolleyLog.e("CovidService.countries()", error.toString());
+                    Log.e("CovidService.countries()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
                     callback.onError(error);
                 }
         )
@@ -142,7 +150,8 @@ public class CovidService
                 },
                 error ->
                 {
-                    VolleyLog.e("CovidService.Provinces()", error.toString());
+                    VolleyLog.e("CovidService.provinces()", error.toString());
+                    Log.e("CovidService.provinces()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
                     callback.onError(error);
                 }
         )
@@ -200,14 +209,15 @@ public class CovidService
                     catch (Exception e)
                     {
                         e.printStackTrace();
-                        Log.e("CovidSvc.Municipalities", e.toString());
+                        Log.e("CovidSvc.Municipalities", CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
                     }
 
                     callback.onSuccess(result);
                 },
                 error ->
                 {
-                    VolleyLog.e("CovidService.Municipalities()", error.toString());
+                    VolleyLog.e("CovidService.municipalities()", error.toString());
+                    Log.e("CovidService.municipalities()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
                     callback.onError(error);
                 }
         )
@@ -237,7 +247,7 @@ public class CovidService
      * @param callback      The callback method(s) called after data is received from the service
      */
     public static void report(final String iso, final String province, final String region, final String municipality,
-                              final Calendar dateToCheck, final IServiceCallbackCovidStats callback)
+                               final Calendar dateToCheck, final IServiceCallbackCovidStats callback)
     {
         String url;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -301,10 +311,10 @@ public class CovidService
                             else // province and municipality are both not null
                             {
                                 City c = r.region.Cities.get(0);
-//                                Municipality filtered = r.Region.Municipalities.stream()
-//                                        .filter(m -> m.Name.equals(municipality))
-//                                        .findFirst()
-//                                        .orElse(null);
+    //                                Municipality filtered = r.Region.Municipalities.stream()
+    //                                        .filter(m -> m.Name.equals(municipality))
+    //                                        .findFirst()
+    //                                        .orElse(null);
 
                                 if (null == c)
                                     throw new RuntimeException("Municipality not found");
@@ -319,7 +329,7 @@ public class CovidService
                     }
                     catch (Exception e)
                     {
-                        Log.e("onErrorResponse", e.getMessage());
+                        Log.e("CovidService.report()", CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
                         result = null;
                     }
 
@@ -331,6 +341,7 @@ public class CovidService
                         VolleyLog.e("CovidService.Report()", error.toString());
                     else
                         VolleyLog.e("CovidService.Report()", "Error occurred while executing CovidService.Report()");
+                    Log.e("CovidService.report()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
                     callback.onError(error);
                 }
         )
@@ -346,6 +357,262 @@ public class CovidService
 
         // Add request to queue
         CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+    }
+
+    /**
+     * Gets statistics for the given region, province or municipality.  If the return
+     * from the service is null, then there are no more stats to be retrieved and subsequent calls
+     * for daily report data should be stopped.
+     *
+     * @param location      Location for which to get statistics
+     * @param dateToCheck   Date for which to get statistics
+     * @param callback      The callback method(s) called after data is received from the service
+     */
+    public static void report(final Location location, final Calendar dateToCheck,
+                              final IServiceCallbackCovidStats callback)
+    {
+        String url;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        url = MessageFormat.format("{0}/reports?iso={1}",COVID_API_URL, location.getIso());
+
+        if (location.isCountry())
+        {
+            url = MessageFormat.format("{0}&region_name={1}", url, location.getRegion());
+        }
+        else if (location.isProvince())
+        {
+            url = MessageFormat.format("{0}&region_province={1}", url, location.getProvince());
+        }
+        else if (location.isMunicipality())
+        {
+            url = MessageFormat.format("{0}&city_name={1}", url, location.getMunicipality());
+        }
+
+
+        if (null != dateToCheck)
+            url = MessageFormat.format("{0}&date={1}", url, dateFormat.format(dateToCheck.getTime()));
+
+
+        Log.d("CovidService.Report()", url);
+
+        JsonObjectRequest jor = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+                response ->
+                {
+                    // Transform response to service object
+                    Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                    Report report = g.fromJson(response.toString(), Report.class);
+
+                    // If report has no data, return null
+                    // Returning null is an indicator to the caller
+                    // that there are no more stats to retrieve
+                    if (report.Data.size() == 0)
+                    {
+                        callback.onSuccess(null);
+                        return;
+                    }
+
+                    // Set local list
+                    CovidStats result = new CovidStats();
+
+                    try
+                    {
+                        // Loop through data array
+                        for(ReportStatistics r: report.Data)
+                        {
+                            result.setStatusDate(r.date);
+                            result.setLastUpdate(r.lastUpdate);
+
+                            //if (TextUtils.isEmpty(municipality))
+                            if (!location.isMunicipality())
+                            {
+                                result.setTotalConfirmed(result.getTotalConfirmed() + r.confirmed);
+                                result.setTotalDeaths(result.getTotalDeaths() + r.deaths);
+                                result.setDiffConfirmed(result.getDiffConfirmed() + r.confirmedDiff);
+                                result.setDiffDeaths(result.getDiffDeaths() + r.deathsDiff);
+
+                                result.setTotalRecovered(result.getTotalRecovered() + r.recovered);
+                                result.setDiffRecovered(result.getDiffRecovered() + r.recoveredDiff);
+
+                                result.setTotalactive(result.getTotalActive() + r.active);
+                                result.setDiffActive(result.getDiffActive() + r.activeDiff);
+
+                                result.setFatalityRate(r.fatalityRate);
+                            }
+                            else // province and municipality are both not null
+                            {
+                                City c = r.region.Cities.get(0);
+                                //                                Municipality filtered = r.Region.Municipalities.stream()
+                                //                                        .filter(m -> m.Name.equals(municipality))
+                                //                                        .findFirst()
+                                //                                        .orElse(null);
+
+                                if (null == c)
+                                    throw new RuntimeException("Municipality not found");
+
+                                result.setTotalConfirmed(c.Confirmed);
+                                result.setTotalDeaths(c.Deaths);
+                                result.setDiffConfirmed(c.ConfirmedDiff);
+                                result.setDiffDeaths(c.DeathsDiff);
+                            }
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e("onErrorResponse", CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
+                        result = null;
+                    }
+
+                    callback.onSuccess(result);
+                },
+                error ->
+                {
+                    if (!TextUtils.isEmpty(error.getMessage()))
+                        VolleyLog.e("CovidService.report()", error.toString());
+                    else
+                        VolleyLog.e("CovidService.report()", "Error occurred while executing CovidService.Report()");
+
+                    Log.e("CovidService.report()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
+                    callback.onError(error);
+                }
+        )
+        {
+            @Override
+            public Map<String, String> getHeaders()
+            {
+                Map<String, String> params = new HashMap<>();
+                //params.put("x-rapidapi-key", RAPID_KEY_COVID_19_STATISTICS);
+                return params;
+            }
+        };
+
+        // Add request to queue
+        CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+    }
+
+    /**
+     * Gets a CovidStat via callback method based on Location and Calendar date
+     *
+     * @param location              Location for which to get statistics
+     * @param dateToUse             Calendar date for which to get statistics for given Location
+     * @param hospitalizationStats  List of HospitalizationStat for a given US State
+     * @param callback              Callback method that will return a CovidStat
+     */
+    public static void getCovidStat(Location location, Calendar dateToUse,
+                                    List<HospitalizationStat> hospitalizationStats, IServiceCallbackCovidStats callback)
+    {
+        // Get report statistics
+        //report(location.getIso(), location.getProvince(), location.getRegion(), location.getMunicipality(), dateToUse, new IServiceCallbackCovidStats()
+        report(location, dateToUse, new IServiceCallbackCovidStats()
+        {
+            @Override
+            public void onSuccess(CovidStats stat)
+            {
+                if (null != stat)
+                {
+                    // Check for hospitalisation statistics
+                    if (null != hospitalizationStats)
+                    {
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+                        HospitalizationStat hStat = hospitalizationStats.stream()
+                                .filter(s -> s.getDate() == Integer.parseInt(dateFormat.format(dateToUse.getTime())))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (null != hStat)
+                        {
+                            // Set Hospitalization stats
+                            stat.setHospitalizationsTotal( hStat.getHospitalizedTotal());
+                            stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+                            stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+                            stat.setICUCurrent(hStat.getIcuCurrent());
+                            stat.setICUTotal(hStat.getIcuTotal());
+                        }
+
+                        callback.onSuccess(stat);
+                    }
+                    else if (!TextUtils.isEmpty(location.getUsStateAbbreviation()))
+                    {
+                        // This is a US State and HospitalizationStats were not passed
+                        getUSStateHospitalizations(location.getUsStateAbbreviation(), dateToUse, new IServiceCallbackHospitalizationStat()
+                        {
+                            @Override
+                            public void onSuccess(HospitalizationStat hStat)
+                            {
+                                if (null != hStat)
+                                {
+                                    // Set Hospitalization stats
+                                    stat.setHospitalizationsTotal( hStat.getHospitalizedTotal());
+                                    stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+                                    stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+                                    stat.setICUCurrent(hStat.getIcuCurrent());
+                                    stat.setICUTotal(hStat.getIcuTotal());
+                                }
+
+                                callback.onSuccess(stat);
+                            }
+
+                            @Override
+                            public void onError(VolleyError err)
+                            {
+                                Log.e("CovidService.getCovidStat().getUSStateHospitalization()", err.toString());
+                                Log.e("CovidService.getCovidStat()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+                                callback.onSuccess(stat);
+                            }
+                        });
+                    }
+                    else if (CovidUtils.isUS(location))
+                    {
+                        // This is US and hospitalization Stats were not passed
+                        getUSHospitalizations(dateToUse, new IServiceCallbackHospitalizationStat()
+                        {
+                            @Override
+                            public void onSuccess(HospitalizationStat hStat)
+                            {
+                                if (null != hStat)
+                                {
+                                    // Set Hospitalization stats
+                                    stat.setHospitalizationsTotal( hStat.getHospitalizedTotal());
+                                    stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+                                    stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+                                    stat.setICUCurrent(hStat.getIcuCurrent());
+                                    stat.setICUTotal(hStat.getIcuTotal());
+                                }
+
+                                callback.onSuccess(stat);
+                            }
+
+                            @Override
+                            public void onError(VolleyError err)
+                            {
+                                Log.e("CovidService.getCovidStat().getUSHospitalization()", err.toString());
+                                Log.e("CovidService.getCovidStat()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+                                callback.onSuccess(stat);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        callback.onSuccess(stat);
+                    }
+                }
+                else
+                {
+                    callback.onSuccess(null);
+                }
+            }
+
+            @Override
+            public void onError(VolleyError err)
+            {
+                Log.d("CovidService.getCovidStat().report()", err.toString());
+                Log.e("CovidService.getCovidStat()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+                callback.onError(err);
+            }
+        });
     }
 
     /**
@@ -382,7 +649,8 @@ public class CovidService
                     },
                     error ->
                     {
-                        VolleyLog.e("CovidService.Summary()" + COVID_SUMMARY_TO_USE, error.toString());
+                        VolleyLog.e("CovidService.summary()" + COVID_SUMMARY_TO_USE, error.toString());
+                        Log.e("CovidService.summary()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
                         callback.onError(error);
                     }
             );
@@ -421,7 +689,8 @@ public class CovidService
                     },
                     error ->
                     {
-                        VolleyLog.e("CovidService.Summary()" + COVID_SUMMARY_TO_USE, error.getStackTrace().toString());
+                        VolleyLog.e("CovidService.summary()" + COVID_SUMMARY_TO_USE, error.getStackTrace().toString());
+                        Log.e("CovidService.summary()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
                         callback.onError(error);
                     }
             );
@@ -430,6 +699,400 @@ public class CovidService
             CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
         }
     }
+
+    /**
+     * Gets hospitalization stats for a US for a given date
+     *
+     * @param dateToCheck   Date for which to get stats
+     * @param callback      The callback method(s) called after data is received from the service
+     */
+    public static void getUSHospitalizations(final Calendar dateToCheck, final IServiceCallbackHospitalizationStat callback)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+        // Create the URI to call
+        String url = MessageFormat.format("{0}/us/{1}.json",
+                COVID_TRACKING_API_URL,
+                dateFormat.format(dateToCheck.getTime()));
+
+        Log.d("COVID Tracking URI", url);
+
+        JsonObjectRequest jor = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+
+                response ->
+                {
+                    // Transform response to service object
+                    Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+                    UnitedStatesStat stat = g.fromJson(response.toString(), UnitedStatesStat.class);
+
+                    HospitalizationStat result = new HospitalizationStat();
+                    result.setDate(stat.date);
+                    result.setHospitalizedTotal(null == stat.hospitalizedCumulative ? 0 : stat.hospitalizedCumulative);
+                    result.setHospitalizedCurrent(null == stat.hospitalizedCurrently ? 0 : stat.hospitalizedCurrently);
+                    result.setHospitalizedChange(null == stat.hospitalizedIncrease ? 0 : stat.hospitalizedIncrease);
+                    result.setIcuTotal(null == stat.inIcuCumulative ? 0 : stat.inIcuCumulative);
+                    result.setIcuCurrent(null == stat.inIcuCurrently ? 0 : stat.inIcuCurrently);
+
+                    callback.onSuccess(result);
+                },
+
+                error ->
+                {
+                    VolleyLog.e("CovidService.getUSHospitalization()", error.toString());
+                    Log.e("CovidService.getUSHospitalizations()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
+                    callback.onError(error);
+                }
+        );
+
+        // Add request to queue
+        CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+    }
+
+    /**
+     * Gets all hospitalization stats for a US.  This would typically be called
+     * when adding a new location.  This SHOULD NOT be called when looking for new or
+     * updated hospitalization stats.
+     *
+     * @param callback  The callback method(s) called after data is received from the service
+     */
+    public static void getUSHospitalizations(final IServiceCallbackList callback)
+    {
+        // Create the URI to call
+        String url = MessageFormat.format("{0}/us/daily.json",
+                COVID_TRACKING_API_URL);
+
+        Log.d("COVID Tracking URI", url);
+
+        JsonArrayRequest jor = new JsonArrayRequest(
+                Request.Method.GET, url, null,
+                response ->
+                {
+                    List<HospitalizationStat> result = new ArrayList<>();
+                    try
+                    {
+                        // Transform response to service object
+                        Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+                        UnitedStatesStat[] usStats = g.fromJson(response.toString(), UnitedStatesStat[].class);
+
+                        // Create HospitalizationStat for looping
+                        HospitalizationStat tempStat;
+                        UnitedStatesStat stat;
+                        for (int i = 0; i < usStats.length; i++)
+                        {
+                            // Get current stat
+                            stat = usStats[i];
+
+                            // Initialize new HospitalizationStat
+                            tempStat = new HospitalizationStat();
+                            tempStat.setDate(stat.date);
+
+                            tempStat.setHospitalizedTotal(null == stat.hospitalizedCumulative ? 0 : stat.hospitalizedCumulative);
+                            tempStat.setHospitalizedCurrent(null == stat.hospitalizedCurrently ? 0 : stat.hospitalizedCurrently);
+                            tempStat.setHospitalizedChange(null == stat.hospitalizedIncrease ? 0 : stat.hospitalizedIncrease);
+                            tempStat.setIcuTotal(null == stat.inIcuCumulative ? 0 : stat.inIcuCumulative);
+                            tempStat.setIcuCurrent(null == stat.inIcuCurrently ? 0 : stat.inIcuCurrently);
+
+                            // Add stat to result List
+                            result.add(tempStat);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.e("CovidService.getUSHospitalizations()", CovidUtils.formatError(ex.getMessage(), ex.getStackTrace().toString()));
+                        callback.onError(new VolleyError(ex));
+                    }
+
+                    callback.onSuccess(result);
+                },
+                error ->
+                {
+                    VolleyLog.e("CovidService.getUSHospitalization()", error.toString());
+
+                    Log.e("CovidService.getUSHospitalizations()",
+                            CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
+                    callback.onError(error);
+                }
+        );
+
+        // Add request to queue
+        CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+    }
+
+    /**
+     * Gets hospitalization stats for a US state for a given date
+     *
+     * @param abbreviation      Two character US state abbreviation
+     * @param dateToCheck   Date for which to get stats
+     * @param callback      The callback method(s) called after data is received from the service
+     */
+    public static void getUSStateHospitalizations(final String abbreviation, final Calendar dateToCheck, final IServiceCallbackHospitalizationStat callback)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+        // Create the URI to call
+        String url = MessageFormat.format("{0}/states/{1}/{2}.json",
+                COVID_TRACKING_API_URL,
+                abbreviation.toLowerCase(),
+                dateFormat.format(dateToCheck.getTime()));
+
+        Log.d("COVID Tracking URI", url);
+
+        JsonObjectRequest jor = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+
+                response ->
+                {
+                    // Transform response to service object
+                    Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+                    StateStat stat = g.fromJson(response.toString(), StateStat.class);
+
+                    HospitalizationStat result = new HospitalizationStat();
+                    result.setDate(stat.date);
+
+                    try
+                    {
+                        result.setHospitalizedTotal(null == stat.hospitalizedCumulative ? 0 : stat.hospitalizedCumulative);
+                        result.setHospitalizedCurrent(null == stat.hospitalizedCurrently ? 0 : stat.hospitalizedCurrently);
+                        result.setHospitalizedChange(null == stat.hospitalizedIncrease ? 0 : stat.hospitalizedIncrease);
+                        result.setIcuTotal(null == stat.inIcuCumulative ? 0 : stat.inIcuCumulative);
+                        result.setIcuCurrent(null == stat.inIcuCurrently ? 0 : stat.inIcuCurrently);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.d("Errors occurred while setting HospitalizationStat", g.toJson(stat));
+                        Log.e("CovidService.getUSStateHospitalization()",
+                                CovidUtils.formatError(ex.getMessage(), ex.getStackTrace().toString()));
+                    }
+
+
+                    callback.onSuccess(result);
+                },
+
+                error ->
+                {
+                    VolleyLog.e("CovidService.getUSStateHospitalization()", error.toString());
+                    Log.e("CovidService.getUSStateHospitalization()",
+                            CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
+                    callback.onError(error);
+                }
+        );
+
+        // Add request to queue
+        CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+    }
+
+    /**
+     * Gets all hospitalization stats for a US state.  This would typically be called
+     * when adding a new location.  This SHOULD NOT be called when looking for new or
+     * updated hospitalization stats.
+     *
+     * @param abbreviation  Two character US state abbreviation
+     * @param callback  The callback method(s) called after data is received from the service
+     */
+    public static void getUSStateHospitalizations(final String abbreviation, final IServiceCallbackList callback)
+    {
+        // Create the URI to call
+        String url = MessageFormat.format("{0}/states/{1}/daily.json",
+                                            COVID_TRACKING_API_URL,
+                                            abbreviation.toLowerCase());
+
+        Log.d("COVID Tracking URI", url);
+
+        JsonArrayRequest jor = new JsonArrayRequest(
+                Request.Method.GET, url, null,
+
+                response ->
+                {
+                    List<HospitalizationStat> result = new ArrayList<>();
+                    try
+                    {
+                        // Transform response to service object
+                        Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+                        StateStat[] stateStats = g.fromJson(response.toString(), StateStat[].class);
+
+                        // Create HospitalizationStat for looping
+                        HospitalizationStat tempStat;
+                        StateStat stat;
+                        for (int i = 0; i < stateStats.length; i++)
+                        {
+                            // Get current stat
+                            stat = stateStats[i];
+
+                            // Initialize new HospitalizationStat
+                            tempStat = new HospitalizationStat();
+                            tempStat.setDate(stat.date);
+
+                            tempStat.setHospitalizedTotal(null == stat.hospitalizedCumulative ? 0 : stat.hospitalizedCumulative);
+                            tempStat.setHospitalizedCurrent(null == stat.hospitalizedCurrently ? 0 : stat.hospitalizedCurrently);
+                            tempStat.setHospitalizedChange(null == stat.hospitalizedIncrease ? 0 : stat.hospitalizedIncrease);
+                            tempStat.setIcuTotal(null == stat.inIcuCumulative ? 0 : stat.inIcuCumulative);
+                            tempStat.setIcuCurrent(null == stat.inIcuCurrently ? 0 : stat.inIcuCurrently);
+
+                            // Add stat to result List
+                            result.add(tempStat);
+                        }
+
+                        // Loop through data array
+                        /*for (StateStat stat : stateStats.statistics)
+                        {
+                            // Initialize new HospitalizationStat
+                            tempStat = new HospitalizationStat();
+                            tempStat.setDate(stat.date);
+
+                            tempStat.setHospitalizedTotal(null == stat.hospitalizedCumulative ? 0 : stat.hospitalizedCumulative);
+                            tempStat.setHospitalizedCurrent(null == stat.hospitalizedCurrently ? 0 : stat.hospitalizedCurrently);
+                            tempStat.setHospitalizedChange(null == stat.hospitalizedIncrease ? 0 : stat.hospitalizedIncrease);
+                            tempStat.setIcuTotal(null == stat.inIcuCumulative ? 0 : stat.inIcuCumulative);
+                            tempStat.setIcuCurrent(null == stat.inIcuCurrently ? 0 : stat.inIcuCurrently);
+
+                            // Add stat to result List
+                            result.add(tempStat);
+                        }*/
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.e("CovidService.getUSStateHospitalization()",
+                                CovidUtils.formatError(ex.getMessage(), ex.getStackTrace().toString()));
+                        callback.onError(new VolleyError(ex));
+                    }
+
+                    callback.onSuccess(result);
+                },
+
+                error ->
+                {
+                    VolleyLog.e("CovidService.getUSStateHospitalization()", error.getStackTrace().toString());
+                    Log.e("CovidService.getUSStateHospitalization()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
+                    callback.onError(error);
+                }
+        );
+
+        // Add request to queue
+        CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+    }
+
+    /*public static void updateLocationStats(final Location loc, String usStateAbbreviation, final IServiceCallbackLocation callback)
+    {
+        // Set date to start getting report
+        Calendar startDate = Calendar.getInstance();
+        startDate.add(Calendar.DATE, -1);
+
+        // if US state abbreviation the get hospitalization stats
+        if (TextUtils.isEmpty(usStateAbbreviation))
+        {
+            getUSStateHospitalizations(usStateAbbreviation, startDate, new IServiceCallbackHospitalizationStat()
+            {
+                @Override
+                public void onSuccess(HospitalizationStat statistics)
+                {
+
+                    populateLocationStat(loc, (List<HospitalizationStat>) statistics, startDate, callback);
+                }
+
+                @Override
+                public void onError(VolleyError err)
+                {
+                    if (!TextUtils.isEmpty(err.getMessage()))
+                        VolleyLog.e("CovidService.provinceHospitalization()", err.toString());
+                    else
+                        VolleyLog.e("CovidService.provinceHospitalization()", "Error occurred while executing CovidService.Report()");
+
+                    Log.e("CovidService.updateLocationStats()",
+                            CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+                    callback.onError(err);
+                }
+            });
+        }
+        else
+        {
+            populateLocationStat(loc, null, startDate, callback);
+        }
+    }
+
+    public static void addLocationStats(final Location loc, String usStateAbbreviation, final IServiceCallbackLocation callback)
+    {
+        // Set date to start getting report
+        Calendar startDate = Calendar.getInstance();
+        startDate.add(Calendar.DATE, -1);
+
+        if (TextUtils.isEmpty(usStateAbbreviation))
+        {
+            getUSStateHospitalizations(usStateAbbreviation, new IServiceCallbackList()
+            {
+                @Override
+                public <T> void onSuccess(List<T> list)
+                {
+                    populateLocationStat(loc, (List<HospitalizationStat>) list, startDate, callback);
+                }
+
+                @Override
+                public void onError(VolleyError err)
+                {
+                    if (!TextUtils.isEmpty(err.getMessage()))
+                        VolleyLog.e("CovidService.provinceHospitalization()", err.toString());
+                    else
+                        VolleyLog.e("CovidService.provinceHospitalization()", "Error occurred while executing CovidService.Report()");
+
+                    callback.onError(err);
+                }
+            });
+        }
+        else
+        {
+            populateLocationStat(loc, null, startDate, callback);
+        }
+    }
+
+    private static void populateLocationStat(final Location loc, final List<HospitalizationStat> hospitalizationStats, Calendar dateToUse, final IServiceCallbackLocation callback)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+        report(loc.getIso(), loc.getProvince(), loc.getRegion(), loc.getMunicipality(), dateToUse, new IServiceCallbackCovidStats()
+        {
+            @Override
+            public void onSuccess(CovidStats stat)
+            {
+                if (null != stat)
+                {
+                    // If stat is null then there is no data for requested Location and Date
+                    if (null != hospitalizationStats && hospitalizationStats.size() > 0)
+                    {
+                        HospitalizationStat hStat = hospitalizationStats.stream()
+                                .filter(s -> String.valueOf(s.getDate()) == dateFormat.format(dateToUse))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (null != hStat)
+                        {
+                            // Set Hospitalization stats
+                            stat.setHospitalizationsTotal(hStat.getHospitalizedTotal());
+                            stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+                            stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+                            stat.setICUCurrent(hStat.getIcuCurrent());
+                            stat.setICUTotal(hStat.getIcuTotal());
+                        }
+                    }
+
+                    // Get next stat...
+                    loc.getStatistics().add(stat);
+                    dateToUse.add(Calendar.DATE, -1);
+
+                    populateLocationStat(loc, hospitalizationStats, dateToUse, callback);
+                }
+                else
+                {
+                    callback.onSuccess(loc);
+                }
+            }
+
+            @Override
+            public void onError(VolleyError err)
+            {
+                callback.onError(err);
+            }
+        });
+    }*/
 }
 
 

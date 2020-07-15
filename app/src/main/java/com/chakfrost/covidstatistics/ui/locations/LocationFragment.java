@@ -1,6 +1,5 @@
 package com.chakfrost.covidstatistics.ui.locations;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +17,7 @@ import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationSimpleListRecyclerViewAdapter;
 import com.chakfrost.covidstatistics.models.Location;
+import com.chakfrost.covidstatistics.models.OperationActions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -70,32 +70,46 @@ public class LocationFragment extends Fragment
         locationsSimpleListAdapter.setClickListener(this::locationSelected);
     }
 
-    private void locationSelected(View view, int position)
+    private void locationSelected(OperationActions action, View view, int position)
     {
         // Get Location to delete
-        Location toDelete = locations.get(position);
+        Location location = locations.get(position);
+
+
 
         // 1. Instantiate an AlertDialog.Builder with its constructor
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        // Set buttons
-        builder.setPositiveButton("Remove", (dialog, id) -> deleteLocation(view, position));
-        builder.setNegativeButton("Cancel", (dialog, id) -> { });
+        if (action == OperationActions.DELETE)
+        {
+            // Set buttons
+            builder.setPositiveButton("Remove", (dialog, id) -> RemoveLocation(view, location));
+            builder.setNegativeButton("Cancel", (dialog, id) ->
+            {
+            });
 
-        // 2. Chain together various setter methods to set the dialog characteristics
-        builder.setMessage("Are you sure you want to remove " + CovidUtils.formatLocation(toDelete) + "?")
-                .setTitle("Remove location?");
+            // 2. Chain together various setter methods to set the dialog characteristics
+            builder.setMessage("Are you sure you want to remove " + CovidUtils.formatLocation(location) + "?")
+                    .setTitle("Remove location?");
+        }
+        else if (action == OperationActions.REFRESH)
+        {
+            builder.setPositiveButton("Refresh", (dialog, id) -> RefreshLocationStats(view, location));
+            builder.setNegativeButton("Cancel", (dialog, id) ->
+            {
+            });
 
+            // 2. Chain together various setter methods to set the dialog characteristics
+            builder.setMessage("Are you sure you want to refresh all stats for " + CovidUtils.formatLocation(location) + "?")
+                    .setTitle("Refresh location?");
+        }
         // 3. Get the AlertDialog from create()
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
-    private void deleteLocation(View view, int position)
+    private void RemoveLocation(View view, Location toDelete)
     {
-        // Get Location to delete
-        Location toDelete = locations.get(position);
-
         String locationName = CovidUtils.formatLocation(toDelete);
 
         // Delete selected Location
@@ -106,6 +120,20 @@ public class LocationFragment extends Fragment
 
         // Notify user
         Snackbar.make(view, "Removed " + locationName, Snackbar.LENGTH_SHORT)
+                .setAction("Action", null).show();
+
+        // Reload list
+        loadLocations();
+    }
+
+    private void RefreshLocationStats(View view, Location location)
+    {
+        String locationName = CovidUtils.formatLocation(location);
+
+        // TODO: Refresh data
+
+        // Notify user
+        Snackbar.make(view, "Refreshed " + locationName, Snackbar.LENGTH_SHORT)
                 .setAction("Action", null).show();
 
         // Reload list

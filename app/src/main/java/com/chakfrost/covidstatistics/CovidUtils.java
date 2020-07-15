@@ -6,8 +6,10 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.chakfrost.covidstatistics.models.CovidStats;
+import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -93,10 +95,7 @@ public class CovidUtils
                 .findFirst()
                 .orElse(null);
 
-        if (null == found)
-            return false;
-        else
-            return true;
+        return !(null == found);
     }
 
     /**
@@ -110,7 +109,6 @@ public class CovidUtils
      */
     public static int determineArrow(double current, double previous, boolean upIsGood)
     {
-        //Log.d("determineArrow()", "Comparing " + String.valueOf(current) + " with previous value of " + String.valueOf(previous));
         if (current > previous)
         {
             return upIsGood ? R.drawable.ic_arrow_drop_up_green_24dp : R.drawable.ic_arrow_drop_up_yellow_24dp;
@@ -123,5 +121,76 @@ public class CovidUtils
         {
             return R.drawable.ic_remove_black_24dp;
         }
+    }
+
+    public static boolean isUS(Location location)
+    {
+        if (location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() == "")
+            return true;
+        else
+            return false;
+    }
+
+    public static boolean isUSState(Location location)
+    {
+        if (location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() != "")
+            return true;
+        else
+            return false;
+    }
+
+    public static CovidStats findCovidStat(List<CovidStats> stats, Calendar dateToCheck)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        CovidStats stat = stats.stream()
+                .filter(s -> dateFormat.format(s.getStatusDate().getTime()).equals(dateFormat.format(dateToCheck.getTimeInMillis())))
+                .findFirst()
+                .orElse(null);
+
+        return stat;
+    }
+
+    public static HospitalizationStat findHospitalizationStat(List<HospitalizationStat> stats, int dateAsInt)
+    {
+        HospitalizationStat stat = stats.stream()
+                .filter(s -> s.getDate() == dateAsInt)
+                .findFirst()
+                .orElse(null);
+
+        return stat;
+    }
+
+    /**
+     * Finds 2 character US state abbreviation
+     *
+     * @param loc       Location to use for getting abbreviation
+     * @return          String of 2 character abbreviation or null if not found
+     */
+    public static String getUSStateAbbreviation(Location loc)
+    {
+        String[] states = CovidApplication.getUSStates();
+
+        String stateAbbreviation = null;
+        if (isUSState(loc))
+        {
+            String province = loc.getProvince();
+            for (int i = 0; i < states.length; i++)
+            {
+                if (states[i].contains("|" + province + "|"))
+                {
+                    String[] stateParts = states[i].split("\\|");
+                    stateAbbreviation = stateParts[2];
+                    break;
+                }
+            }
+        }
+
+        return stateAbbreviation;
+    }
+
+    public static String formatError(String message, String stackTrace)
+    {
+        return MessageFormat.format("{0}:\n{1}", message, stackTrace);
     }
 }

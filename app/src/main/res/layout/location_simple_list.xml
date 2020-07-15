@@ -33,6 +33,15 @@
         app:layout_constraintTop_toBottomOf="@+id/location_simple_list_province" />
 -->
     <ImageView
+        android:id="@+id/location_simple_list_refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/img_trashcan"
+        app:layout_constraintRight_toLeftOf="@id/location_simple_list_delete"
+        app:layout_constraintTop_toTopOf="@+id/location_simple_list_country"
+        app:srcCompat="@drawable/ic_baseline_refresh_24" />
+    <ImageView
         android:id="@+id/location_simple_list_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
