@@ -1,7 +1,9 @@
 package com.chakfrost.covidstatistics.ui.statistics;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,9 +29,11 @@ import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationStatsRecyclerViewAdapter;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
+import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
+import com.chakfrost.covidstatistics.services.IServiceCallbackList;
 import com.chakfrost.covidstatistics.services.IserviceCallbackGlobalStats;
 import com.chakfrost.covidstatistics.ui.LocationStatsDetail;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -77,14 +81,18 @@ public class StatisticsFragment extends Fragment
 
     private static boolean globalRefreshComplete;
     private static boolean locationRefreshComplete;
+    private static boolean locationsUpdated;
+    private static boolean manualRefresh;
 
     private int locationRefreshCount;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         statisticsViewModel = ViewModelProviders.of(requireActivity()).get(StatisticsViewModel.class);
 
         View root = inflater.inflate(R.layout.fragment_statistics, container, false);
+
 
         // Instantiate UI elements
         globalLastUpdate = root.findViewById(R.id.stats_global_last_update);
@@ -124,6 +132,8 @@ public class StatisticsFragment extends Fragment
         FloatingActionButton fab = getActivity().findViewById(R.id.fab);
         fab.show();
 
+        manualRefresh = false;
+
         // Load data
         loadGlobals();
         loadLocations(locationsView, true);
@@ -139,8 +149,9 @@ public class StatisticsFragment extends Fragment
         locationRefreshCount = 0;
         globalRefreshComplete = false;
         locationRefreshComplete = false;
-        retrieveGlobalStatsData(true);
-        RefreshLocations(true);
+        manualRefresh = true;
+        new RefreshGlobalStatistics().execute(true);
+        new RefreshLocationStatistics().execute(false);
     }
 
     private void loadGlobals()
@@ -151,7 +162,7 @@ public class StatisticsFragment extends Fragment
         // If summary is null, get it
         if (null == summary)
         {
-            retrieveGlobalStatsData(false);
+            new RefreshGlobalStatistics().execute(false);
         }
         else
         {
@@ -172,7 +183,7 @@ public class StatisticsFragment extends Fragment
 
             // Only refresh data if 6+ hours old
             if (hours >= 6)
-                retrieveGlobalStatsData(false);
+                new RefreshGlobalStatistics().execute(false);
         }
     }
 
@@ -323,7 +334,10 @@ public class StatisticsFragment extends Fragment
 
         // If there are Locations and refresh is true
         if (refreshLocations && locations.size() > 0)
-            RefreshLocations(false);
+        {
+            new RefreshLocationStatistics().execute(false);
+            //RefreshLocations(false);
+        }
 /*        else
         {
             // Version 1.2.0.0 update: add fatality rate
@@ -390,39 +404,69 @@ public class StatisticsFragment extends Fragment
         locationRefreshCount = 0;
 
         // Loop through each Location checking for stale LastUpdated value
-        for (Location loc : locations)
+        for (Location location : locations)
         {
             // Account for a null value
-            if (null == loc.getLastUpdated())
+            if (null == location.getLastUpdated())
             {
                 hours = 6;
             }
             else
             {
-                diff = currentDate.getTime() - loc.getLastUpdated().getTime();
+                diff = currentDate.getTime() - location.getLastUpdated().getTime();
                 hours = TimeUnit.MILLISECONDS.toHours(diff);
             }
 
             // If 6+ hours stale, check for new stats
-            if (hours >= 6 || manualRefresh)
+            if (hours >= 6 || manualRefresh)                       // <- TODO: change to 6
             {
                 // Check if Location's current date state is present
-                if (!CovidUtils.statExists(loc.getStatistics()))
+                if (!CovidUtils.statExists(location.getStatistics()))     // <- TODO: change to !(not)
                 {
                     // Set date
                     Calendar startDate = Calendar.getInstance();
                     startDate.add(Calendar.DATE, -1);
-                    loc.setLastUpdated(new Date());
+                    location.setLastUpdated(new Date());
 
                     // Log analytics
                     Bundle bundle = new Bundle();
-                    bundle.putString(FirebaseAnalytics.Param.ITEM_ID, CovidUtils.formatLocation(loc));
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_ID, CovidUtils.formatLocation(location));
                     bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Refresh From Statistics Fragment");
                     firebaseAnalytics.logEvent("LOCATION_STATS", bundle);
 
                     // Load report
                     locationRefreshCount++;
-                    LoadReportData(loc, startDate, manualRefresh);
+
+                    // if US state, ensure the state abbreviation is set
+                    if (CovidUtils.isUSState(location) && TextUtils.isEmpty(location.getUsStateAbbreviation()))
+                        location.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(location));
+
+                    // Refresh location data
+                    GetStatsForLocation(location, startDate, null, manualRefresh);
+                }
+                else
+                {
+                    if (CovidUtils.isUS(location) || CovidUtils.isUSState(location))
+                    {
+                        // Ensure state has abbreviation set
+                        if (CovidUtils.isUSState(location) && TextUtils.isEmpty(location.getUsStateAbbreviation()))
+                            location.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(location));
+
+                        // Get hospitalization stats
+                        manualHospitalizationStatBackFill(location);
+                    }
+                }
+            }
+            else
+            {
+                if (CovidUtils.isUS(location) || CovidUtils.isUSState(location))
+                {
+                    // Ensure state has abbreviation set
+                    if (CovidUtils.isUSState(location) && TextUtils.isEmpty(location.getUsStateAbbreviation()))
+                        location.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(location));
+
+                    // Get hospitalization stats
+                    manualHospitalizationStatBackFill(location);
                 }
             }
         }
@@ -438,107 +482,321 @@ public class StatisticsFragment extends Fragment
         }
     }
 
-    private void LoadReportData(Location loc, Calendar dateToCheck, boolean manualRefresh)
+    private void ProcessCovidStat(Location loc, CovidStats stat, Calendar dateToCheck,
+                                  List<HospitalizationStat> hospitalizationStats,
+                                  boolean manualRefresh)
+    {
+        if (null != stat)
+        {
+            // Add CovidStat to Location
+            loc.getStatistics().add(stat);
+
+            // Get next date to check
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            dateToCheck.add(Calendar.DATE, -1);
+
+            // Check if we already have stats for next dayToCheck
+            // If so, stop.  Stats won't change.
+            CovidStats found = loc.getStatistics().stream()
+                    .filter(s -> dateFormat.format(s.getStatusDate().getTime()).equals(dateFormat.format(dateToCheck.getTimeInMillis())))
+                    .findFirst()
+                    .orElse(null);
+
+            if (null != found)
+            {
+                locationRefreshCount--;
+
+                // Stat for next day found, stop
+                SetLocation(loc);
+                loadLocations(locationsView, false);
+
+
+                if (locationRefreshCount == 0)
+                {
+                    locationRefreshComplete = true;
+
+                    // Dismiss progress indicator
+                    if (manualRefresh && globalRefreshComplete)
+                        swipeContainer.setRefreshing(false);
+                    else if (!manualRefresh)
+                        progressBar.setVisibility(View.GONE);
+                }
+
+                // Notify
+                Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null).show();
+            }
+            else
+            {
+                // Stat needed for next day
+                GetStatsForLocation(loc, dateToCheck, hospitalizationStats, manualRefresh);
+            }
+        }
+        else
+        {
+            locationRefreshCount--;
+
+            SetLocation(loc);
+            loadLocations(locationsView, false);
+
+            if (locationRefreshCount == 0)
+            {
+                locationRefreshComplete = true;
+
+                // Dismiss progress indicator
+                if (manualRefresh && globalRefreshComplete)
+                    swipeContainer.setRefreshing(false);
+                else if (!manualRefresh)
+                    progressBar.setVisibility(View.GONE);
+            }
+
+            // Notify
+            Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
+                    .setAction("Action", null).show();
+        }
+    }
+
+/*    private void LoadHospitalizations(CovidStats stat, Location loc, Calendar dateToCheck, boolean manualRefresh, String stateAbbreviation)
+    {
+        CovidService.getUSStateHospitalizations(stateAbbreviation, dateToCheck, new IServiceCallbackHospitalizationStat()
+        {
+            @Override
+            public void onSuccess(HospitalizationStat hStat)
+            {
+                // Set Hospitalization stats for the current stat day
+                stat.setHospitalizationsTotal(hStat.getHospitalizedTotal());
+                stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+                stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+                stat.setICUCurrent(hStat.getIcuCurrent());
+                stat.setICUTotal(hStat.getIcuTotal());
+            }
+
+            @Override
+            public void onError(VolleyError error)
+            {
+                //locationRefreshCount--;
+
+                Log.e("CovidService.provinceHospitalization.onError()", error.getStackTrace().toString());
+                Toast.makeText(getActivity().getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+
+                Bundle bundle = new Bundle();
+                bundle.putString(FirebaseAnalytics.Param.METHOD, "LoadHospitalizations.onError");
+                bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "0");
+                bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Refresh");
+                bundle.putString("Location_Stats_Error", error.getStackTrace().toString());
+                firebaseAnalytics.logEvent("ERROR", bundle);
+
+                // Dismiss progress indicator
+                if (manualRefresh && locationRefreshComplete)
+                    swipeContainer.setRefreshing(false);
+                else if (!manualRefresh)
+                    progressBar.setVisibility(View.GONE);
+            }
+        });
+    }*/
+
+    private void GetStatsForLocation(Location location, Calendar dateToCheck, List<HospitalizationStat> hospitalizationStats, boolean manualRefresh)
     {
         if (!manualRefresh)
             progressBar.setVisibility(View.VISIBLE);
 
-        CovidService.report(loc.getIso(), loc.getProvince(), loc.getRegion(), loc.getMunicipality(), dateToCheck, new IServiceCallbackCovidStats()
+        // Set update boolean for status
+        locationsUpdated = true;
+
+        // Check to back-fill hospitalization stats
+        if (null == hospitalizationStats && location.getStatistics().size() > 0 && (CovidUtils.isUS(location) || CovidUtils.isUSState(location)))
+        {
+            long occurrences = location.getStatistics().stream()
+                    .filter(s -> s.getHospitalizationsCurrent() != 0)
+                    .count();
+
+            // Get Hospitalization Stats if List is null
+            if (occurrences < 10)
+            {
+                if (CovidUtils.isUS(location))
+                {
+                    // Get stats for US
+                    CovidService.getUSHospitalizations(new IServiceCallbackList()
+                    {
+                        @Override
+                        public <T> void onSuccess(List<T> list)
+                        {
+                            // Loop dates to back-fill
+                            PopulateHospitalizationStats(location, (List<HospitalizationStat>)list);
+
+                            // Now that we have the List<>, get report data
+                            GetCovidStat(location, dateToCheck, (List<HospitalizationStat>)list, manualRefresh);
+                        }
+
+                        @Override
+                        public void onError(VolleyError err)
+                        {
+                            Log.e("StatisticsFragment.GetStatsForLocation()",
+                                    CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+                        }
+                    });
+                }
+                else if (CovidUtils.isUSState(location))
+                {
+                    // Get US State abbreviation if not populated
+                    if (TextUtils.isEmpty(location.getUsStateAbbreviation()))
+                        location.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(location));
+
+                    // Get stats for US State
+                    CovidService.getUSStateHospitalizations(location.getUsStateAbbreviation(), new IServiceCallbackList()
+                    {
+                        @Override
+                        public <T> void onSuccess(List<T> list)
+                        {
+                            // Loop dates to back-fill
+                            PopulateHospitalizationStats(location, (List<HospitalizationStat>)list);
+
+                            // Now that we have the List<>, get report data
+                            GetCovidStat(location, dateToCheck, (List<HospitalizationStat>)list, manualRefresh);
+                        }
+
+                        @Override
+                        public void onError(VolleyError err)
+                        {
+                            Log.e("StatisticsFragment.GetStatsForLocation()",
+                                    CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+                        }
+                    });
+                }
+            }
+            else
+            {
+                GetCovidStat(location, dateToCheck, null, manualRefresh);
+            }
+        }
+        else
+        {
+            GetCovidStat(location, dateToCheck, hospitalizationStats, manualRefresh);
+        }
+    }
+
+    private void manualHospitalizationStatBackFill(Location location)
+    {
+        long occurrences = location.getStatistics().stream()
+                .filter(s -> s.getHospitalizationsCurrent() != 0)
+                .count();
+
+        // Get Hospitalization Stats if List is null
+        if (occurrences < 10)
+        {
+            Log.d("StatisticsFragment.manualHospitalizationStatBackFill()",
+                    MessageFormat.format("Back-filling {0}", CovidUtils.formatLocation(location)));
+
+            if (CovidUtils.isUS(location))
+            {
+                locationRefreshCount++;
+                // Get stats for US
+                CovidService.getUSHospitalizations(new IServiceCallbackList()
                 {
                     @Override
-                    public void onSuccess(CovidStats stat)
+                    public <T> void onSuccess(List<T> list)
                     {
-                        // If stat is null then there is no data for requested Location and Date
-                        if (null != stat)
-                        {
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                            loc.getStatistics().add(stat);
-                            dateToCheck.add(Calendar.DATE, -1);
+                        // Loop dates to back-fill
+                        PopulateHospitalizationStats(location, (List<HospitalizationStat>)list);
+                        locationRefreshCount--;
 
-                            // Check if we already have stats for next dayToCheck
-                            // If so, stop.  Stats won't change.
-                            CovidStats found = loc.getStatistics().stream()
-                                    .filter(s -> dateFormat.format(s.getStatusDate().getTime()).equals(dateFormat.format(dateToCheck.getTimeInMillis())))
-                                    .findFirst()
-                                    .orElse(null);
-
-                            if (null != found)
-                            {
-                                locationRefreshCount--;
-
-                                // Stat for next day found, stop
-                                SetLocation(loc);
-                                loadLocations(locationsView, false);
-
-                                if (locationRefreshCount == 0)
-                                {
-                                    locationRefreshComplete = true;
-
-                                    // Dismiss progress indicator
-                                    if (manualRefresh && globalRefreshComplete)
-                                        swipeContainer.setRefreshing(false);
-                                    else if (!manualRefresh)
-                                        progressBar.setVisibility(View.GONE);
-                                }
-
-
-                                // Notify
-                                Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
-                                        .setAction("Action", null).show();
-                            }
-                            else
-                            {
-                                // Stat needed for next day
-                                LoadReportData(loc, dateToCheck, manualRefresh);
-                            }
-                        }
-                        else
-                        {
-                            locationRefreshCount--;
-
-                            SetLocation(loc);
-                            loadLocations(locationsView, false);
-
-                            if (locationRefreshCount == 0)
-                            {
-                                locationRefreshComplete = true;
-
-                                // Dismiss progress indicator
-                                if (manualRefresh && globalRefreshComplete)
-                                    swipeContainer.setRefreshing(false);
-                                else if (!manualRefresh)
-                                    progressBar.setVisibility(View.GONE);
-                            }
-
-                            // Notify
-                            Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
-                                    .setAction("Action", null).show();
-                        }
+                        // Save Location
+                        SetLocation(location);
                     }
 
                     @Override
-                    public void onError(VolleyError error)
+                    public void onError(VolleyError err)
                     {
+                        Log.e("StatisticsFragment.manualHospitalizationStatBackFill()",
+                                CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
                         locationRefreshCount--;
-
-                        Log.e("GetReportData.onError()", error.getStackTrace().toString());
-                        Toast.makeText(getActivity().getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-
-                        Bundle bundle = new Bundle();
-                        bundle.putString(FirebaseAnalytics.Param.METHOD, "LoadReportData.onError");
-                        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "0");
-                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Refresh");
-                        bundle.putString("Location_Stats_Error", error.getStackTrace().toString());
-                        firebaseAnalytics.logEvent("ERROR", bundle);
-
-                        // Dismiss progress indicator
-                        if (manualRefresh && locationRefreshComplete)
-                            swipeContainer.setRefreshing(false);
-                        else if (!manualRefresh)
-                            progressBar.setVisibility(View.GONE);
+                    }
+                });
+            }
+            else if (CovidUtils.isUSState(location))
+            {
+                locationRefreshCount++;
+                // Get US State abbreviation if not populated
+                if (TextUtils.isEmpty(location.getUsStateAbbreviation()))
+                {
+                    location.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(location));
+                    if (TextUtils.isEmpty(location.getUsStateAbbreviation()))
+                    {
+                        Log.d("StatisticsFragment.manualHospitalizationStatBackFill()",
+                                MessageFormat.format("Unable to get state abbreviation for {0}",
+                                        CovidUtils.formatLocation(location)));
+                        return;
                     }
                 }
-        );
+
+                // Get stats for US State
+                CovidService.getUSStateHospitalizations(location.getUsStateAbbreviation(), new IServiceCallbackList()
+                {
+                    @Override
+                    public <T> void onSuccess(List<T> list)
+                    {
+                        // Loop dates to back-fill
+                        PopulateHospitalizationStats(location, (List<HospitalizationStat>)list);
+                        locationRefreshCount--;
+
+                        // Save Location
+                        SetLocation(location);
+                    }
+
+                    @Override
+                    public void onError(VolleyError err)
+                    {
+                        Log.e("StatisticsFragment.manualHospitalizationStatBackFill()",
+                                CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+                        locationRefreshCount--;
+                    }
+                });
+            }
+        }
+    }
+
+    private Location PopulateHospitalizationStats(Location location, List<HospitalizationStat> stats)
+    {
+        // Set date to start getting report
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+        location.getStatistics().forEach(covidStat ->
+        {
+            // Convert date to known int format
+            String formattedDate = dateFormat.format(covidStat.getStatusDate().getTime());
+            int dateAsInt = Integer.parseInt(formattedDate);
+
+            HospitalizationStat hStat = CovidUtils.findHospitalizationStat(stats,  dateAsInt);
+
+            if (null != hStat)
+            {
+                covidStat.setHospitalizationsTotal(hStat.getHospitalizedTotal());
+                covidStat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+                covidStat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+                covidStat.setICUCurrent(hStat.getIcuCurrent());
+                covidStat.setICUTotal(hStat.getIcuTotal());
+            }
+        });
+
+        return location;
+    }
+
+    private void GetCovidStat(Location location, Calendar dateToCheck, List<HospitalizationStat> hospitalizationStats, boolean manualRefresh)
+    {
+        CovidService.getCovidStat(location, dateToCheck, hospitalizationStats, new IServiceCallbackCovidStats()
+        {
+            @Override
+            public void onSuccess(CovidStats stat)
+            {
+                ProcessCovidStat(location, stat, dateToCheck, hospitalizationStats, manualRefresh);
+            }
+
+            @Override
+            public void onError(VolleyError err)
+            {
+                Log.d("StatisticsFragment.LoadReportData()", err.toString());
+            }
+        });
     }
 
     private void SetLocation(Location loc)
@@ -555,21 +813,21 @@ public class StatisticsFragment extends Fragment
                 .findFirst()
                 .orElse(null);
 
-
-        if (null == found)
-        {
-            // Location is new, add to List
-            locations.add(loc);
-        }
-        else
+        if (null != found)
         {
             // Location is being updated
             locations.remove(found);
-            locations.add(loc);
         }
 
-        // Save to local storage
-        CovidApplication.setLocations(locations);
+        // Save Location
+        locations.add(loc);
+
+        // Wait until all updates are done before saving
+        if (locationRefreshCount == 0)
+        {
+            // Save to local storage
+            CovidApplication.setLocations(locations);
+        }
     }
 
     private void parentOnRefresh(int resultCode, Intent data)
@@ -587,20 +845,164 @@ public class StatisticsFragment extends Fragment
             firebaseAnalytics.logEvent("ADD_LOCATION", bundle);
 
             // Notify
-            Snackbar.make(getView(), "Retrieving location statistics...", Snackbar.LENGTH_SHORT)
+            Snackbar.make(getView(),
+                    MessageFormat.format("Retrieving location statistics for {0}...",
+                            CovidUtils.formatLocation(loc)),
+                    Snackbar.LENGTH_SHORT)
                     .setAction("Action", null).show();
 
             // Set date to start getting report
             Calendar startDate = Calendar.getInstance();
             startDate.add(Calendar.DATE, -1);
 
-            // Load report
+            // Set ProgressBar and refresh counter
             if (progressBar.getVisibility() == View.VISIBLE)
                 locationRefreshCount++;
             else
                 locationRefreshCount = 1;
 
-            LoadReportData(loc, startDate, false);
+            // Find 2 character state abbreviation, if applicable
+            loc.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(loc));
+
+            // Get stats
+            if (!CovidUtils.isUS(loc) && !CovidUtils.isUSState(loc))
+            {
+                // Get report data; not US or US State
+                GetStatsForLocation(loc, startDate, null, false);
+            }
+            else
+            {
+                if (CovidUtils.isUSState(loc))
+                {
+                    // Grab all hospitalization stats for state to be passed rather
+                    // than making individual calls for each date
+                    CovidService.getUSStateHospitalizations(loc.getUsStateAbbreviation(), new IServiceCallbackList()
+                    {
+                        @Override
+                        public <T> void onSuccess(List<T> list)
+                        {
+                            // Now that we have the List<>, get report data
+                            GetStatsForLocation(loc, startDate, (List<HospitalizationStat>) list, false);
+                        }
+
+                        @Override
+                        public void onError(VolleyError err)
+                        {
+                            Log.d("StatisticsFragment.parentOnRefresh()", err.toString());
+                        }
+                    });
+                }
+                else if (CovidUtils.isUS(loc))
+                {
+                    CovidService.getUSHospitalizations(new IServiceCallbackList()
+                    {
+                        @Override
+                        public <T> void onSuccess(List<T> list)
+                        {
+                            // Loop dates to back-fill
+                            PopulateHospitalizationStats(loc, (List<HospitalizationStat>)list);
+
+                            // Now that we have the List<>, get report data
+                            GetCovidStat(loc, startDate, (List<HospitalizationStat>)list, false);
+                        }
+
+                        @Override
+                        public void onError(VolleyError err)
+                        {
+                            Log.e("StatisticsFragment.parentOnRefresh()", err.toString());
+                        }
+                    });
+                }
+                else
+                {
+                    Log.d("StatisticsFragment.parentOnRefresh()",
+                            "unable to create new location; neither US or US State yet pre-qualified with previous check");
+
+                    Snackbar.make(getView(), "Unable to get statistics for " + CovidUtils.formatLocation(loc), Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                }
+            }
+        }
+    }
+
+
+
+    public class RefreshLocationStatistics extends AsyncTask<Boolean, Integer, String>
+    {
+        @Override
+        protected void onPreExecute()
+        {
+            if(!manualRefresh)
+                progressBar.setVisibility(View.VISIBLE);
+            locationsUpdated = false;
+        }
+
+        @Override
+        protected String doInBackground(Boolean... refresh)
+        {
+            for (int i = 0; i < refresh.length; i++)
+            {
+                RefreshLocations(refresh[i]);
+            }
+
+            // Wait for refresh to finish
+            while (locationRefreshCount != 0);
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            if (locationsUpdated)
+            {
+                // Notify
+                Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null).show();
+            }
+
+            // Dismiss progress indicator
+            if (globalRefreshComplete)
+            {
+                swipeContainer.setRefreshing(false);
+                manualRefresh = false;
+            }
+
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    public class RefreshGlobalStatistics extends AsyncTask<Boolean, Integer, String>
+    {
+        @Override
+        protected void onPreExecute()
+        {
+            if (!manualRefresh)
+                progressBar.setVisibility(View.VISIBLE);
+
+            locationsUpdated = false;
+        }
+
+        @Override
+        protected String doInBackground(Boolean... refresh)
+        {
+            for (int i = 0; i < refresh.length; i++)
+                retrieveGlobalStatsData(refresh[i]);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            if (locationRefreshComplete)
+            {
+                swipeContainer.setRefreshing(false);
+                manualRefresh = false;
+            }
+
+            progressBar.setVisibility(View.GONE);
         }
     }
 }

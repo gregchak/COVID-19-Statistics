@@ -2,6 +2,7 @@ package com.chakfrost.covidstatistics.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,6 +15,8 @@ import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.models.LocationStats;
 import com.chakfrost.covidstatistics.models.StatDatePair;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +34,9 @@ public class LocationStatsDetail extends AppCompatActivity
     private LocationStats active;
     private LocationStats newActive;
     private LocationStats fatalityRate;
+    private LocationStats hopsitalizations;
+    private LocationStats newHospitalizations;
+    private LocationStats icu;
     private List<LocationStats> locationStats;
 
     private RecyclerView locationStatDetailView;
@@ -75,6 +81,8 @@ public class LocationStatsDetail extends AppCompatActivity
         int recoveredZeroCount = 0;
         int activeZeroCount = 0;
         int fatalityZeroCount = 0;
+        int hospitalizationZeroCount = 0;
+        int icuZeroCount = 0;
 
         confirmed = new LocationStats("Confirmed");
         newConfirmed = new LocationStats("New Confirmed");
@@ -86,8 +94,14 @@ public class LocationStatsDetail extends AppCompatActivity
         newActive = new LocationStats("New Active");
         fatalityRate = new LocationStats("Fatality Rate (%)");
 
+        hopsitalizations = new LocationStats("Hospitalizations");
+        newHospitalizations = new LocationStats("New Hospitalizations");
+        icu = new LocationStats("ICU");
+
         List<CovidStats> statsForDisplay = location.getStatistics();
         Collections.sort(statsForDisplay);
+
+        Gson g = new Gson();
 
         // Loop through all the Location's statistics
         for (int i = 0; i < statsForDisplay.size(); i++)
@@ -128,6 +142,7 @@ public class LocationStatsDetail extends AppCompatActivity
                     newRecovered.addValue(statTemp.getStatusDate(), statTemp.getDiffRecovered());
             }
 
+
             if (statTemp.getTotalRecovered() == 0)
                 recoveredZeroCount++;
             else if (statTemp.getTotalRecovered() != 0 && recoveredZeroCount < 4)
@@ -146,6 +161,7 @@ public class LocationStatsDetail extends AppCompatActivity
             else if (statTemp.getTotalActive() != 0 && activeZeroCount < 4)
                 activeZeroCount = 0;
 
+
             // Set fatality rates
             if (fatalityZeroCount < 3)
                 fatalityRate.addValue(statTemp.getStatusDate(), statTemp.getFatalityRate() * 100);
@@ -155,6 +171,25 @@ public class LocationStatsDetail extends AppCompatActivity
             else if (statTemp.getFatalityRate() != 0 && fatalityZeroCount < 4)
                 fatalityZeroCount = 0;
 
+
+            // Set hospitalizations
+             if (statTemp.getHospitalizationsCurrent() == 0)
+                hospitalizationZeroCount++;
+            else if (statTemp.getHospitalizationsCurrent() != 0 && hospitalizationZeroCount < 4)
+                hospitalizationZeroCount = 0;
+
+            if (hospitalizationZeroCount < 3)
+                hopsitalizations.addValue(statTemp.getStatusDate(), statTemp.getHospitalizationsCurrent());
+
+
+            // Set ICU
+            if (statTemp.getICUCurrent() == 0)
+                icuZeroCount++;
+            else if (statTemp.getICUCurrent() != 0 && icuZeroCount < 4)
+                icuZeroCount = 0;
+
+            if (icuZeroCount < 3)
+                icu.addValue(statTemp.getStatusDate(), statTemp.getICUCurrent());
         }
 
         // Populate LocationStats List<>
@@ -167,6 +202,31 @@ public class LocationStatsDetail extends AppCompatActivity
         locationStats.add(deaths);
         Collections.reverse(newDeaths.getValues());
         locationStats.add(newDeaths);
+
+        // Not all locations have hospitalization and ICU values, verify this has data
+        StatDatePair findHospitalization = hopsitalizations.getValues().stream()
+                .filter(s -> s.getValue() != 0)
+                .findFirst()
+                .orElse(null);
+
+        // Only add if hospitalizations have values
+        if (null != findHospitalization)
+        {
+            Collections.reverse(hopsitalizations.getValues());
+            locationStats.add(hopsitalizations);
+        }
+
+        // Not all locations have ICU values, verify this has data
+        StatDatePair findICU = icu.getValues().stream()
+                .filter(s -> s.getValue() != 0)
+                .findFirst()
+                .orElse(null);
+
+        if (null != findICU)
+        {
+            Collections.reverse(icu.getValues());
+            locationStats.add(icu);
+        }
 
         // Not all locations have Recovered values, verify this has data
         StatDatePair findRecovered = recovered.getValues().stream()
@@ -204,7 +264,7 @@ public class LocationStatsDetail extends AppCompatActivity
                 .findFirst()
                 .orElse(null);
 
-        // Only add if Active hs values
+        // Only add if fatality rate hs values
         if (null != findFatality)
         {
             Collections.reverse(fatalityRate.getValues());

@@ -6,6 +6,8 @@ import android.text.TextUtils;
 //import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.gson.annotations.SerializedName;
 
+import org.w3c.dom.Text;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +20,7 @@ public class Location implements Comparable<Location>, Serializable
     private String province;
     private String municipality;
     private String iso;
+    private String usStateAbbreviation;
     @SerializedName("Region")
     private String region;
     private List<CovidStats> statistics;
@@ -59,6 +62,42 @@ public class Location implements Comparable<Location>, Serializable
         province = _province;
         municipality = _municipality;
         statistics = _statistics;
+    }
+
+    /**
+     * Determines if the Location is a Country
+     * @return  True if Location is a Country, false if not
+     */
+    public boolean isCountry()
+    {
+        if (TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * Determines if the Location is a Province
+     * @return  True if Location is a Province, false if not
+     */
+    public boolean isProvince()
+    {
+        if (!TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * Determines if the Location is a Municipality
+     * @return  True if Location is a Municipality, false if not
+     */
+    public boolean isMunicipality()
+    {
+        if (!TextUtils.isEmpty(province) && !TextUtils.isEmpty(municipality))
+            return true;
+        else
+            return false;
     }
 
     @Override
@@ -117,6 +156,7 @@ public class Location implements Comparable<Location>, Serializable
     }
     public String getIso() { return iso; }
     public String getRegion() { return region; }
+    public String getUsStateAbbreviation() { return usStateAbbreviation; }
     public List<CovidStats> getStatistics() { return statistics; }
     public Date getLastUpdated() { return lastUpdated; }
 
@@ -126,6 +166,7 @@ public class Location implements Comparable<Location>, Serializable
     public void setMunicipality(String val) { municipality = val; }
     public void setIso(String val) { iso = val; }
     public void setRegion(String val) { region = val; }
+    public void setUsStateAbbreviation(String val) { usStateAbbreviation = val; }
     public void setStatistics(List<CovidStats> val) { statistics = val; }
     public void setLastUpdated(Date val) { lastUpdated = val; }
 
