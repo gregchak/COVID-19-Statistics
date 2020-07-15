@@ -15,8 +15,6 @@ import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.models.LocationStats;
 import com.chakfrost.covidstatistics.models.StatDatePair;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,8 +98,6 @@ public class LocationStatsDetail extends AppCompatActivity
 
         List<CovidStats> statsForDisplay = location.getStatistics();
         Collections.sort(statsForDisplay);
-
-        Gson g = new Gson();
 
         // Loop through all the Location's statistics
         for (int i = 0; i < statsForDisplay.size(); i++)

@@ -25,7 +25,6 @@ import com.chakfrost.covidstatistics.models.Country;
 import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.models.Province;
-import com.chakfrost.covidstatistics.ui.statistics.StatisticsFragment;
 import com.chakfrost.covidstatistics.workers.RefreshStatsWorker;
 
 import java.util.List;

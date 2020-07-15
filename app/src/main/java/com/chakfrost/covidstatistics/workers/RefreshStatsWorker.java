@@ -61,7 +61,6 @@ public class RefreshStatsWorker extends Worker
             // Update stats
             RefreshGlobalStats();
             RefreshLocationStats();
-            RefreshLocationStats();
 
             // Wait for RequestQueue to clear
             while (locationQueue > 0);
