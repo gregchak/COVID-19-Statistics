@@ -926,7 +926,10 @@ public class StatisticsFragment extends Fragment
     }
 
 
-
+    /**
+     * Class for handling the fetching of Location stats
+     * asynchronously, off the Main UI thread
+     */
     public class RefreshLocationStatistics extends AsyncTask<Boolean, Integer, String>
     {
         @Override
@@ -973,6 +976,10 @@ public class StatisticsFragment extends Fragment
         }
     }
 
+    /**
+     * Class for handling the fetching of Global stats
+     * asynchronously, off the Main UI thread
+     */
     public class RefreshGlobalStatistics extends AsyncTask<Boolean, Integer, String>
     {
         @Override
