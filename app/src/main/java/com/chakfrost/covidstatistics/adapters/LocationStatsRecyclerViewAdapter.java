@@ -2,6 +2,7 @@ package com.chakfrost.covidstatistics.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -216,13 +217,21 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             // Confirmed data
             confirmed.setText(NumberFormat.getInstance().format(stat.getTotalConfirmed()));
             confirmedDiff.setText(NumberFormat.getInstance().format(stat.getDiffConfirmed()));
-            confirmedImage.setImageResource(CovidUtils.determineArrow(stat.getTotalConfirmed(), previousStat.getTotalConfirmed(), false));
+            confirmedImage.setImageResource(CovidUtils.determineArrow(stat.getDiffConfirmed(), previousStat.getDiffConfirmed(), false));
+//            Log.d("Confirm comparison", MessageFormat.format("{0} -> current: {1}; previous: {2}",
+//                    CovidUtils.formatLocation(location),
+//                    stat.getDiffConfirmed(),
+//                    previousStat.getDiffConfirmed()));
 
 
             // Death data
             deaths.setText(NumberFormat.getInstance().format(stat.getTotalDeaths()));
             deathsDiff.setText(NumberFormat.getInstance().format(stat.getDiffDeaths()));
-            deathsImage.setImageResource(CovidUtils.determineArrow(stat.getTotalDeaths(), previousStat.getTotalDeaths(), false));
+            deathsImage.setImageResource(CovidUtils.determineArrow(stat.getDiffDeaths(), previousStat.getDiffDeaths(), false));
+//            Log.d("Death comparison", MessageFormat.format("{0} -> current: {1}; previous: {2}",
+//                    CovidUtils.formatLocation(location),
+//                    stat.getDiffDeaths(),
+//                    previousStat.getDiffDeaths()));
 
 
             // Hospitalization data

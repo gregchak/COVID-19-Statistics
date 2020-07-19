@@ -277,12 +277,8 @@ public class StatisticsFragment extends Fragment
 
                                      // Dismiss progress indicator
                                      //Log.d("refreshGlobals()", "manualRefresh: " + String.valueOf(manualRefresh) + "; locationRefreshComplete: " + String.valueOf(locationRefreshComplete));
-                                     if (manualRefresh && locationRefreshComplete)
-                                         swipeContainer.setRefreshing(false);
-                                     else if (!manualRefresh)
-                                         progressBar.setVisibility(View.GONE);
-
                                      globalRefreshComplete = true;
+                                     clearProgressIndicators();
                                  }
 
                                  @Override
@@ -299,10 +295,7 @@ public class StatisticsFragment extends Fragment
                                      firebaseAnalytics.logEvent("ERROR", bundle);
 
                                      // Dismiss progress indicator
-                                     if (manualRefresh && locationRefreshComplete)
-                                         swipeContainer.setRefreshing(false);
-                                     else if (!manualRefresh)
-                                         progressBar.setVisibility(View.GONE);
+                                     clearProgressIndicators();
                                  }
                              }
         );
@@ -516,10 +509,7 @@ public class StatisticsFragment extends Fragment
                     locationRefreshComplete = true;
 
                     // Dismiss progress indicator
-                    if (manualRefresh && globalRefreshComplete)
-                        swipeContainer.setRefreshing(false);
-                    else if (!manualRefresh)
-                        progressBar.setVisibility(View.GONE);
+                    clearProgressIndicators();
                 }
 
                 // Notify
@@ -544,10 +534,7 @@ public class StatisticsFragment extends Fragment
                 locationRefreshComplete = true;
 
                 // Dismiss progress indicator
-                if (manualRefresh && globalRefreshComplete)
-                    swipeContainer.setRefreshing(false);
-                else if (!manualRefresh)
-                    progressBar.setVisibility(View.GONE);
+                clearProgressIndicators();
             }
 
             // Notify
@@ -827,6 +814,8 @@ public class StatisticsFragment extends Fragment
         {
             // Save to local storage
             CovidApplication.setLocations(locations);
+
+            clearProgressIndicators();
         }
     }
 
@@ -923,6 +912,15 @@ public class StatisticsFragment extends Fragment
                 }
             }
         }
+    }
+
+    private void clearProgressIndicators()
+    {
+        // Dismiss progress indicator
+        if (manualRefresh && globalRefreshComplete)
+            swipeContainer.setRefreshing(false);
+        else if (!manualRefresh)
+            progressBar.setVisibility(View.GONE);
     }
 
 
