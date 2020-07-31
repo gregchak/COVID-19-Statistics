@@ -11,6 +11,9 @@ https://www.seas.harvard.edu/office-communications/brand-style-guide/color-palet
 
 # Version History
 
+**1.4.1.1** - 2020-07-31  
+Resolved Issues 15 and 17.  Other clean-up tasks.
+
 **1.4.0.0** - 2020-07-14   
 Added hospitalization and ICU statistics for US and US States where available. Not all states are reporting either or both statistics. International statistics for hopaitalizatiins and ICU are not yet freely available.
 
