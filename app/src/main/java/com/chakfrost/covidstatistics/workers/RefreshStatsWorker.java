@@ -31,6 +31,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class RefreshStatsWorker extends Worker
@@ -55,12 +56,11 @@ public class RefreshStatsWorker extends Worker
             Log.d("RefreshStatsWorker.doWork()", "starting job...");
 
             // Instantiate collection of updated locations
-            newData = new ArrayList<>();
+            newData = new CopyOnWriteArrayList<>();
             locationQueue = 0;
 
             // Update stats
             RefreshGlobalStats();
-            RefreshLocationStats();
             RefreshLocationStats();
 
             // Wait for RequestQueue to clear
@@ -415,7 +415,10 @@ public class RefreshStatsWorker extends Worker
 
             // If found, remove
             if (null != found)
+            {
+                Log.d("Removing location", CovidUtils.formatLocation(found));
                 locations.remove(found);
+            }
 
             // Add new/updated location to List<Location>
             locations.add(loc);

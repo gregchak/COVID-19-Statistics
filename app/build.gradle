@@ -11,7 +11,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
-        versionName '1.4.0.0'
+        versionName '1.4.1.1'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -54,6 +54,7 @@ dependencies {
     // add the Firebase SDK for Google Analytics
 
     implementation 'com.google.firebase:firebase-analytics:17.2.0'
+    implementation 'org.jetbrains:annotations:15.0'
     // add SDKs for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
 

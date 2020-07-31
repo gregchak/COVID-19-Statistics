@@ -117,4 +117,14 @@
         <item>|Wisconsin|WI</item>
         <item>|Wyoming|WY</item>
     </string-array>
+
+    <string-array name="location_retrieve_complete">
+        <item>Beep... Bop... Boop... Computing...|Beep... Bop... Boop... Complete!</item>
+        <item>Generating awesome-sauce...|New awesome-sauce added to list!</item>
+        <item>We\'re workin\'... We\'re workin\'... We\'re workin\'|Workin\' complete!</item>
+        <item>Techno-wizardry in process, please stand by...|Wizardry complete!</item>
+        <item>I wonder how long it takes to get stats...|About that long :)</item>
+        <item>Caf-Pow ingestion starting...|Processing complete!</item>
+        <item>Better make some popcorn, this one may take a while|Just kidding, all done!</item>
+    </string-array>
 </resources>

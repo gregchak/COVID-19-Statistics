@@ -1,9 +1,17 @@
 package com.chakfrost.covidstatistics.ui.locations;
 
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -18,9 +26,12 @@ import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationSimpleListRecyclerViewAdapter;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.models.OperationActions;
+import com.chakfrost.covidstatistics.services.CovidStatService;
+import com.chakfrost.covidstatistics.services.IServiceCallbackGeneric;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,6 +42,7 @@ public class LocationFragment extends Fragment
     private List<Location> locations;
     private RecyclerView locationsSimpleListView;
     private LocationSimpleListRecyclerViewAdapter locationsSimpleListAdapter;
+    private ProgressBar locationsProgressBar;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -44,6 +56,7 @@ public class LocationFragment extends Fragment
         FloatingActionButton fab = getActivity().findViewById(R.id.fab);
         fab.hide();
 
+        locationsProgressBar = root.findViewById(R.id.locations_progress_bar);
         locationsSimpleListView = root.findViewById(R.id.locations_recycler_view);
         locationsSimpleListView.addItemDecoration(new DividerItemDecoration(
                 locationsSimpleListView.getContext(),
@@ -131,6 +144,8 @@ public class LocationFragment extends Fragment
         String locationName = CovidUtils.formatLocation(location);
 
         // TODO: Refresh data
+        // new RefreshLocationStatistics().execute(false);
+        new RefreshLocationStatistics().execute(location);
 
         // Notify user
         Snackbar.make(view, "Refreshed " + locationName, Snackbar.LENGTH_SHORT)
@@ -138,5 +153,151 @@ public class LocationFragment extends Fragment
 
         // Reload list
         loadLocations();
+    }
+
+    public void setProgressDialog()
+    {
+
+        int llPadding = 30;
+        LinearLayout ll = new LinearLayout(this.getActivity());
+        ll.setOrientation(LinearLayout.HORIZONTAL);
+        ll.setPadding(llPadding, llPadding, llPadding, llPadding);
+        ll.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams llParam = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        llParam.gravity = Gravity.CENTER;
+        ll.setLayoutParams(llParam);
+
+        ProgressBar progressBar = new ProgressBar(this.getActivity());
+        progressBar.setIndeterminate(true);
+        progressBar.setPadding(0, 0, llPadding, 0);
+        progressBar.setLayoutParams(llParam);
+
+        llParam = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        llParam.gravity = Gravity.CENTER;
+        TextView tvText = new TextView(this.getActivity());
+        tvText.setText("Loading ...");
+        tvText.setTextColor(Color.parseColor("#000000"));
+        tvText.setTextSize(20);
+        tvText.setLayoutParams(llParam);
+
+        ll.addView(progressBar);
+        ll.addView(tvText);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
+        builder.setCancelable(true);
+        builder.setView(ll);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+            layoutParams.copyFrom(dialog.getWindow().getAttributes());
+            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+            layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setAttributes(layoutParams);
+        }
+    }
+
+    /**
+     * Class for handling the fetching of Location stats
+     * asynchronously, off the Main UI thread
+     */
+    public class RefreshLocationStatistics extends AsyncTask<Location, Integer, Boolean>
+    {
+        private boolean isComplete;
+        private Boolean isSuccessful;
+        private Location currentLocation;
+        @Override
+        protected void onPreExecute()
+        {
+            // Show progressBar
+            locationsProgressBar.setVisibility(View.VISIBLE);
+
+            // Set progress variables
+            isComplete = false;
+            isSuccessful = false;
+        }
+
+        @Override
+        protected Boolean doInBackground(Location... location)
+        {
+            for (int i = 0; i < location.length; i++)
+            {
+                currentLocation = location[i];
+                CovidStatService.getLocationStat(currentLocation, new IServiceCallbackGeneric()
+                {
+                    @Override
+                    public <T> void onSuccess(T result)
+                    {
+                        Location updatedLocation = (Location)result;
+
+                        Location found = locations.stream()
+                                .filter(l -> l.getCountry().equals(currentLocation.getCountry())
+                                        && l.getProvince().equals(currentLocation.getProvince())
+                                        && l.getMunicipality().equals(currentLocation.getMunicipality()))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (null != found)
+                        {
+                            // Location is being updated
+                            locations.remove(found);
+                        }
+
+                        // Save Location
+                        locations.add(updatedLocation);
+
+                        // Save to local storage
+                        CovidApplication.setLocations(locations);
+
+                        isSuccessful = true;
+                        isComplete = true;
+                    }
+
+                    @Override
+                    public void onError(Error err)
+                    {
+                        isSuccessful = false;
+                        isComplete = true;
+                    }
+                });
+            }
+
+            while (!isComplete) {}
+
+            return isSuccessful;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result)
+        {
+            // Hide progressBar
+            locationsProgressBar.setVisibility(View.GONE);
+
+            if (result)
+            {
+                if(null != getView())
+                {
+                    // Notify
+                    Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                }
+            }
+            else
+            {
+                if(null != getView())
+                {
+                    // Notify
+                    Snackbar.make(getView(),
+                            MessageFormat.format("Errors occurred while updating {0}", CovidUtils.formatLocation(currentLocation)),
+                            Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                }
+            }
+        }
     }
 }

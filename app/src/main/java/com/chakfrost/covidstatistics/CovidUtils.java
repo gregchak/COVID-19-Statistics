@@ -9,6 +9,9 @@ import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,6 +20,7 @@ import java.util.List;
 
 public class CovidUtils
 {
+
     /**
      * Shows/hides loading indicator
      *
@@ -49,7 +53,8 @@ public class CovidUtils
      * @param loc Location whose name is to be formatted
      * @return String formatted as Municipality, Province, Country
      */
-    public static String formatLocation(Location loc)
+    @NotNull
+    public static String formatLocation(@NotNull Location loc)
     {
         String result = "";
         if (!TextUtils.isEmpty(loc.getMunicipality()))
@@ -65,13 +70,6 @@ public class CovidUtils
             result += ", ";
         result += loc.getCountry();
 
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(loc.getCountry());
-//        if (!TextUtils.isEmpty(loc.getProvince()))
-//            sb.append(", " + loc.getProvince());
-//        if (!TextUtils.isEmpty(loc.getMunicipality()))
-//            sb.append(", " + loc.getMunicipality());
-
         return result;
     }
 
@@ -81,7 +79,7 @@ public class CovidUtils
      * @param stats List<> of CovidStat objects
      * @return boolean true if CovidStat exists for today - 1, false if not
      */
-    public static boolean statExists(List<CovidStats> stats)
+    public static boolean statExists(@NotNull List<CovidStats> stats)
     {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DATE, -1);
@@ -123,7 +121,12 @@ public class CovidUtils
         }
     }
 
-    public static boolean isUS(Location location)
+    /**
+     * Determines if Location is United States
+     * @param location  Location to check
+     * @return          Boolean true if Location is United States, false if not
+     */
+    public static boolean isUS(@NotNull Location location)
     {
         if (location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() == "")
             return true;
@@ -131,7 +134,12 @@ public class CovidUtils
             return false;
     }
 
-    public static boolean isUSState(Location location)
+    /**
+     * Determines if Location is a US State
+     * @param location  Location to check
+     * @return          Boolean true if Location is a US State, false if not
+     */
+    public static boolean isUSState(@NotNull Location location)
     {
         if (location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() != "")
             return true;
@@ -139,7 +147,14 @@ public class CovidUtils
             return false;
     }
 
-    public static CovidStats findCovidStat(List<CovidStats> stats, Calendar dateToCheck)
+    /**
+     * Checks if a CovidStats exists in a List
+     * @param stats         List of CovidStats
+     * @param dateToCheck   Date for which to check if a CovidStat exists
+     * @return              CovidStats if found, null if not found in List
+     */
+    @Nullable
+    public static CovidStats findCovidStat(@NotNull List<CovidStats> stats, @NotNull Calendar dateToCheck)
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -151,7 +166,14 @@ public class CovidUtils
         return stat;
     }
 
-    public static HospitalizationStat findHospitalizationStat(List<HospitalizationStat> stats, int dateAsInt)
+    /**
+     * Checks if a HospitalizationStat exists in a List
+     * @param stats     List of HospitalizationStat
+     * @param dateAsInt Date for which to check if a CovidStat exists in YYYYMMDD format
+     * @return          HospitalizationStat if found, null if not
+     */
+    @Nullable
+    public static HospitalizationStat findHospitalizationStat(@NotNull List<HospitalizationStat> stats, @NotNull int dateAsInt)
     {
         HospitalizationStat stat = stats.stream()
                 .filter(s -> s.getDate() == dateAsInt)
@@ -189,8 +211,26 @@ public class CovidUtils
         return stateAbbreviation;
     }
 
+    /**
+     * Creates a string representation of an error using the error's message and stack trace
+     * @param message       Error message
+     * @param stackTrace    Error stack trace
+     * @return              String representation of message and stack trace
+     */
     public static String formatError(String message, String stackTrace)
     {
         return MessageFormat.format("{0}:\n{1}", message, stackTrace);
+    }
+
+    public static String[] getRandomLocationRetrieveCompletePair()
+    {
+        String[] retVal = new String[2];
+        String[][] values = CovidApplication.getLocationRetrieveComplete();
+        int r = (int) (Math.random() * (values.length/2));
+
+        retVal[0] = values[r][0];
+        retVal[1] = values[r][1];
+
+        return retVal;
     }
 }
