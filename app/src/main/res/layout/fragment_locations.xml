@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".ui.locations.LocationFragment">
 
+    <ProgressBar
+        android:id="@+id/locations_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        style="?android:attr/progressBarStyleHorizontal"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/locations_recycler_view"
         android:layout_width="match_parent"

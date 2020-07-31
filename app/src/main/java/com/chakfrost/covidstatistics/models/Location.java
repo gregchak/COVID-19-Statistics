@@ -4,6 +4,8 @@ import android.text.TextUtils;
 
 //import com.chakfrost.covidnotifier.deserializers.DateHandler;
 //import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 import org.w3c.dom.Text;
@@ -13,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Location implements Comparable<Location>, Serializable
+public class Location implements Comparable<Location>, Serializable, Cloneable
 {
     @SerializedName("country")
     private String country;
@@ -136,6 +138,13 @@ public class Location implements Comparable<Location>, Serializable
         }
         else
             return country.compareTo(o.country);
+    }
+
+    @NonNull
+    @Override
+    protected Object clone() throws CloneNotSupportedException
+    {
+        return super.clone();
     }
 
     /* Getters */

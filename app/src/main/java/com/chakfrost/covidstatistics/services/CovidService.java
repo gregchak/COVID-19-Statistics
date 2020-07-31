@@ -29,6 +29,8 @@ import com.chakfrost.covidstatistics.services.covidTracking.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -177,7 +179,8 @@ public class CovidService
      * @param region    Name of the region/country
      * @param callback  The callback method(s) called after data is received from the service
      */
-    public static void municipalities(final String iso, final String province, final String region, final IServiceCallbackList callback) {
+    public static void municipalities(final String iso, final String province,
+                                      final String region, final IServiceCallbackList callback) {
         String url;
         if (null == province || province.equals(""))
             url = MessageFormat.format("{0}/reports?iso={1}&region_name={2}", COVID_API_URL, iso, region);
@@ -368,8 +371,8 @@ public class CovidService
      * @param dateToCheck   Date for which to get statistics
      * @param callback      The callback method(s) called after data is received from the service
      */
-    public static void report(final Location location, final Calendar dateToCheck,
-                              final IServiceCallbackCovidStats callback)
+    public static void report(@NotNull final Location location, @NotNull final Calendar dateToCheck,
+                              @NotNull final IServiceCallbackCovidStats callback)
     {
         String url;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -386,7 +389,8 @@ public class CovidService
         }
         else if (location.isMunicipality())
         {
-            url = MessageFormat.format("{0}&city_name={1}", url, location.getMunicipality());
+            url = MessageFormat.format("{0}&region_province={1}&city_name={2}", url,
+                    location.getProvince(), location.getMunicipality());
         }
 
 
@@ -706,7 +710,8 @@ public class CovidService
      * @param dateToCheck   Date for which to get stats
      * @param callback      The callback method(s) called after data is received from the service
      */
-    public static void getUSHospitalizations(final Calendar dateToCheck, final IServiceCallbackHospitalizationStat callback)
+    public static void getUSHospitalizations(@NotNull final Calendar dateToCheck,
+                                             @NotNull final IServiceCallbackHospitalizationStat callback)
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 
@@ -826,7 +831,9 @@ public class CovidService
      * @param dateToCheck   Date for which to get stats
      * @param callback      The callback method(s) called after data is received from the service
      */
-    public static void getUSStateHospitalizations(final String abbreviation, final Calendar dateToCheck, final IServiceCallbackHospitalizationStat callback)
+    public static void getUSStateHospitalizations(@NotNull final String abbreviation,
+                                                  @NotNull final Calendar dateToCheck,
+                                                  @NotNull final IServiceCallbackHospitalizationStat callback)
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 
@@ -890,7 +897,8 @@ public class CovidService
      * @param abbreviation  Two character US state abbreviation
      * @param callback  The callback method(s) called after data is received from the service
      */
-    public static void getUSStateHospitalizations(final String abbreviation, final IServiceCallbackList callback)
+    public static void getUSStateHospitalizations(@NotNull final String abbreviation,
+                                                  @NotNull final IServiceCallbackList callback)
     {
         // Create the URI to call
         String url = MessageFormat.format("{0}/states/{1}/daily.json",
@@ -971,128 +979,6 @@ public class CovidService
         // Add request to queue
         CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
     }
-
-    /*public static void updateLocationStats(final Location loc, String usStateAbbreviation, final IServiceCallbackLocation callback)
-    {
-        // Set date to start getting report
-        Calendar startDate = Calendar.getInstance();
-        startDate.add(Calendar.DATE, -1);
-
-        // if US state abbreviation the get hospitalization stats
-        if (TextUtils.isEmpty(usStateAbbreviation))
-        {
-            getUSStateHospitalizations(usStateAbbreviation, startDate, new IServiceCallbackHospitalizationStat()
-            {
-                @Override
-                public void onSuccess(HospitalizationStat statistics)
-                {
-
-                    populateLocationStat(loc, (List<HospitalizationStat>) statistics, startDate, callback);
-                }
-
-                @Override
-                public void onError(VolleyError err)
-                {
-                    if (!TextUtils.isEmpty(err.getMessage()))
-                        VolleyLog.e("CovidService.provinceHospitalization()", err.toString());
-                    else
-                        VolleyLog.e("CovidService.provinceHospitalization()", "Error occurred while executing CovidService.Report()");
-
-                    Log.e("CovidService.updateLocationStats()",
-                            CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
-                    callback.onError(err);
-                }
-            });
-        }
-        else
-        {
-            populateLocationStat(loc, null, startDate, callback);
-        }
-    }
-
-    public static void addLocationStats(final Location loc, String usStateAbbreviation, final IServiceCallbackLocation callback)
-    {
-        // Set date to start getting report
-        Calendar startDate = Calendar.getInstance();
-        startDate.add(Calendar.DATE, -1);
-
-        if (TextUtils.isEmpty(usStateAbbreviation))
-        {
-            getUSStateHospitalizations(usStateAbbreviation, new IServiceCallbackList()
-            {
-                @Override
-                public <T> void onSuccess(List<T> list)
-                {
-                    populateLocationStat(loc, (List<HospitalizationStat>) list, startDate, callback);
-                }
-
-                @Override
-                public void onError(VolleyError err)
-                {
-                    if (!TextUtils.isEmpty(err.getMessage()))
-                        VolleyLog.e("CovidService.provinceHospitalization()", err.toString());
-                    else
-                        VolleyLog.e("CovidService.provinceHospitalization()", "Error occurred while executing CovidService.Report()");
-
-                    callback.onError(err);
-                }
-            });
-        }
-        else
-        {
-            populateLocationStat(loc, null, startDate, callback);
-        }
-    }
-
-    private static void populateLocationStat(final Location loc, final List<HospitalizationStat> hospitalizationStats, Calendar dateToUse, final IServiceCallbackLocation callback)
-    {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-
-        report(loc.getIso(), loc.getProvince(), loc.getRegion(), loc.getMunicipality(), dateToUse, new IServiceCallbackCovidStats()
-        {
-            @Override
-            public void onSuccess(CovidStats stat)
-            {
-                if (null != stat)
-                {
-                    // If stat is null then there is no data for requested Location and Date
-                    if (null != hospitalizationStats && hospitalizationStats.size() > 0)
-                    {
-                        HospitalizationStat hStat = hospitalizationStats.stream()
-                                .filter(s -> String.valueOf(s.getDate()) == dateFormat.format(dateToUse))
-                                .findFirst()
-                                .orElse(null);
-
-                        if (null != hStat)
-                        {
-                            // Set Hospitalization stats
-                            stat.setHospitalizationsTotal(hStat.getHospitalizedTotal());
-                            stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
-                            stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
-                            stat.setICUCurrent(hStat.getIcuCurrent());
-                            stat.setICUTotal(hStat.getIcuTotal());
-                        }
-                    }
-
-                    // Get next stat...
-                    loc.getStatistics().add(stat);
-                    dateToUse.add(Calendar.DATE, -1);
-
-                    populateLocationStat(loc, hospitalizationStats, dateToUse, callback);
-                }
-                else
-                {
-                    callback.onSuccess(loc);
-                }
-            }
-
-            @Override
-            public void onError(VolleyError err)
-            {
-                callback.onError(err);
-            }
-        });
-    }*/
 }
 
 

@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -83,6 +82,8 @@ public class StatisticsFragment extends Fragment
     private static boolean locationRefreshComplete;
     private static boolean locationsUpdated;
     private static boolean manualRefresh;
+    private String retrieveLocationStatsText;
+    private String completeLocationStatsText;
 
     private int locationRefreshCount;
 
@@ -92,7 +93,6 @@ public class StatisticsFragment extends Fragment
         statisticsViewModel = ViewModelProviders.of(requireActivity()).get(StatisticsViewModel.class);
 
         View root = inflater.inflate(R.layout.fragment_statistics, container, false);
-
 
         // Instantiate UI elements
         globalLastUpdate = root.findViewById(R.id.stats_global_last_update);
@@ -132,6 +132,7 @@ public class StatisticsFragment extends Fragment
         FloatingActionButton fab = getActivity().findViewById(R.id.fab);
         fab.show();
 
+        // Default manualRefresh to false
         manualRefresh = false;
 
         // Load data
@@ -230,75 +231,74 @@ public class StatisticsFragment extends Fragment
             progressBar.setVisibility(View.VISIBLE);
 
         CovidService.summary(new IserviceCallbackGlobalStats()
-                             {
-                                 @Override
-                                 public void onSuccess(GlobalStats stats)
-                                 {
-                                     if (null != summary && stats.getLastUpdate().getTime() == summary.getLastUpdate().getTime())
-                                     {
-                                         // Update Last Checked date
-                                         summary.setLastChecked(new Date());
+        {
+             @Override
+             public void onSuccess(GlobalStats stats)
+             {
+                 if (null != summary && stats.getLastUpdate().getTime() == summary.getLastUpdate().getTime())
+                 {
+                     // Update Last Checked date
+                     summary.setLastChecked(new Date());
 
-                                         // Save Global stats
-                                         CovidApplication.setGlobalStats(summary);
+                     // Save Global stats
+                     CovidApplication.setGlobalStats(summary);
 
-                                         // Notify
-                                         Snackbar.make(getView(), "Global stats already up to date", Snackbar.LENGTH_SHORT)
-                                                 .setAction("Action", null).show();
-                                     }
-                                     else
-                                     {
-                                         if (null != summary)
-                                         {
-                                             // Set the previous fatality rate value based on stat date
-                                             // since stats are only updated once a day
-                                             stats.setPreviousFatalityRate(summary.getFatalityRate());
-                                         }
-                                         else
-                                         {
-                                             // No previous information, set to same rate as current
-                                             stats.setPreviousFatalityRate(stats.getFatalityRate());
-                                         }
+                     // Notify
+                     Snackbar.make(getView(), "Global stats already up to date", Snackbar.LENGTH_SHORT)
+                             .setAction("Action", null).show();
+                 }
+                 else
+                 {
+                     if (null != summary)
+                     {
+                         // Set the previous fatality rate value based on stat date
+                         // since stats are only updated once a day
+                         stats.setPreviousFatalityRate(summary.getFatalityRate());
+                     }
+                     else
+                     {
+                         // No previous information, set to same rate as current
+                         stats.setPreviousFatalityRate(stats.getFatalityRate());
+                     }
 
-                                         // Set local variables
-                                         summary = stats;
-                                         summary.setLastChecked(new Date());
+                     // Set local variables
+                     summary = stats;
+                     summary.setLastChecked(new Date());
 
-                                         // Save Global stats
-                                         CovidApplication.setGlobalStats(summary);
+                     // Save Global stats
+                     CovidApplication.setGlobalStats(summary);
 
-                                         // Display
-                                         populateGlobalStats();
+                     // Display
+                     populateGlobalStats();
 
-                                         // Notify
-                                         Snackbar.make(getView(), "Global stats updated", Snackbar.LENGTH_SHORT)
-                                                 .setAction("Action", null).show();
-                                     }
+                     // Notify
+                     Snackbar.make(getView(), "Global stats updated", Snackbar.LENGTH_SHORT)
+                             .setAction("Action", null).show();
+                 }
 
-                                     // Dismiss progress indicator
-                                     //Log.d("refreshGlobals()", "manualRefresh: " + String.valueOf(manualRefresh) + "; locationRefreshComplete: " + String.valueOf(locationRefreshComplete));
-                                     globalRefreshComplete = true;
-                                     clearProgressIndicators();
-                                 }
+                 // Dismiss progress indicator
+                 //Log.d("refreshGlobals()", "manualRefresh: " + String.valueOf(manualRefresh) + "; locationRefreshComplete: " + String.valueOf(locationRefreshComplete));
+                 globalRefreshComplete = true;
+                 clearProgressIndicators();
+             }
 
-                                 @Override
-                                 public void onError(VolleyError error)
-                                 {
-                                     Log.e("LoadCountries.onError()", error.getStackTrace().toString());
-                                     Toast.makeText(getActivity().getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+             @Override
+             public void onError(VolleyError error)
+             {
+                 Log.e("LoadCountries.onError()", error.getStackTrace().toString());
+                 Toast.makeText(getActivity().getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
 
-                                     Bundle bundle = new Bundle();
-                                     bundle.putString(FirebaseAnalytics.Param.METHOD, "retrieveGlobalStatsData.onError");
-                                     bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "0");
-                                     bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Refresh");
-                                     bundle.putString("Global_Stats_Error", error.getStackTrace().toString());
-                                     firebaseAnalytics.logEvent("ERROR", bundle);
+                 Bundle bundle = new Bundle();
+                 bundle.putString(FirebaseAnalytics.Param.METHOD, "retrieveGlobalStatsData.onError");
+                 bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "0");
+                 bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Refresh");
+                 bundle.putString("Global_Stats_Error", error.getStackTrace().toString());
+                 firebaseAnalytics.logEvent("ERROR", bundle);
 
-                                     // Dismiss progress indicator
-                                     clearProgressIndicators();
-                                 }
-                             }
-        );
+                 // Dismiss progress indicator
+                 clearProgressIndicators();
+             }
+        });
     }
 
     private void loadLocations(RecyclerView recyclerView, boolean refreshLocations)
@@ -331,25 +331,6 @@ public class StatisticsFragment extends Fragment
             new RefreshLocationStatistics().execute(false);
             //RefreshLocations(false);
         }
-/*        else
-        {
-            // Version 1.2.0.0 update: add fatality rate
-            Date currentDate = new Date(2020,4,14);
-            long diff;
-            long hours;
-            for (Location loc : locations)
-            {
-                diff = currentDate.getTime() - loc.getLastUpdated().getTime();
-                hours = TimeUnit.MILLISECONDS.toHours(diff);
-
-                long count = loc.getStatistics().stream()
-                        .filter(s -> s.getFatalityRate() > 0 && s.getStatusDate().before(currentDate))
-                        .count();
-
-                if (count == 0)
-                    LoadReportData(loc, startDate);
-            }
-        }*/
     }
 
     private void locationListAdapterClick(Location selectedLocation)
@@ -802,6 +783,7 @@ public class StatisticsFragment extends Fragment
 
         if (null != found)
         {
+            Log.d("removing updated location", CovidUtils.formatLocation(found));
             // Location is being updated
             locations.remove(found);
         }
@@ -834,9 +816,13 @@ public class StatisticsFragment extends Fragment
             firebaseAnalytics.logEvent("ADD_LOCATION", bundle);
 
             // Notify
+            String[] texts = CovidUtils.getRandomLocationRetrieveCompletePair();
+            retrieveLocationStatsText = texts[0];
+            completeLocationStatsText = texts[1];
+
             Snackbar.make(getView(),
-                    MessageFormat.format("Retrieving location statistics for {0}...",
-                            CovidUtils.formatLocation(loc)),
+                    MessageFormat.format("{0}",
+                            retrieveLocationStatsText),
                     Snackbar.LENGTH_SHORT)
                     .setAction("Action", null).show();
 
@@ -956,10 +942,10 @@ public class StatisticsFragment extends Fragment
         @Override
         protected void onPostExecute(String result)
         {
-            if (locationsUpdated)
+            if (locationsUpdated && locationRefreshComplete)
             {
                 // Notify
-                Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
+                Snackbar.make(getView(), "Your statistical awesome-sauce has been updated", Snackbar.LENGTH_SHORT)
                         .setAction("Action", null).show();
             }
 

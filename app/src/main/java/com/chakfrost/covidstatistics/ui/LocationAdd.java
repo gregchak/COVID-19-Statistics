@@ -20,11 +20,9 @@ import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.MainActivity;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.models.Country;
-import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.models.Province;
 import com.chakfrost.covidstatistics.services.CovidService;
-import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
 import com.chakfrost.covidstatistics.services.IServiceCallbackList;
 import com.google.android.material.button.MaterialButton;
 
@@ -96,38 +94,37 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
         if (CovidApplication.getCountries() == null)
         {
             CovidService.countries(new IServiceCallbackList()
-                                   {
-                                       @Override
-                                       public <T> void onSuccess(List<T> list)
-                                       {
-                                           countries = (ArrayList<Country>) list;
-                                           countries.add(new Country("-SELECT-", "-SELECT-"));
-                                           Collections.sort(countries, (s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
+            {
+               @Override
+               public <T> void onSuccess(List<T> list)
+               {
+                   countries = (ArrayList<Country>) list;
+                   countries.add(new Country("-SELECT-", "-SELECT-"));
+                   Collections.sort(countries, (s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
 
-                                           Country us = countries.stream()
-                                                   .filter(c -> c.getName().equals("US"))
-                                                   .findFirst()
-                                                   .orElse(null);
+                   Country us = countries.stream()
+                           .filter(c -> c.getName().equals("US"))
+                           .findFirst()
+                           .orElse(null);
 
-                                           if (null != us)
-                                           {
-                                               //countries.remove(us);
-                                               countries.add(1, us);
-                                           }
+                   if (null != us)
+                   {
+                       //countries.remove(us);
+                       countries.add(1, us);
+                   }
 
-                                           CovidApplication.setCountries(countries);
+                   CovidApplication.setCountries(countries);
 
-                                           PopulateCountries();
-                                       }
+                   PopulateCountries();
+               }
 
-                                       @Override
-                                       public void onError(VolleyError error)
-                                       {
-                                           Log.e("LoadCountries.onError()", error.getStackTrace().toString());
-                                           Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-                                       }
-                                   }
-            );
+               @Override
+               public void onError(VolleyError error)
+               {
+                   Log.e("LoadCountries.onError()", error.getStackTrace().toString());
+                   Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+               }
+            });
         }
         else
         {
@@ -270,12 +267,12 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
     }
 
 
-    private void SetLocation(Location loc)
+/*    private void SetLocation(Location loc)
     {
         if (progressBar.getProgress() < 90)
             progressBar.setProgress(90);
 
-        List<Location> locations = CovidApplication.getLocations();
+        CopyOnWriteArrayList<Location> locations = CovidApplication.getLocations();
 
         Location found = locations.stream()
                 .filter(l -> l.getCountry().equals(loc.getCountry())
@@ -294,7 +291,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
             locations.add(loc);
         }
         CovidApplication.setLocations(locations);
-    }
+    }*/
 
     private void SaveLocation()
     {
@@ -363,7 +360,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
         }
     }
 
-    private void LoadReportData(Location loc, Calendar dateToCheck, final long totalDays)
+/*    private void LoadReportData(Location loc, Calendar dateToCheck, final long totalDays)
     {
         progress.setVisibility(View.VISIBLE);
 
@@ -401,13 +398,13 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                     }
                 }
         );
-    }
+    }*/
 
-    private void updateProgressBar(double total, double remaining)
+/*    private void updateProgressBar(double total, double remaining)
     {
         int percentage = (int) ((remaining / total) *100);
         progressBar.setProgress(percentage, true);
-    }
+    }*/
 
     public void btnAddClick(View view)
     {

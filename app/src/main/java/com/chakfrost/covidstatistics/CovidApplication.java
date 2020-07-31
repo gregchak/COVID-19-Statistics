@@ -9,7 +9,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
@@ -39,6 +38,7 @@ public class CovidApplication extends Application
     private static GlobalStats globalStats;
     private static BooleanPreference receiveNotifications;
     private static String[] usStates;
+    private static String[][] locationRetrieveComplete;
 
     private final static String CHANNEL_ID = "COVID_STATISTICS";
     private final static String UNIQUE_WORK = "STATUS_REFRESH";
@@ -117,7 +117,6 @@ public class CovidApplication extends Application
 
     }
 
-
     public static void sendNotification(String title, String content, Context context)
     {
         // Only send notification if application is in background AND user wants it
@@ -188,6 +187,25 @@ public class CovidApplication extends Application
         return usStates;
     }
 
+    public static String[][] getLocationRetrieveComplete()
+    {
+        if (null == locationRetrieveComplete)
+        {
+            String[] values;
+            String[] temp = CovidApplication.getContext().getResources().getStringArray(R.array.location_retrieve_complete);
+            locationRetrieveComplete = new String[temp.length][2];
+
+            for (int i = 0; i < temp.length; i++)
+            {
+                values = temp[i].split("\\|");
+                locationRetrieveComplete[i][0] = values[0];
+                locationRetrieveComplete[i][1] = values[1];
+            }
+        }
+
+        return locationRetrieveComplete;
+    }
+
     /* Getters */
     public static Context getContext() { return instance.getBaseContext(); }
     public static List<Country> getCountries() { return countries; }
@@ -225,14 +243,12 @@ public class CovidApplication extends Application
     public static void setLocations(List<Location> val)
     {
         locations = val;
-        new WriteLocationsToFileSystem().execute(val);
-        //CovidDataStore.saveLocations(instance.getApplicationContext(), val);
+        CovidDataStore.saveLocations(instance.getApplicationContext(), val);
     }
     public static void setGlobalStats(GlobalStats val)
     {
         globalStats = val;
-        new WriteGlobalStatsToFileSystem().execute(val);
-        //CovidDataStore.saveGlobalStats(instance.getApplicationContext(), val);
+        CovidDataStore.saveGlobalStats(instance.getApplicationContext(), val);
     }
     public static void setReceiveNotifications(boolean val)
     {
@@ -249,38 +265,5 @@ public class CovidApplication extends Application
         unassigned,
         yes,
         no
-    }
-
-    /**
-     * Class for handling the writing of Location stats to the files system
-     * asynchronously, off the Main UI thread
-     */
-    public static class WriteLocationsToFileSystem extends AsyncTask<List<Location>, Integer, String>
-    {
-
-        @Override
-        protected String doInBackground(List<Location>... lists)
-        {
-            List<Location> locations = lists[0];
-            CovidDataStore.saveLocations(instance.getApplicationContext(), locations);
-
-            return null;
-        }
-    }
-
-    /**
-     * Class for handling the writing of Global stats to the files system
-     * asynchronously, off the Main UI thread
-     */
-    public static class WriteGlobalStatsToFileSystem extends AsyncTask<GlobalStats, Integer, String>
-    {
-
-        @Override
-        protected String doInBackground(GlobalStats... globalStats)
-        {
-            CovidDataStore.saveGlobalStats(instance.getApplicationContext(), globalStats[0]);
-
-            return null;
-        }
     }
 }
