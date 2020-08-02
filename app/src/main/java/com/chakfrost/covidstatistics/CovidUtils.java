@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class CovidUtils
 {
@@ -85,7 +86,7 @@ public class CovidUtils
         cal.add(Calendar.DATE, -1);
         Date dte = cal.getTime();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         String dateString = dateFormat.format(dte);
 
         CovidStats found = stats.stream()
@@ -156,7 +157,7 @@ public class CovidUtils
     @Nullable
     public static CovidStats findCovidStat(@NotNull List<CovidStats> stats, @NotNull Calendar dateToCheck)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
         CovidStats stat = stats.stream()
                 .filter(s -> dateFormat.format(s.getStatusDate().getTime()).equals(dateFormat.format(dateToCheck.getTimeInMillis())))

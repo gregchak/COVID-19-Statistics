@@ -38,6 +38,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Singleton;
@@ -253,7 +254,7 @@ public class CovidService
                                final Calendar dateToCheck, final IServiceCallbackCovidStats callback)
     {
         String url;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
         url = MessageFormat.format("{0}/reports?iso={1}",COVID_API_URL, iso);
         if (!TextUtils.isEmpty(region))
@@ -306,7 +307,7 @@ public class CovidService
                                 result.setTotalRecovered(result.getTotalRecovered() + r.recovered);
                                 result.setDiffRecovered(result.getDiffRecovered() + r.recoveredDiff);
 
-                                result.setTotalactive(result.getTotalActive() + r.active);
+                                result.setTotalActive(result.getTotalActive() + r.active);
                                 result.setDiffActive(result.getDiffActive() + r.activeDiff);
 
                                 result.setFatalityRate(r.fatalityRate);
@@ -375,7 +376,7 @@ public class CovidService
                               @NotNull final IServiceCallbackCovidStats callback)
     {
         String url;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
         url = MessageFormat.format("{0}/reports?iso={1}",COVID_API_URL, location.getIso());
 
@@ -439,7 +440,7 @@ public class CovidService
                                 result.setTotalRecovered(result.getTotalRecovered() + r.recovered);
                                 result.setDiffRecovered(result.getDiffRecovered() + r.recoveredDiff);
 
-                                result.setTotalactive(result.getTotalActive() + r.active);
+                                result.setTotalActive(result.getTotalActive() + r.active);
                                 result.setDiffActive(result.getDiffActive() + r.activeDiff);
 
                                 result.setFatalityRate(r.fatalityRate);
@@ -519,7 +520,7 @@ public class CovidService
                     // Check for hospitalisation statistics
                     if (null != hospitalizationStats)
                     {
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
 
                         HospitalizationStat hStat = hospitalizationStats.stream()
                                 .filter(s -> s.getDate() == Integer.parseInt(dateFormat.format(dateToUse.getTime())))
@@ -624,7 +625,7 @@ public class CovidService
      *
      * @param callback  The callback method(s) called after data is received from the service
      */
-    public static void summary(IserviceCallbackGlobalStats callback)
+    public static void summary(IServiceCallbackGlobalStats callback)
     {
         if (COVID_SUMMARY_TO_USE == "COVID_19_API_URL")
         {
@@ -713,7 +714,7 @@ public class CovidService
     public static void getUSHospitalizations(@NotNull final Calendar dateToCheck,
                                              @NotNull final IServiceCallbackHospitalizationStat callback)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
 
         // Create the URI to call
         String url = MessageFormat.format("{0}/us/{1}.json",
@@ -835,7 +836,7 @@ public class CovidService
                                                   @NotNull final Calendar dateToCheck,
                                                   @NotNull final IServiceCallbackHospitalizationStat callback)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
 
         // Create the URI to call
         String url = MessageFormat.format("{0}/states/{1}/{2}.json",

@@ -3,7 +3,6 @@ package com.chakfrost.covidstatistics.workers;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -13,24 +12,20 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.chakfrost.covidstatistics.CovidApplication;
 import com.chakfrost.covidstatistics.CovidUtils;
-import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
-import com.chakfrost.covidstatistics.services.CovidRequestQueue;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
 import com.chakfrost.covidstatistics.services.IServiceCallbackList;
-import com.chakfrost.covidstatistics.services.IserviceCallbackGlobalStats;
-import com.google.android.material.snackbar.Snackbar;
+import com.chakfrost.covidstatistics.services.IServiceCallbackGlobalStats;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -119,7 +114,7 @@ public class RefreshStatsWorker extends Worker
 
     private void RetrieveSummaryData()
     {
-        CovidService.summary(new IserviceCallbackGlobalStats()
+        CovidService.summary(new IServiceCallbackGlobalStats()
          {
              @Override
              public void onSuccess(GlobalStats stats)
@@ -257,7 +252,7 @@ public class RefreshStatsWorker extends Worker
     private Location PopulateHospitalizationStats(Location location, List<HospitalizationStat> stats)
     {
         // Set date to start getting report
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
 
         location.getStatistics().forEach(covidStat ->
         {
@@ -307,7 +302,7 @@ public class RefreshStatsWorker extends Worker
             loc.getStatistics().add(stat);
 
             // Get next date to check
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             dateToCheck.add(Calendar.DATE, -1);
 
             // Check if we already have stats for next dayToCheck
@@ -350,7 +345,7 @@ public class RefreshStatsWorker extends Worker
                     {
                         if (null != stat)
                         {
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
                             loc.getStatistics().add(stat);
                             dateToCheck.add(Calendar.DATE, -1);
 

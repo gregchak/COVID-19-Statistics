@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class CovidStatService
 {
@@ -192,7 +193,7 @@ public class CovidStatService
     private static Location PopulateHospitalizationStats(@NotNull Location location, List<HospitalizationStat> stats)
     {
         // Set date to start getting report
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
 
         location.getStatistics().forEach(covidStat ->
         {
@@ -244,7 +245,7 @@ public class CovidStatService
             loc.getStatistics().add(stat);
 
             // Get next date to check
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             dateToCheck.add(Calendar.DATE, -1);
 
             // Check if we already have stats for next dayToCheck

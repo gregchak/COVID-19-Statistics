@@ -33,7 +33,7 @@ import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
 import com.chakfrost.covidstatistics.services.IServiceCallbackList;
-import com.chakfrost.covidstatistics.services.IserviceCallbackGlobalStats;
+import com.chakfrost.covidstatistics.services.IServiceCallbackGlobalStats;
 import com.chakfrost.covidstatistics.ui.LocationStatsDetail;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -46,6 +46,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -190,7 +191,7 @@ public class StatisticsFragment extends Fragment
 
     private void populateGlobalStats()
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US);
         globalLastUpdate.setText(MessageFormat.format("as of {0}", dateFormat.format(summary.getLastUpdate())));
 
         // Confirmed
@@ -230,7 +231,7 @@ public class StatisticsFragment extends Fragment
         if (!manualRefresh)
             progressBar.setVisibility(View.VISIBLE);
 
-        CovidService.summary(new IserviceCallbackGlobalStats()
+        CovidService.summary(new IServiceCallbackGlobalStats()
         {
              @Override
              public void onSuccess(GlobalStats stats)
@@ -466,7 +467,7 @@ public class StatisticsFragment extends Fragment
             loc.getStatistics().add(stat);
 
             // Get next date to check
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             dateToCheck.add(Calendar.DATE, -1);
 
             // Check if we already have stats for next dayToCheck
@@ -726,7 +727,7 @@ public class StatisticsFragment extends Fragment
     private Location PopulateHospitalizationStats(Location location, List<HospitalizationStat> stats)
     {
         // Set date to start getting report
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
 
         location.getStatistics().forEach(covidStat ->
         {

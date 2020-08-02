@@ -143,19 +143,17 @@ public class LocationFragment extends Fragment
     {
         String locationName = CovidUtils.formatLocation(location);
 
-        // TODO: Refresh data
-        // new RefreshLocationStatistics().execute(false);
         new RefreshLocationStatistics().execute(location);
 
         // Notify user
-        Snackbar.make(view, "Refreshed " + locationName, Snackbar.LENGTH_SHORT)
+        Snackbar.make(view, "Refreshing stats for " + locationName, Snackbar.LENGTH_SHORT)
                 .setAction("Action", null).show();
 
         // Reload list
         loadLocations();
     }
 
-    public void setProgressDialog()
+/*    public void setProgressDialog()
     {
 
         int llPadding = 30;
@@ -200,7 +198,7 @@ public class LocationFragment extends Fragment
             layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setAttributes(layoutParams);
         }
-    }
+    }*/
 
     /**
      * Class for handling the fetching of Location stats

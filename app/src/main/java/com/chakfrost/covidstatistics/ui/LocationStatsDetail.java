@@ -2,7 +2,6 @@ package com.chakfrost.covidstatistics.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,7 +31,7 @@ public class LocationStatsDetail extends AppCompatActivity
     private LocationStats active;
     private LocationStats newActive;
     private LocationStats fatalityRate;
-    private LocationStats hopsitalizations;
+    private LocationStats hospitalizations;
     private LocationStats newHospitalizations;
     private LocationStats icu;
     private List<LocationStats> locationStats;
@@ -92,7 +91,7 @@ public class LocationStatsDetail extends AppCompatActivity
         newActive = new LocationStats("New Active");
         fatalityRate = new LocationStats("Fatality Rate (%)");
 
-        hopsitalizations = new LocationStats("Hospitalizations");
+        hospitalizations = new LocationStats("Hospitalizations");
         newHospitalizations = new LocationStats("New Hospitalizations");
         icu = new LocationStats("ICU");
 
@@ -175,7 +174,7 @@ public class LocationStatsDetail extends AppCompatActivity
                 hospitalizationZeroCount = 0;
 
             if (hospitalizationZeroCount < 3)
-                hopsitalizations.addValue(statTemp.getStatusDate(), statTemp.getHospitalizationsCurrent());
+                hospitalizations.addValue(statTemp.getStatusDate(), statTemp.getHospitalizationsCurrent());
 
 
             // Set ICU
@@ -200,7 +199,7 @@ public class LocationStatsDetail extends AppCompatActivity
         locationStats.add(newDeaths);
 
         // Not all locations have hospitalization and ICU values, verify this has data
-        StatDatePair findHospitalization = hopsitalizations.getValues().stream()
+        StatDatePair findHospitalization = hospitalizations.getValues().stream()
                 .filter(s -> s.getValue() != 0)
                 .findFirst()
                 .orElse(null);
@@ -208,8 +207,8 @@ public class LocationStatsDetail extends AppCompatActivity
         // Only add if hospitalizations have values
         if (null != findHospitalization)
         {
-            Collections.reverse(hopsitalizations.getValues());
-            locationStats.add(hopsitalizations);
+            Collections.reverse(hospitalizations.getValues());
+            locationStats.add(hospitalizations);
         }
 
         // Not all locations have ICU values, verify this has data

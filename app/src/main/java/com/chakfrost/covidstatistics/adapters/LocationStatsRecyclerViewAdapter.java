@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
@@ -298,7 +299,7 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
                 }
             }
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US);
             lastUpdated.setText(MessageFormat.format("as of {0}", dateFormat.format(stat.getLastUpdate())));
 
             buildChart(location.getStatistics());
@@ -308,7 +309,7 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
         {
             Collections.sort(stats);
             CovidStats stat;
-            SimpleDateFormat dayAbv = new SimpleDateFormat("E");
+            SimpleDateFormat dayAbv = new SimpleDateFormat("E", Locale.US);
             String[] axisData = new String[7];
             int[] yAxisData = new int[7];
 

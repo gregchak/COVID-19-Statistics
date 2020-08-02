@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
@@ -176,8 +177,8 @@ public class LocationStatsDetailRecyclerViewAdapter
         private void buildLineChart(List<StatDatePair> stats)
         {
             StatDatePair stat;
-            SimpleDateFormat dayAbv = new SimpleDateFormat("E");
-            SimpleDateFormat dateAbv = new SimpleDateFormat("M/dd");
+            SimpleDateFormat dayAbv = new SimpleDateFormat("E", Locale.US);
+            SimpleDateFormat dateAbv = new SimpleDateFormat("M/dd", Locale.US);
 
             int numberOfDays = CovidApplication.DAYS_TO_DISPLAY_DETAILS;
             double[] yAxisData = new double[stats.size()];
@@ -278,7 +279,7 @@ public class LocationStatsDetailRecyclerViewAdapter
             List<SubcolumnValue> values;
             List axisValues = new ArrayList();
             String[] xAxisDataPoints = new String[stats.size()];
-            SimpleDateFormat dateAbv = new SimpleDateFormat("M/dd");
+            SimpleDateFormat dateAbv = new SimpleDateFormat("M/dd", Locale.US);
 
             // Set number of columns based on stats size
             int numColumns = stats.size();

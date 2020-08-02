@@ -143,7 +143,7 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     public void setDiffConfirmed(int val) { DiffConfirmed = val; }
     public void setDiffDeaths(int val) { DiffDeaths = val; }
     public void setDiffRecovered(int val) { DiffRecovered = val; }
-    public void setTotalactive(int val) { TotalActive = val; }
+    public void setTotalActive(int val) { TotalActive = val; }
     public void setNewActive(int val) { NewActive = val; }
     public void setDiffActive(int val) { DiffActive = val; }
     public void setFatalityRate(double val) { FatalityRate = val; }

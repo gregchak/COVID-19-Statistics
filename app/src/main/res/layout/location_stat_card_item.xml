@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/location_stat_card_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -48,7 +49,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/stats_location_name"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@+id/stats_location_name"/>
+                app:layout_constraintBottom_toBottomOf="@+id/stats_location_name"
+                tools:ignore="SmallSp" />
 
             <lecho.lib.hellocharts.view.LineChartView
                 android:id="@+id/stats_location_chart"
@@ -68,7 +70,8 @@
                 android:textStyle="italic"
                 android:text="@string/lbl_seven_day_trend"
                 app:layout_constraintTop_toBottomOf="@+id/stats_location_grid_layout"
-                app:layout_constraintRight_toRightOf="parent"/>
+                app:layout_constraintRight_toRightOf="parent"
+                tools:ignore="SmallSp" />
 
             <!-- GridLayout for showing numeric stats -->
             <GridLayout

@@ -32,6 +32,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -325,7 +326,7 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
         }
         else
         {
-            SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MM yyyy");
             String inputString1 = "2020-01-01";
             String inputString2 = "27 04 1997";
