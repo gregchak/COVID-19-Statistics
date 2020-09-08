@@ -50,7 +50,7 @@ public class CovidService
     private static int callCounter;
     private static final String COVID_19_API_URL = "https://api.covid19api.com";
     private static final String COVID_API_URL = "https://covid-api.com/api";
-    private static final String COVID_TRACKING_API_URL = "https://covidtracking.com/api/v1";
+    private static final String COVID_TRACKING_API_URL = "https://api.covidtracking.com/api/v1";
     private static final String COVID_SUMMARY_TO_USE = "COVID_API_URL";
     private static final String THE_VIRUS_TRACKER = "https://api.thevirustracker.com";
     //private static final String COVID_19_STATISTICS_URL = "https://covid-19-statistics.p.rapidapi.com";
