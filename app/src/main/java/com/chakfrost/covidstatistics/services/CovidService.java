@@ -53,7 +53,6 @@ public class CovidService
     private static final String COVID_SUMMARY_TO_USE = "COVID_API_URL";
     private static final String THE_VIRUS_TRACKER = "https://api.thevirustracker.com";
     //private static final String COVID_19_STATISTICS_URL = "https://covid-19-statistics.p.rapidapi.com";
-    //private static final String RAPID_KEY_COVID_19_STATISTICS = "2b0656f909mshf12452ea67727c5p1cdac2jsn392ca7d9ed82";
 
     /**
      * Gets countries from service
