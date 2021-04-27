@@ -2,6 +2,13 @@
 
 This is a project for Android written for SDK 24+.  The prupose of this project is to show statistics of COVID-19 cases in specific locations.  Users will be able to select a location and add it to their list of tracked locations.  The main entry shows a summary of global statistics and a list of the user's tracked locations with their individual stats.  
 
+# Motivation
+To create an app to show summary COVID-19 data from various places from all over the world.  There were a bunch of desparate apps out there that did some of the features but not all of them.  This app combines the ability to select locations from all over the world and see their COVID-19 information about new and active cases, positivity and fatality rates and hospitalizations.  It also gives you graphing for a 7 day trend and overall across time. 
+
+# Installation
+This appis not available in any android store so it must be sideloaded.  There is a setting in Android Security settings to allow installation of apps from unknown sources.  This must be enabled to install.  On most Android devices, if you try to install this app it will prompt you about the setting and give you an option to go directly to the setting and change it. Opening the `.apk` file on an Android device will start the installation process.
+
+# Sources
 Locations can be as broad as a country or as specific as a municipality depending on the area's reporting.  This application takes COVID-19 statistics from COVID-19 Statistics API (https://covid-api.com/) which is based on public data by Johns Hopkins CSSE (https://github.com/CSSEGISandData/COVID-19). Hospitalization and ICU stats come from The Covid Tracking Project (https://covidtracking.com/).  
 
 
