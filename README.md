@@ -33,3 +33,7 @@ Added confiramtion when removing a location
 **1.2.3.0** - 2020-05-21  
 Added pull-down refresh to manually fetch global stats and check for location updates
 
+# License
+GPL-3.0 License
+
+https://github.com/gregchak/COVID-19-Statistics/blob/master/LICENSE
