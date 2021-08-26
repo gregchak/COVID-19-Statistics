@@ -87,6 +87,7 @@
                 <TextView
                     android:id="@+id/stats_location_confirmed_label"
                     android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
                     android:text="@string/lbl_confirmed"
                     android:textColor="@color/textPrimary" />
                 <TextView
@@ -187,6 +188,7 @@
                     android:id="@+id/stats_location_fatality_label"
                     android:textColor="@color/textPrimary"
                     android:paddingRight="4dp"
+                    android:paddingLeft="0dp"
                     android:text="@string/lbl_fatality"/>
                 <TextView
                     android:id="@+id/stats_location_fatality_value"

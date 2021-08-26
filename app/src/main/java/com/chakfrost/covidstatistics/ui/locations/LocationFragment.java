@@ -1,17 +1,11 @@
 package com.chakfrost.covidstatistics.ui.locations;
 
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -226,7 +220,7 @@ public class LocationFragment extends Fragment
             for (int i = 0; i < location.length; i++)
             {
                 currentLocation = location[i];
-                CovidStatService.getLocationStat(currentLocation, new IServiceCallbackGeneric()
+                CovidStatService.getAllLocationStats(currentLocation, new IServiceCallbackGeneric()
                 {
                     @Override
                     public <T> void onSuccess(T result)

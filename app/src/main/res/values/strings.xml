@@ -50,6 +50,7 @@
     <string name="lbl_recovered">Recovered:</string>
     <string name="lbl_active">Active:</string>
     <string name="lbl_fatality">Fatality Rate:</string>
+    <string name="lbl_positivity">Positivity Rate:</string>
     <string name="lbl_seven_day_trend">7 day trend of confirmed cases</string>
     <string name="lbl_hospitalizations">Hospitalizations:</string>
     <string name="lbl_icu">ICU:</string>
@@ -119,12 +120,12 @@
     </string-array>
 
     <string-array name="location_retrieve_complete">
-        <item>Beep&amp;#8230 Bop&amp;#8230 Boop&amp;#8230 Computing&amp;#8230|Beep&amp;#8230 Bop&amp;#8230 Boop&amp;#8230 Complete!</item>
-        <item>Generating awesome-sauce&amp;#8230|New awesome-sauce added to list!</item>
-        <item>We\'re workin\'&amp;#8230 We\'re workin\'&amp;#8230 We\'re workin\'|Workin\' complete!</item>
-        <item>Techno-wizardry in process, please stand by&amp;#8230|Wizardry complete!</item>
-        <item>I wonder how long it takes to get stats&amp;#8230|About that long :)</item>
-        <item>Caf-Pow ingestion starting&amp;#8230|Processing complete!</item>
+        <item>Beep Bop Boop Computing|Beep Bop Boop Complete!</item>
+        <item>Generating awesome-sauce|New awesome-sauce added to list!</item>
+        <item>We\'re workin\' We\'re workin\' We\'re workin\'|Workin\' complete!</item>
+        <item>Techno-wizardry in process, please stand by|Wizardry complete!</item>
+        <item>I wonder how long it takes to get stats|About that long :)</item>
+        <item>Caf-Pow ingestion starting|Processing complete!</item>
         <item>Better make some popcorn, this one may take a while|Just kidding, all done!</item>
     </string-array>
 </resources>

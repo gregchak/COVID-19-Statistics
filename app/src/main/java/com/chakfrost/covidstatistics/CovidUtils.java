@@ -98,6 +98,51 @@ public class CovidUtils
     }
 
     /**
+     * Checks if a CovidStat exists in the list for today
+     * @param location Location to check
+     * @return boolean true if CovidStat exists for today - 1, false if not
+     */
+    public static boolean statExists(@NotNull Location location)
+    {
+        Calendar cal = Calendar.getInstance();
+
+        // Only decrease the date by 1 if outside US
+        if (!CovidUtils.isUS(location) && !CovidUtils.isUSState(location) && !CovidUtils.isUSMunicipality(location))
+            cal.add(Calendar.DATE, -1);
+        Date dte = cal.getTime();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        String dateString = dateFormat.format(dte);
+
+        CovidStats found = location.getStatistics().stream()
+                .filter(s -> dateFormat.format(s.getStatusDate()).equals(dateString))
+                .findFirst()
+                .orElse(null);
+
+        return !(null == found);
+    }
+
+    /**
+     * Checks if a CovidStat exists in the list for a given date
+     *
+     * @param stats List<> of CovidStat objects
+     * @param dateToCheck Date to check to see if stats are present
+     * @return boolean true if CovidStat exists for today - 1, false if not
+     */
+    public static boolean statExists(@NotNull List<CovidStats> stats, Date dateToCheck)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        String dateString = dateFormat.format(dateToCheck);
+
+        CovidStats found = stats.stream()
+                .filter(s -> dateFormat.format(s.getStatusDate()).equals(dateString))
+                .findFirst()
+                .orElse(null);
+
+        return !(null == found);
+    }
+
+    /**
      * Determines the arrow that should be displayed by comparing current and previous values.
      * The parameter upIsGood determines whether increase or decrease is good or bad.
      *
@@ -129,10 +174,7 @@ public class CovidUtils
      */
     public static boolean isUS(@NotNull Location location)
     {
-        if (location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() == "")
-            return true;
-        else
-            return false;
+        return location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() == "";
     }
 
     /**
@@ -142,10 +184,18 @@ public class CovidUtils
      */
     public static boolean isUSState(@NotNull Location location)
     {
-        if (location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() != "")
-            return true;
-        else
-            return false;
+        return location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() != "";
+    }
+
+    /**
+     * Determines if Location is a US Municipality
+     * i.e. metro area or county
+     * @param location  Location to check
+     * @return          Boolean true if Location is US Municipality, false if not
+     */
+    public static boolean isUSMunicipality(@NotNull Location location)
+    {
+        return location.getIso().equals("USA") && location.getMunicipality() != "" && location.getProvince() != "";
     }
 
     /**

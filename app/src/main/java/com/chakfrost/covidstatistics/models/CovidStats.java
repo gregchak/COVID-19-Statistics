@@ -70,6 +70,12 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     private int ICUTotal;
     @Expose(serialize = false)
     private int ICUCurrent;
+    @Expose(serialize = false)
+    private double PositivityRate;
+    @Expose(serialize = false)
+    private double CaseDensity;
+    @Expose(serialize = false)
+    private int CdcTransimssionLevel;
 
     public CovidStats()
     {
@@ -132,6 +138,12 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
 
     public Date getStatusDate() { return StatusDate; }
     public Date getLastUpdate() { return LastUpdate; }
+    public double getPositivityRate()
+    {
+        return PositivityRate;
+    }
+    public double getCaseDensity() { return CaseDensity; }
+    public int getCdcTransimssionLevel() { return CdcTransimssionLevel; }
 
     /* Setters */
     public void settNewConfirmed(int val) { NewConfirmed = val; }
@@ -185,20 +197,22 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     {
         return ICUTotal;
     }
-
     public void setICUTotal(int ICUTotal)
     {
         this.ICUTotal = ICUTotal;
     }
-
     public int getICUCurrent()
     {
         return ICUCurrent;
     }
-
     public void setICUCurrent(int ICUCurrent)
     {
         this.ICUCurrent = ICUCurrent;
     }
-
+    public void setPositivityRate(double positivityRate)
+    {
+        PositivityRate = positivityRate;
+    }
+    public void setCaseDensity(double caseDensity) { CaseDensity = caseDensity; }
+    public void setCdcTransimssionLevel(int cdcTransimssionLevel) { CdcTransimssionLevel = cdcTransimssionLevel;  }
 }

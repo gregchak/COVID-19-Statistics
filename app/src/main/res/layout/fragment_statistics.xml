@@ -54,6 +54,7 @@
                 android:id="@+id/stats_global_confirmed_label"
                 android:layout_marginStart="8dp"
                 android:paddingEnd="12dp"
+                android:paddingStart="0dp"
                 android:text="@string/lbl_confirmed"
                 android:textColor="@color/white" />
             <TextView
@@ -78,6 +79,7 @@
                 android:textColor="@color/white"
                 android:layout_marginStart="8dp"
                 android:paddingEnd="12dp"
+                android:paddingStart="0dp"
                 android:text="@string/lbl_deaths"/>
             <TextView
                 android:id="@+id/stats_global_deaths_value"
@@ -104,6 +106,7 @@
                 android:textColor="@color/white"
                 android:layout_marginStart="8dp"
                 android:paddingEnd="12dp"
+                android:paddingStart="0dp"
                 android:text="@string/lbl_recovered"/>
 
             <TextView
@@ -130,6 +133,7 @@
                 android:textColor="@color/white"
                 android:layout_marginStart="8dp"
                 android:paddingEnd="12dp"
+                android:paddingStart="0dp"
                 android:text="@string/lbl_active"/>
 
             <TextView
@@ -156,6 +160,7 @@
             android:textColor="@color/white"
             android:layout_marginStart="8dp"
             android:paddingEnd="12dp"
+            android:paddingStart="0dp"
             android:text="@string/lbl_fatality"/>
 
         <TextView

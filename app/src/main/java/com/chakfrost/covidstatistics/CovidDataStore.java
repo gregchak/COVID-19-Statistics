@@ -49,7 +49,11 @@ public class CovidDataStore
 
         Gson gson = new Gson();
         String json = gson.toJson(locations);
-        Log.d("CovidDataStore.SaveLocations()", "json = " + json);
+        locations.forEach(l -> {
+            String tempJson = gson.toJson(l);
+            Log.d("CovidDataStore.SaveLocations()", "json = " + tempJson);
+        });
+        //Log.d("CovidDataStore.SaveLocations()", "json = " + json);
 
         // Write contents
         WriteToFileSystemParams param = new WriteToFileSystemParams(json, StatType.Locations);
@@ -81,6 +85,11 @@ public class CovidDataStore
                 Gson gson = new Gson();
                 Type type = new TypeToken<CopyOnWriteArrayList<Location>>(){}.getType();
                 locations = gson.fromJson(fileContents, type);
+
+                locations.forEach(l -> {
+                    String tempJson = gson.toJson(l);
+                    Log.d("CovidDataStore.SaveLocations()", "json = " + tempJson);
+                });
             }
 
 /*            ObjectMapper mapper = new ObjectMapper();

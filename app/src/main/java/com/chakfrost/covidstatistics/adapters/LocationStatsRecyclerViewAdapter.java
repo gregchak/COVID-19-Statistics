@@ -17,7 +17,10 @@ import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.Location;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -26,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
@@ -140,6 +145,7 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
         private TextView active;
         private TextView activeDiff;
         private TextView lastUpdated;
+        private TextView fatalityLabel;
         private TextView fatality;
         private TextView fatalityDiff;
 
@@ -167,6 +173,7 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             active = itemView.findViewById(R.id.stats_location_active_value);
             activeDiff = itemView.findViewById(R.id.stats_location_active_diff);
             activeImage = itemView.findViewById(R.id.stats_location_active_image);
+            fatalityLabel = itemView.findViewById(R.id.stats_location_fatality_label);
             fatality = itemView.findViewById(R.id.stats_location_fatality_value);
             fatalityDiff = itemView.findViewById(R.id.stats_location_fatality_diff);
             fatalityImage = itemView.findViewById(R.id.stats_location_fatality_image);
@@ -201,7 +208,10 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
          */
         public void bind(Location location)
         {
-            List<CovidStats> stats = location.getStatistics();
+            List<CovidStats> stats = location.getStatistics().stream()
+                    .filter(s -> s.getTotalConfirmed() > 0)
+                    .collect(Collectors.toList());
+
             Collections.sort(stats, (s1, s2) -> s2.getStatusDate().compareTo(s1.getStatusDate()));
             CovidStats stat = stats.get(0);
             CovidStats previousStat = null;
@@ -212,6 +222,15 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
 
             if (stats.size() > 0)
                 previousStat = stats.get(1);
+
+            // For debugging
+            Gson gson = new Gson();
+            Type type = new TypeToken<CopyOnWriteArrayList<Location>>(){}.getType();
+            //String tempJson = gson.toJson(location).toString();
+
+            Log.d("LocationViewHolder.bind()::location", gson.toJson(location));
+            Log.d("LocationViewHolder.bind()::stat", gson.toJson(stat));
+            Log.d("LocationViewHolder.bind()::previous", gson.toJson(previousStat));
 
             locationName.setText(CovidUtils.formatLocation(location));
 
@@ -273,30 +292,38 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
                 activeImage.setImageResource(CovidUtils.determineArrow(stat.getTotalActive(), previousStat.getTotalActive(), false));
             }
 
-            // Fatality
-            if (stat.getFatalityRate() == 0)
+            // Fatality/Positivity rate
+            if (stat.getPositivityRate() == 0)
             {
-                fatalityRateCalculation = (double)stat.getTotalDeaths() / (double)stat.getTotalConfirmed();
-                previousFatalityRateCalculation = (double)previousStat.getTotalDeaths() / (double)previousStat.getTotalConfirmed();
-                fatalityDifference = fatalityRateCalculation - previousFatalityRateCalculation;
+                fatalityLabel.setText(R.string.lbl_fatality);
+                if (stat.getFatalityRate() == 0)
+                {
+                    fatalityRateCalculation = (double)stat.getTotalDeaths() / (double)stat.getTotalConfirmed();
+                    previousFatalityRateCalculation = (double)previousStat.getTotalDeaths() / (double)previousStat.getTotalConfirmed();
+                    fatalityDifference = fatalityRateCalculation - previousFatalityRateCalculation;
 
-                fatality.setText(MessageFormat.format("{0}%", df2.format(fatalityRateCalculation * 100)));
-                fatalityDiff.setText(MessageFormat.format("{0}%", df2.format(Math.abs(fatalityDifference * 100))));
-                fatalityImage.setImageResource(CovidUtils.determineArrow(fatalityRateCalculation, previousFatalityRateCalculation, false));
-
-                //fatality.setText("N/R");
-                //fatalityDiff.setText("N/R");
-                //fatalityImage.setImageResource(R.drawable.ic_remove_black_24dp);
+                    fatality.setText(MessageFormat.format("{0}%", df2.format(fatalityRateCalculation * 100)));
+                    fatalityDiff.setText(MessageFormat.format("{0}%", df2.format(Math.abs(fatalityDifference * 100))));
+                    fatalityImage.setImageResource(CovidUtils.determineArrow(fatalityRateCalculation, previousFatalityRateCalculation, false));
+                }
+                else
+                {
+                    fatality.setText(MessageFormat.format("{0}%", df2.format(stat.getFatalityRate() * 100)));
+                    if (null != previousStat)
+                    {
+                        fatalityDifference = stat.getFatalityRate() - previousStat.getFatalityRate();
+                        fatalityDiff.setText(MessageFormat.format("{0}%", df2.format(Math.abs(fatalityDifference * 100))));
+                        fatalityImage.setImageResource(CovidUtils.determineArrow(stat.getFatalityRate(), previousStat.getFatalityRate(), false));
+                    }
+                }
             }
             else
             {
-                fatality.setText(MessageFormat.format("{0}%", df2.format(stat.getFatalityRate() * 100)));
-                if (null != previousStat)
-                {
-                    fatalityDifference = stat.getFatalityRate() - previousStat.getFatalityRate();
-                    fatalityDiff.setText(MessageFormat.format("{0}%", df2.format(Math.abs(fatalityDifference * 100))));
-                    fatalityImage.setImageResource(CovidUtils.determineArrow(stat.getFatalityRate(), previousStat.getFatalityRate(), false));
-                }
+                fatalityDifference = stat.getPositivityRate() - previousStat.getPositivityRate();
+                fatalityLabel.setText(R.string.lbl_positivity);
+                fatality.setText(MessageFormat.format("{0}%", df2.format(stat.getPositivityRate())));
+                fatalityDiff.setText(MessageFormat.format("{0}%", df2.format(Math.abs(fatalityDifference))));
+                fatalityImage.setImageResource(CovidUtils.determineArrow(stat.getPositivityRate(), previousStat.getPositivityRate(), false));
             }
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US);

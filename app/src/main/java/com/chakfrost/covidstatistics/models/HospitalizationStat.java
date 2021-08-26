@@ -10,6 +10,7 @@ public class HospitalizationStat
     private int icuCurrent;
     private int ventilatorTotal;
     private int ventilatorCurrent;
+    private double positivityRate;
 
     /* Getters and Setters */
     public int getDate() { return date; }
@@ -76,5 +77,15 @@ public class HospitalizationStat
     public void setVentilatorCurrent(int ventilatorCurrent)
     {
         this.ventilatorCurrent = ventilatorCurrent;
+    }
+
+    public double getPositivityRate()
+    {
+        return positivityRate;
+    }
+
+    public void setPositivityRate(double positivityRate)
+    {
+        this.positivityRate = positivityRate;
     }
 }

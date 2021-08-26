@@ -15,6 +15,7 @@ import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
+import com.chakfrost.covidstatistics.models.Municipality;
 import com.chakfrost.covidstatistics.models.Province;
 import com.chakfrost.covidstatistics.services.covid19Statistics.*;
 import com.chakfrost.covidstatistics.services.covid19Statistics.Provinces;
@@ -195,6 +196,7 @@ public class CovidService
                 {
                     // Set local list
                     List<String> result = new ArrayList<>();
+                    List<Municipality> municipalities = new ArrayList<>();
                     try
                     {
                         Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
@@ -207,7 +209,10 @@ public class CovidService
                         }
 
                         for(City m: report.Data.get(0).region.Cities)
+                        {
+                            municipalities.add(new Municipality(m.Name, m.Fips));
                             result.add(m.Name);
+                        }
 
                     }
                     catch (Exception e)
@@ -216,7 +221,7 @@ public class CovidService
                         Log.e("CovidSvc.Municipalities", CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
                     }
 
-                    callback.onSuccess(result);
+                    callback.onSuccess(municipalities);
                 },
                 error ->
                 {
@@ -518,91 +523,95 @@ public class CovidService
                 if (null != stat)
                 {
                     // Check for hospitalisation statistics
-                    if (null != hospitalizationStats)
-                    {
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
-
-                        HospitalizationStat hStat = hospitalizationStats.stream()
-                                .filter(s -> s.getDate() == Integer.parseInt(dateFormat.format(dateToUse.getTime())))
-                                .findFirst()
-                                .orElse(null);
-
-                        if (null != hStat)
-                        {
-                            // Set Hospitalization stats
-                            stat.setHospitalizationsTotal( hStat.getHospitalizedTotal());
-                            stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
-                            stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
-                            stat.setICUCurrent(hStat.getIcuCurrent());
-                            stat.setICUTotal(hStat.getIcuTotal());
-                        }
-
-                        callback.onSuccess(stat);
-                    }
-                    else if (!TextUtils.isEmpty(location.getUsStateAbbreviation()))
-                    {
-                        // This is a US State and HospitalizationStats were not passed
-                        getUSStateHospitalizations(location.getUsStateAbbreviation(), dateToUse, new IServiceCallbackHospitalizationStat()
-                        {
-                            @Override
-                            public void onSuccess(HospitalizationStat hStat)
-                            {
-                                if (null != hStat)
-                                {
-                                    // Set Hospitalization stats
-                                    stat.setHospitalizationsTotal( hStat.getHospitalizedTotal());
-                                    stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
-                                    stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
-                                    stat.setICUCurrent(hStat.getIcuCurrent());
-                                    stat.setICUTotal(hStat.getIcuTotal());
-                                }
-
-                                callback.onSuccess(stat);
-                            }
-
-                            @Override
-                            public void onError(VolleyError err)
-                            {
-                                Log.e("CovidService.getCovidStat().getUSStateHospitalization()", err.toString());
-                                Log.e("CovidService.getCovidStat()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
-                                callback.onSuccess(stat);
-                            }
-                        });
-                    }
-                    else if (CovidUtils.isUS(location))
-                    {
-                        // This is US and hospitalization Stats were not passed
-                        getUSHospitalizations(dateToUse, new IServiceCallbackHospitalizationStat()
-                        {
-                            @Override
-                            public void onSuccess(HospitalizationStat hStat)
-                            {
-                                if (null != hStat)
-                                {
-                                    // Set Hospitalization stats
-                                    stat.setHospitalizationsTotal( hStat.getHospitalizedTotal());
-                                    stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
-                                    stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
-                                    stat.setICUCurrent(hStat.getIcuCurrent());
-                                    stat.setICUTotal(hStat.getIcuTotal());
-                                }
-
-                                callback.onSuccess(stat);
-                            }
-
-                            @Override
-                            public void onError(VolleyError err)
-                            {
-                                Log.e("CovidService.getCovidStat().getUSHospitalization()", err.toString());
-                                Log.e("CovidService.getCovidStat()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
-                                callback.onSuccess(stat);
-                            }
-                        });
-                    }
-                    else
-                    {
-                        callback.onSuccess(stat);
-                    }
+//                    if (null != hospitalizationStats)
+//                    {
+//                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
+//
+//                        HospitalizationStat hStat = hospitalizationStats.stream()
+//                                .filter(s -> s.getDate() == Integer.parseInt(dateFormat.format(dateToUse.getTime())))
+//                                .findFirst()
+//                                .orElse(null);
+//
+//                        if (null != hStat)
+//                        {
+//                            // Set Hospitalization stats
+//                            stat.setHospitalizationsTotal( hStat.getHospitalizedTotal());
+//                            stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+//                            stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+//                            stat.setICUCurrent(hStat.getIcuCurrent());
+//                            stat.setICUTotal(hStat.getIcuTotal());
+//                            stat.setPositivityRate(hStat.getPositivityRate());
+//                        }
+//
+//                        callback.onSuccess(stat);
+//                    }
+//                    else if (!TextUtils.isEmpty(location.getUsStateAbbreviation()))
+//                    {
+//                        // This is a US State and HospitalizationStats were not passed
+//                        getUSStateHospitalizations(location.getUsStateAbbreviation(), dateToUse, new IServiceCallbackHospitalizationStat()
+//                        {
+//                            @Override
+//                            public void onSuccess(HospitalizationStat hStat)
+//                            {
+//                                if (null != hStat)
+//                                {
+//                                    // Set Hospitalization stats
+//                                    stat.setHospitalizationsTotal( hStat.getHospitalizedTotal());
+//                                    stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+//                                    stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+//                                    stat.setICUCurrent(hStat.getIcuCurrent());
+//                                    stat.setICUTotal(hStat.getIcuTotal());
+//                                    stat.setPositivityRate(hStat.getPositivityRate());
+//                                }
+//
+//                                callback.onSuccess(stat);
+//                            }
+//
+//                            @Override
+//                            public void onError(VolleyError err)
+//                            {
+//                                Log.e("CovidService.getCovidStat().getUSStateHospitalization()", err.toString());
+//                                Log.e("CovidService.getCovidStat()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+//                                callback.onSuccess(stat);
+//                            }
+//                        });
+//                    }
+//                    else if (CovidUtils.isUS(location))
+//                    {
+//                        // This is US and hospitalization Stats were not passed
+//                        getUSHospitalizations(dateToUse, new IServiceCallbackHospitalizationStat()
+//                        {
+//                            @Override
+//                            public void onSuccess(HospitalizationStat hStat)
+//                            {
+//                                if (null != hStat)
+//                                {
+//                                    // Set Hospitalization stats
+//                                    stat.setHospitalizationsTotal( hStat.getHospitalizedTotal());
+//                                    stat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+//                                    stat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+//                                    stat.setICUCurrent(hStat.getIcuCurrent());
+//                                    stat.setICUTotal(hStat.getIcuTotal());
+//                                    stat.setPositivityRate(hStat.getPositivityRate());
+//                                }
+//
+//                                callback.onSuccess(stat);
+//                            }
+//
+//                            @Override
+//                            public void onError(VolleyError err)
+//                            {
+//                                Log.e("CovidService.getCovidStat().getUSHospitalization()", err.toString());
+//                                Log.e("CovidService.getCovidStat()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+//                                callback.onSuccess(stat);
+//                            }
+//                        });
+//                    }
+//                    else
+//                    {
+//
+//                    }
+                    callback.onSuccess(stat);
                 }
                 else
                 {
@@ -739,6 +748,9 @@ public class CovidService
                     result.setHospitalizedChange(null == stat.hospitalizedIncrease ? 0 : stat.hospitalizedIncrease);
                     result.setIcuTotal(null == stat.inIcuCumulative ? 0 : stat.inIcuCumulative);
                     result.setIcuCurrent(null == stat.inIcuCurrently ? 0 : stat.inIcuCurrently);
+                    result.setPositivityRate(null != stat.positive && null != stat.totalTestResults
+                            ? (((double)stat.positive / (double)stat.totalTestResults) * 100)
+                            : -1);
 
                     callback.onSuccess(result);
                 },
@@ -798,6 +810,9 @@ public class CovidService
                             tempStat.setHospitalizedChange(null == stat.hospitalizedIncrease ? 0 : stat.hospitalizedIncrease);
                             tempStat.setIcuTotal(null == stat.inIcuCumulative ? 0 : stat.inIcuCumulative);
                             tempStat.setIcuCurrent(null == stat.inIcuCurrently ? 0 : stat.inIcuCurrently);
+                            tempStat.setPositivityRate(null != stat.positive && null != stat.totalTestResults
+                                    ? ((double)(stat.positive / stat.totalTestResults) * 100)
+                                    : -1);
 
                             // Add stat to result List
                             result.add(tempStat);
@@ -865,6 +880,9 @@ public class CovidService
                         result.setHospitalizedChange(null == stat.hospitalizedIncrease ? 0 : stat.hospitalizedIncrease);
                         result.setIcuTotal(null == stat.inIcuCumulative ? 0 : stat.inIcuCumulative);
                         result.setIcuCurrent(null == stat.inIcuCurrently ? 0 : stat.inIcuCurrently);
+                        result.setPositivityRate(null != stat.positiveCasesViral && null != stat.totalTestResults
+                                ? (((double)stat.positiveCasesViral / (double)stat.totalTestResults) * 100)
+                                : -1);
                     }
                     catch (Exception ex)
                     {
@@ -937,6 +955,9 @@ public class CovidService
                             tempStat.setHospitalizedChange(null == stat.hospitalizedIncrease ? 0 : stat.hospitalizedIncrease);
                             tempStat.setIcuTotal(null == stat.inIcuCumulative ? 0 : stat.inIcuCumulative);
                             tempStat.setIcuCurrent(null == stat.inIcuCurrently ? 0 : stat.inIcuCurrently);
+                            tempStat.setPositivityRate(null != stat.positiveCasesViral && null != stat.totalTestResults
+                                    ? (((double)stat.positiveCasesViral / (double)stat.totalTestResults) * 100)
+                                    : -1);
 
                             // Add stat to result List
                             result.add(tempStat);

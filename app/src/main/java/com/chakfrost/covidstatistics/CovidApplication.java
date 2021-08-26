@@ -234,7 +234,7 @@ public class CovidApplication extends Application
             else
                 receiveNotifications = BooleanPreference.no;
         }
-        return receiveNotifications == BooleanPreference.no ? false : true;
+        return receiveNotifications != BooleanPreference.no;
     }
 
     /* Setters */

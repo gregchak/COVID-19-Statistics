@@ -15,6 +15,7 @@ import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.models.LocationStats;
 import com.chakfrost.covidstatistics.models.StatDatePair;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,7 @@ public class LocationStatsDetail extends AppCompatActivity
     private LocationStats hospitalizations;
     private LocationStats newHospitalizations;
     private LocationStats icu;
+    private LocationStats positivityRate;
     private List<LocationStats> locationStats;
 
     private RecyclerView locationStatDetailView;
@@ -80,6 +82,7 @@ public class LocationStatsDetail extends AppCompatActivity
         int fatalityZeroCount = 0;
         int hospitalizationZeroCount = 0;
         int icuZeroCount = 0;
+        int positivityZeroCount = 0;
 
         confirmed = new LocationStats("Confirmed");
         newConfirmed = new LocationStats("New Confirmed");
@@ -90,6 +93,7 @@ public class LocationStatsDetail extends AppCompatActivity
         active = new LocationStats("Active");
         newActive = new LocationStats("New Active");
         fatalityRate = new LocationStats("Fatality Rate (%)");
+        positivityRate = new LocationStats("Positivity Rate (%)");
 
         hospitalizations = new LocationStats("Hospitalizations");
         newHospitalizations = new LocationStats("New Hospitalizations");
@@ -185,6 +189,15 @@ public class LocationStatsDetail extends AppCompatActivity
 
             if (icuZeroCount < 3)
                 icu.addValue(statTemp.getStatusDate(), statTemp.getICUCurrent());
+
+            // Set positivity rates
+            if (positivityZeroCount < 3)
+                positivityRate.addValue(statTemp.getStatusDate(), statTemp.getPositivityRate());
+
+            if (statTemp.getPositivityRate() == 0)
+                positivityZeroCount++;
+            else if (statTemp.getPositivityRate() != 0 && positivityZeroCount < 4)
+                positivityZeroCount = 0;
         }
 
         // Populate LocationStats List<>
@@ -251,6 +264,19 @@ public class LocationStatsDetail extends AppCompatActivity
             locationStats.add(active);
             Collections.reverse(newActive.getValues());
             locationStats.add(newActive);
+        }
+
+        // Not all locations have positivity rate values, verify this has data
+        StatDatePair findPositivity = positivityRate.getValues().stream()
+                .filter(s -> s.getValue() != 0)
+                .findFirst()
+                .orElse(null);
+
+        // Only add if fatality rate hs values
+        if (null != findPositivity)
+        {
+            Collections.reverse(positivityRate.getValues());
+            locationStats.add(positivityRate);
         }
 
         // Not all locations have fatality rate values, verify this has data

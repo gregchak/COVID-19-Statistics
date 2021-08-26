@@ -13,7 +13,7 @@ public class City
     public Date StatusDate;
 
     @SerializedName("fips")
-    public int Fips;
+    public String Fips;
 
     @SerializedName("confirmed")
     public int Confirmed;
