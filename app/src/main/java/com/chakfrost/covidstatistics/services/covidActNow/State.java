@@ -1,10 +1,8 @@
 package com.chakfrost.covidstatistics.services.covidActNow;
 
-import com.chakfrost.covidstatistics.services.covid19Statistics.ReportStatistics;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
-import java.util.List;
 
 public class State
 {

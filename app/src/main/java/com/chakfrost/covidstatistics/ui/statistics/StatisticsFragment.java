@@ -160,8 +160,8 @@ public class StatisticsFragment extends Fragment
         manualRefresh = true;
         progressBar.setVisibility(View.VISIBLE);
 
-        new RefreshGlobalStatistics().execute(true);
-        new RefreshLocationStatistics().execute(false);
+        new RefreshGlobalStatistics().execute(manualRefresh);
+        new RefreshLocationStatistics().execute(manualRefresh);
     }
 
     private void loadGlobals()
@@ -251,10 +251,6 @@ public class StatisticsFragment extends Fragment
 
                      // Save Global stats
                      CovidApplication.setGlobalStats(summary);
-
-                     // Notify
-                     Snackbar.make(getView(), "Global stats already up to date", Snackbar.LENGTH_SHORT)
-                             .setAction("Action", null).show();
                  }
                  else
                  {
@@ -402,7 +398,7 @@ public class StatisticsFragment extends Fragment
             }
 
             // If 6+ hours stale, check for new stats
-            if (hours >= 6 || true)                       // <- TODO: change to 6
+            if (hours >= 6 || manualRefresh)                       // <- TODO: change to 6
             {
                 // Check if Location's current date state is present
                 if (!CovidUtils.statExists(location))     // <- TODO: change to !(not)
@@ -444,8 +440,9 @@ public class StatisticsFragment extends Fragment
                 public <T> void onSuccess(T result)
                 {
                     //locationRefreshCount--;
+                    List<Location> updatedLocations = (List<Location>)result;
 
-                    for (Location l: (List<Location>)result)
+                    for (Location l: updatedLocations)
                     {
                         SetLocation(l);
                     }
@@ -460,7 +457,7 @@ public class StatisticsFragment extends Fragment
                         clearProgressIndicators();
 
                         // Save updated locations
-                        CovidApplication.setLocations(locations);
+                        CovidApplication.setLocations(updatedLocations);
                     }
 
                     // Notify
@@ -486,7 +483,7 @@ public class StatisticsFragment extends Fragment
 //        }
     }
 
-    private void ProcessCovidStat(Location loc, CovidStats stat, Calendar dateToCheck,
+/*    private void ProcessCovidStat(Location loc, CovidStats stat, Calendar dateToCheck,
                                   List<HospitalizationStat> hospitalizationStats,
                                   boolean manualRefresh)
     {
@@ -552,7 +549,7 @@ public class StatisticsFragment extends Fragment
             Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
                     .setAction("Action", null).show();
         }
-    }
+    }*/
 
     private void GetStatsForLocation(Location location, Calendar dateToCheck, List<HospitalizationStat> hospitalizationStats, boolean manualRefresh)
     {
@@ -625,17 +622,6 @@ public class StatisticsFragment extends Fragment
         // Save Location
         Log.d("adding updated location", "");
         locations.add(loc);
-
-        // Wait until all updates are done before saving
-        if (locationRefreshCount == 0)
-        {
-            Log.d("svaing to storage", "");
-            // Save to local storage
-            CovidApplication.setLocations(locations);
-
-            Log.d("clearign progress", "");
-            clearProgressIndicators();
-        }
     }
 
     private void parentOnRefresh(int resultCode, Intent data)
@@ -690,6 +676,7 @@ public class StatisticsFragment extends Fragment
                 {
                     Log.d("StatisticsFragment.parentOnRefresh()", MessageFormat.format("Location callback for: {0}", CovidUtils.formatLocation(loc)));
                     Location populatedLocation = (Location)result;
+                    populatedLocation.setLastUpdated(new Date());
                     locationRefreshCount--;
 
                     // Stat for next day found, stop
@@ -725,10 +712,15 @@ public class StatisticsFragment extends Fragment
     private void clearProgressIndicators()
     {
         // Dismiss progress indicator
-        if (manualRefresh && globalRefreshComplete)
-            swipeContainer.setRefreshing(false);
-        else if (!manualRefresh)
-            progressBar.setVisibility(View.GONE);
+        swipeContainer.setRefreshing(false);
+        manualRefresh = false;
+        progressBar.setVisibility(View.GONE);
+
+
+//        if (manualRefresh && globalRefreshComplete)
+//            swipeContainer.setRefreshing(false);
+//        else if (!manualRefresh)
+//            progressBar.setVisibility(View.GONE);
     }
 
 
@@ -763,6 +755,7 @@ public class StatisticsFragment extends Fragment
         @Override
         protected void onPostExecute(String result)
         {
+            locationRefreshComplete = true;
             loadLocations(locationsView, false);
             if (locationsUpdated && locationRefreshComplete)
             {
@@ -771,12 +764,11 @@ public class StatisticsFragment extends Fragment
                         .setAction("Action", null).show();
             }
 
+
             // Dismiss progress indicator
             if (globalRefreshComplete)
             {
-                swipeContainer.setRefreshing(false);
-                manualRefresh = false;
-                progressBar.setVisibility(View.GONE);
+                clearProgressIndicators();
             }
         }
     }
@@ -806,11 +798,10 @@ public class StatisticsFragment extends Fragment
         @Override
         protected void onPostExecute(String result)
         {
+            globalRefreshComplete = true;
             if (locationRefreshComplete)
             {
-                swipeContainer.setRefreshing(false);
-                manualRefresh = false;
-                progressBar.setVisibility(View.GONE);
+                clearProgressIndicators();
             }
         }
     }

@@ -27,7 +27,17 @@ import java.util.stream.Collectors;
 public class CovidStatService
 {
     static int processCounter = 0;
-    static final CovidActNowService covidActNowServiceLocal = new CovidActNowService();
+    static final CovidActNowService covidActNowServiceLocal = CovidActNowService.getInstance();
+    static final CovidService covidService = CovidService.getInstance();
+
+    private static CovidStatService single_instance = null;
+    public static CovidStatService getInstance()
+    {
+        if (single_instance == null)
+            single_instance = new CovidStatService();
+
+        return single_instance;
+    }
 
     /**
      * Retrieves CovidStats information for a given Location
@@ -58,7 +68,7 @@ public class CovidStatService
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
         try
         {
-            startDate.setTime(sdf.parse("2021-01-01"));
+            startDate.setTime(sdf.parse("2020-01-01"));
         }
         catch (ParseException e)
         {
@@ -66,8 +76,6 @@ public class CovidStatService
             e.printStackTrace();
             return 0;
         }
-
-        newLocation.setLastUpdated(new Date());
 
         // Load report
         retVal = 1;
@@ -157,80 +165,6 @@ public class CovidStatService
         return retVal;
     }
 
-    private static void manualHospitalizationStatBackFill(@NotNull Location location, @NotNull IServiceCallbackGeneric callback)
-    {
-        long occurrences = location.getStatistics().stream()
-                .filter(s -> s.getHospitalizationsCurrent() != 0)
-                .count();
-
-        // Get Hospitalization Stats if List is null
-        if (occurrences < 10)
-        {
-            Log.d("CovidStatService.manualHospitalizationStatBackFill()",
-                    MessageFormat.format("Back-filling {0}", CovidUtils.formatLocation(location)));
-
-            if (CovidUtils.isUS(location))
-            {
-                // Get stats for US
-                CovidService.getUSHospitalizations(new IServiceCallbackList()
-                {
-                    @Override
-                    public <T> void onSuccess(List<T> list)
-                    {
-                        // Loop dates to back-fill
-                        PopulateHospitalizationStats(location, (List<HospitalizationStat>)list);
-
-                        callback.onSuccess(location);
-                    }
-
-                    @Override
-                    public void onError(VolleyError err)
-                    {
-                        Log.e("CovidStatService.manualHospitalizationStatBackFill()",
-                                CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
-
-                        callback.onError(new Error(err));
-                    }
-                });
-            }
-            else if (CovidUtils.isUSState(location))
-            {
-                // Get US State abbreviation if not populated
-                if (TextUtils.isEmpty(location.getUsStateAbbreviation()))
-                {
-                    location.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(location));
-                    if (TextUtils.isEmpty(location.getUsStateAbbreviation()))
-                    {
-                        Log.d("CovidStatService.manualHospitalizationStatBackFill()",
-                                MessageFormat.format("Unable to get state abbreviation for {0}",
-                                        CovidUtils.formatLocation(location)));
-                        return;
-                    }
-                }
-
-                // Get stats for US State
-                CovidService.getUSStateHospitalizations(location.getUsStateAbbreviation(), new IServiceCallbackList()
-                {
-                    @Override
-                    public <T> void onSuccess(List<T> list)
-                    {
-                        // Loop dates to back-fill
-                        PopulateHospitalizationStats(location, (List<HospitalizationStat>)list);
-
-                        callback.onSuccess(location);
-                    }
-
-                    @Override
-                    public void onError(VolleyError err)
-                    {
-                        Log.e("CovidStatService.manualHospitalizationStatBackFill()",
-                                CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
-                    }
-                });
-            }
-        }
-    }
-
     private static void GetStatsForLocation(Location location, Calendar dateToCheck, boolean timeseries,
                                             IServiceCallbackGeneric callback)
     {
@@ -244,36 +178,9 @@ public class CovidStatService
         GetCovidStat(location, dateToCheck, hospitalizationStats, callback);
     }
 
-    private static Location PopulateHospitalizationStats(@NotNull Location location, List<HospitalizationStat> stats)
-    {
-        // Set date to start getting report
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
-
-        location.getStatistics().forEach(covidStat ->
-        {
-            // Convert date to known int format
-            String formattedDate = dateFormat.format(covidStat.getStatusDate().getTime());
-            int dateAsInt = Integer.parseInt(formattedDate);
-
-            HospitalizationStat hStat = CovidUtils.findHospitalizationStat(stats,  dateAsInt);
-
-            if (null != hStat)
-            {
-                covidStat.setHospitalizationsTotal(hStat.getHospitalizedTotal());
-                covidStat.setHospitalizationsDiff(hStat.getHospitalizedChange());
-                covidStat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
-                covidStat.setICUCurrent(hStat.getIcuCurrent());
-                covidStat.setICUTotal(hStat.getIcuTotal());
-                covidStat.setPositivityRate(hStat.getPositivityRate());
-            }
-        });
-
-        return location;
-    }
-
     private static void GetCovidStat(Location location, Calendar dateToCheck, List<HospitalizationStat> hospitalizationStats, IServiceCallbackGeneric callback)
     {
-        CovidService.getCovidStat(location, dateToCheck, hospitalizationStats, new IServiceCallbackCovidStats()
+        covidService.getCovidStat(location, dateToCheck, hospitalizationStats, new IServiceCallbackCovidStats()
         {
             @Override
             public void onSuccess(CovidStats stat)
@@ -463,7 +370,6 @@ public class CovidStatService
             // Set date
             Calendar startDate = Calendar.getInstance();
             dateToCheck = startDate;
-            location.setLastUpdated(new Date());
         }
 
         final Calendar dateToUse = dateToCheck;
@@ -597,7 +503,7 @@ public class CovidStatService
         }
         else
         {
-            CovidService.getCovidStat(location, dateToUse, null, new IServiceCallbackCovidStats()
+            covidService.getCovidStat(location, dateToUse, null, new IServiceCallbackCovidStats()
             {
                 @Override
                 public void onSuccess(CovidStats statistics)
@@ -613,8 +519,6 @@ public class CovidStatService
                     callback.onError(new Error(err));
                 }
             });
-            // Only US, US States and US State Counties/Metro regions can be processed in this method
-            callback.onError(new Error("Invalid call: Only US and its states and counties are supported in this method"));
         }
     }
 
@@ -675,10 +579,14 @@ public class CovidStatService
                         processCounter--;
                         if (processCounter <= 0)
                         {
+                            // Update the last update date
+                            for(Location l: locations)
+                            {
+                                l.setLastUpdated(new Date());
+                            }
                            // Return call
                             callback.onSuccess(locations);
                         }
-
                     }
 
                     @Override
@@ -703,4 +611,106 @@ public class CovidStatService
         if (processCounter == 0)
             callback.onSuccess(locations);
     }
+
+
+    /*    private static void manualHospitalizationStatBackFill(@NotNull Location location, @NotNull IServiceCallbackGeneric callback)
+    {
+        long occurrences = location.getStatistics().stream()
+                .filter(s -> s.getHospitalizationsCurrent() != 0)
+                .count();
+
+        // Get Hospitalization Stats if List is null
+        if (occurrences < 10)
+        {
+            Log.d("CovidStatService.manualHospitalizationStatBackFill()",
+                    MessageFormat.format("Back-filling {0}", CovidUtils.formatLocation(location)));
+
+            if (CovidUtils.isUS(location))
+            {
+                // Get stats for US
+                covidService.getUSHospitalizations(new IServiceCallbackList()
+                {
+                    @Override
+                    public <T> void onSuccess(List<T> list)
+                    {
+                        // Loop dates to back-fill
+                        PopulateHospitalizationStats(location, (List<HospitalizationStat>)list);
+
+                        callback.onSuccess(location);
+                    }
+
+                    @Override
+                    public void onError(VolleyError err)
+                    {
+                        Log.e("CovidStatService.manualHospitalizationStatBackFill()",
+                                CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+
+                        callback.onError(new Error(err));
+                    }
+                });
+            }
+            else if (CovidUtils.isUSState(location))
+            {
+                // Get US State abbreviation if not populated
+                if (TextUtils.isEmpty(location.getUsStateAbbreviation()))
+                {
+                    location.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(location));
+                    if (TextUtils.isEmpty(location.getUsStateAbbreviation()))
+                    {
+                        Log.d("CovidStatService.manualHospitalizationStatBackFill()",
+                                MessageFormat.format("Unable to get state abbreviation for {0}",
+                                        CovidUtils.formatLocation(location)));
+                        return;
+                    }
+                }
+
+                // Get stats for US State
+                covidService.getUSStateHospitalizations(location.getUsStateAbbreviation(), new IServiceCallbackList()
+                {
+                    @Override
+                    public <T> void onSuccess(List<T> list)
+                    {
+                        // Loop dates to back-fill
+                        PopulateHospitalizationStats(location, (List<HospitalizationStat>)list);
+
+                        callback.onSuccess(location);
+                    }
+
+                    @Override
+                    public void onError(VolleyError err)
+                    {
+                        Log.e("CovidStatService.manualHospitalizationStatBackFill()",
+                                CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+                    }
+                });
+            }
+        }
+    }*/
+
+    /*    private static Location PopulateHospitalizationStats(@NotNull Location location, List<HospitalizationStat> stats)
+    {
+        // Set date to start getting report
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
+
+        location.getStatistics().forEach(covidStat ->
+        {
+            // Convert date to known int format
+            String formattedDate = dateFormat.format(covidStat.getStatusDate().getTime());
+            int dateAsInt = Integer.parseInt(formattedDate);
+
+            HospitalizationStat hStat = CovidUtils.findHospitalizationStat(stats,  dateAsInt);
+
+            if (null != hStat)
+            {
+                covidStat.setHospitalizationsTotal(hStat.getHospitalizedTotal());
+                covidStat.setHospitalizationsDiff(hStat.getHospitalizedChange());
+                covidStat.setHospitalizationsCurrent(hStat.getHospitalizedCurrent());
+                covidStat.setICUCurrent(hStat.getIcuCurrent());
+                covidStat.setICUTotal(hStat.getIcuTotal());
+                covidStat.setPositivityRate(hStat.getPositivityRate());
+            }
+        });
+
+        return location;
+    }*/
 }

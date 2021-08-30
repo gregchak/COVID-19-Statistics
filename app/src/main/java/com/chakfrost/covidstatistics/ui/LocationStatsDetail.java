@@ -174,20 +174,20 @@ public class LocationStatsDetail extends AppCompatActivity
             // Set hospitalizations
              if (statTemp.getHospitalizationsCurrent() == 0)
                 hospitalizationZeroCount++;
-            else if (statTemp.getHospitalizationsCurrent() != 0 && hospitalizationZeroCount < 4)
+            else if (statTemp.getHospitalizationsCurrent() != 0 && hospitalizationZeroCount < 10)
                 hospitalizationZeroCount = 0;
 
-            if (hospitalizationZeroCount < 3)
+            if (hospitalizationZeroCount < 10)
                 hospitalizations.addValue(statTemp.getStatusDate(), statTemp.getHospitalizationsCurrent());
 
 
             // Set ICU
             if (statTemp.getICUCurrent() == 0)
                 icuZeroCount++;
-            else if (statTemp.getICUCurrent() != 0 && icuZeroCount < 4)
+            else if (statTemp.getICUCurrent() != 0 && icuZeroCount < 10)
                 icuZeroCount = 0;
 
-            if (icuZeroCount < 3)
+            if (icuZeroCount < 10)
                 icu.addValue(statTemp.getStatusDate(), statTemp.getICUCurrent());
 
             // Set positivity rates

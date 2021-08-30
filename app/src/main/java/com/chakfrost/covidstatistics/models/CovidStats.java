@@ -72,10 +72,23 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     private int ICUCurrent;
     @Expose(serialize = false)
     private double PositivityRate;
+
+    // Cases per 100k
     @Expose(serialize = false)
     private double CaseDensity;
+
+    // 1 of 4 text values
     @Expose(serialize = false)
-    private int CdcTransimssionLevel;
+    private String CdcTransmissionLevel;
+    @Expose(serialize = false)
+    private double InfectionRate;
+
+    @Expose(serialize = false)
+    private double TestPositivityPercentage;
+    @Expose(serialize = false)
+    private double VaccinationsInitiatedPercentage;
+    @Expose(serialize = false)
+    private double VaccinationsCompletedPercentage;
 
     public CovidStats()
     {
@@ -143,7 +156,32 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
         return PositivityRate;
     }
     public double getCaseDensity() { return CaseDensity; }
-    public int getCdcTransimssionLevel() { return CdcTransimssionLevel; }
+    public String getCdcTransmissionLevel() { return CdcTransmissionLevel; }
+    public double getInfectionRate() { return InfectionRate; }
+    public double getTestPositivityPercentage() { return TestPositivityPercentage; }
+    public double getVaccinationsInitiatedPercentage() { return VaccinationsInitiatedPercentage; }
+    public double getVaccinationsCompletedPercentage() { return VaccinationsCompletedPercentage; }
+    public int getHospitalizationsTotal()
+    {
+        return hospitalizationsTotal;
+    }
+    public int getHospitalizationsDiff()
+    {
+        return hospitalizationsDiff;
+    }
+    public int getHospitalizationsCurrent()
+    {
+        return hospitalizationsCurrent;
+    }
+    public int getICUTotal()
+    {
+        return ICUTotal;
+    }
+    public int getICUCurrent()
+    {
+        return ICUCurrent;
+    }
+
 
     /* Setters */
     public void settNewConfirmed(int val) { NewConfirmed = val; }
@@ -163,47 +201,15 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     public void setStatusDate(Date val) { StatusDate = val; }
     public void setLastUpdate(Date val) { LastUpdate = val; }
 
-    public int getHospitalizationsTotal()
-    {
-        return hospitalizationsTotal;
-    }
-
-    public void setHospitalizationsTotal(int hospitalizationsTotal)
-    {
-        this.hospitalizationsTotal = hospitalizationsTotal;
-    }
-
-    public int getHospitalizationsDiff()
-    {
-        return hospitalizationsDiff;
-    }
-
-    public void setHospitalizationsDiff(int hospitalizationsDiff)
-    {
-        this.hospitalizationsDiff = hospitalizationsDiff;
-    }
-
-    public int getHospitalizationsCurrent()
-    {
-        return hospitalizationsCurrent;
-    }
-
-    public void setHospitalizationsCurrent(int hospitalizationsCurrent)
-    {
-        this.hospitalizationsCurrent = hospitalizationsCurrent;
-    }
-
-    public int getICUTotal()
-    {
-        return ICUTotal;
-    }
+    public void setVaccinationsCompletedPercentage(double vaccinationsCompletedPercentage) { VaccinationsCompletedPercentage = vaccinationsCompletedPercentage; }
+    public void setVaccinationsInitiatedPercentage(double vaccinationsInitiatedPercentage) { VaccinationsInitiatedPercentage = vaccinationsInitiatedPercentage; }
+    public void setTestPositivityPercentage(double testPositivityPercentage) { TestPositivityPercentage = testPositivityPercentage; }
+    public void setHospitalizationsTotal(int hospitalizationsTotal) { this.hospitalizationsTotal = hospitalizationsTotal; }
+    public void setHospitalizationsDiff(int hospitalizationsDiff) { this.hospitalizationsDiff = hospitalizationsDiff; }
+    public void setHospitalizationsCurrent(int hospitalizationsCurrent)  { this.hospitalizationsCurrent = hospitalizationsCurrent; }
     public void setICUTotal(int ICUTotal)
     {
         this.ICUTotal = ICUTotal;
-    }
-    public int getICUCurrent()
-    {
-        return ICUCurrent;
     }
     public void setICUCurrent(int ICUCurrent)
     {
@@ -214,5 +220,6 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
         PositivityRate = positivityRate;
     }
     public void setCaseDensity(double caseDensity) { CaseDensity = caseDensity; }
-    public void setCdcTransimssionLevel(int cdcTransimssionLevel) { CdcTransimssionLevel = cdcTransimssionLevel;  }
+    public void setCdcTransmissionLevel(String cdcTransmissionLevel) { CdcTransmissionLevel = cdcTransmissionLevel;  }
+    public void setInfectionRate(double infectionRate) { InfectionRate = infectionRate;}
 }

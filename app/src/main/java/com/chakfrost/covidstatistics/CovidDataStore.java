@@ -33,6 +33,7 @@ public class CovidDataStore
     private final static String LOCATION_FILENAME = "locations";
     private final static String SUMMARY_FILENAME = "summary";
     private static Context context;
+    private final static CovidUtils covidUtils = CovidUtils.getInstance();
 
     public CovidDataStore() { }
 
@@ -119,7 +120,7 @@ public class CovidDataStore
         catch(Exception e)
         {
             Log.e("CovidDataStore.RetrieveLocations()",
-                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
+                    covidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
         finally
         {
@@ -174,7 +175,7 @@ public class CovidDataStore
         catch(Exception e)
         {
             Log.e("CovidDataStore.RetrieveGlobalStats()",
-                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
+                    covidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
         finally
         {
@@ -203,7 +204,7 @@ public class CovidDataStore
         catch (Exception e)
         {
             Log.e("CovidDataStore.writeToDisk()",
-                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
+                    covidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
     }
 
@@ -243,7 +244,7 @@ public class CovidDataStore
         catch(Exception e)
         {
             Log.e("CovidDataStore.readFileFromDisk()",
-                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
+                    covidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
         finally
         {

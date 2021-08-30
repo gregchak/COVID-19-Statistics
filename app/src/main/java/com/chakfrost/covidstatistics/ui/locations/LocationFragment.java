@@ -27,6 +27,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.text.MessageFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class LocationFragment extends Fragment
@@ -203,6 +204,7 @@ public class LocationFragment extends Fragment
         private boolean isComplete;
         private Boolean isSuccessful;
         private Location currentLocation;
+
         @Override
         protected void onPreExecute()
         {
@@ -226,6 +228,7 @@ public class LocationFragment extends Fragment
                     public <T> void onSuccess(T result)
                     {
                         Location updatedLocation = (Location)result;
+                        updatedLocation.setLastUpdated(new Date());
 
                         Location found = locations.stream()
                                 .filter(l -> l.getCountry().equals(currentLocation.getCountry())

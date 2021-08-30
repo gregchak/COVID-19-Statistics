@@ -8,6 +8,7 @@ import android.view.View;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
+import com.chakfrost.covidstatistics.services.CovidActNowService;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,14 @@ import java.util.Locale;
 
 public class CovidUtils
 {
+    private static CovidUtils single_instance = null;
+    public static CovidUtils getInstance()
+    {
+        if (single_instance == null)
+            single_instance = new CovidUtils();
+
+        return single_instance;
+    }
 
     /**
      * Shows/hides loading indicator
@@ -107,7 +116,7 @@ public class CovidUtils
         Calendar cal = Calendar.getInstance();
 
         // Only decrease the date by 1 if outside US
-        if (!CovidUtils.isUS(location) && !CovidUtils.isUSState(location) && !CovidUtils.isUSMunicipality(location))
+        if (!isUS(location) && !isUSState(location) && !isUSMunicipality(location))
             cal.add(Calendar.DATE, -1);
         Date dte = cal.getTime();
 

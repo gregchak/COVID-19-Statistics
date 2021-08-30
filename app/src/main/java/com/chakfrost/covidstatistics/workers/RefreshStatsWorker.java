@@ -17,11 +17,14 @@ import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.services.CovidService;
+import com.chakfrost.covidstatistics.services.CovidStatService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
+import com.chakfrost.covidstatistics.services.IServiceCallbackGeneric;
 import com.chakfrost.covidstatistics.services.IServiceCallbackList;
 import com.chakfrost.covidstatistics.services.IServiceCallbackGlobalStats;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -35,6 +38,9 @@ public class RefreshStatsWorker extends Worker
     private List<Location> locations;
     private List<Location> newData;
     private int locationQueue;
+
+    private final static CovidUtils covidUtils = CovidUtils.getInstance();
+    private final static CovidStatService covidStatService = CovidStatService.getInstance();
 
     public RefreshStatsWorker(@NonNull Context context, @NonNull WorkerParameters params)
     {
@@ -65,7 +71,6 @@ public class RefreshStatsWorker extends Worker
             Log.d("RefreshStatsWorker.doWork()", "number of changes found: " + newData.size());
             if (newData.size() > 0)
             {
-                SetLocation(newData);
                 CovidApplication.sendNotification
                         ("Location Update",
                                 "Your tracked locations have new COVID-19 stats available",
@@ -134,6 +139,8 @@ public class RefreshStatsWorker extends Worker
     private void RefreshLocationStats()
     {
         locations = CovidApplication.getLocations();
+        List<Location> needsUpdate = new ArrayList<>();
+
 
         long diff;
         long hours;
@@ -170,13 +177,32 @@ public class RefreshStatsWorker extends Worker
                     loc.setLastUpdated(new Date());
 
                     // Get new stats
-                    RefreshLocationStats(loc, startDate);
+                    //RefreshLocationStats(loc, startDate);
+                    needsUpdate.add(loc);
+                    newData .add(loc);
                 }
             }
         }
+
+        covidStatService.updateLocations(needsUpdate, new IServiceCallbackGeneric()
+        {
+            @Override
+            public <T> void onSuccess(T result)
+            {
+                CovidApplication.setLocations((List<Location>)result);
+            }
+
+            @Override
+            public void onError(Error err)
+            {
+                Log.e("RefreshStatsWorker.RefreshLocationStats()",
+                        covidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+
+            }
+        });
     }
 
-    private void RefreshLocationStats(Location location, Calendar dateToCheck)
+/*    private void RefreshLocationStats(Location location, Calendar dateToCheck)
     {
         if (location.getStatistics().size() > 0 && (CovidUtils.isUS(location) || CovidUtils.isUSState(location)))
         {
@@ -421,6 +447,6 @@ public class RefreshStatsWorker extends Worker
 
         // Save updated Locations
         CovidApplication.setLocations(locations);
-    }
+    }*/
 
 }

@@ -311,7 +311,6 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
 
         // Initialize report data
         Location loc = new Location(selectedCountry.getName());
-        loc.setLastUpdated(new Date());
         loc.setIso(selectedCountry.getISO2());
         loc.setRegion(selectedCountry.getName());
 
@@ -353,21 +352,18 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
         }
         else
         {
-            SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MM yyyy");
-            String inputString1 = "2020-01-01";
-            String inputString2 = "27 04 1997";
+//            SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+//            String inputString1 = "2020-01-01";
 
             try
             {
-                Date end = dtf.parse(inputString1);
-                Date now = new Date();
-                long diffMs = now.getTime() - end.getTime();
-                long diffD = TimeUnit.MILLISECONDS.toDays(diffMs);
-
-                // Populate report information
-                Calendar startDate = Calendar.getInstance();
-                startDate.add(Calendar.DATE, -1);
+//                Date end = dtf.parse(inputString1);
+//                Date now = new Date();
+//                long diffMs = now.getTime() - end.getTime();
+//
+//                // Populate report information
+//                Calendar startDate = Calendar.getInstance();
+//                startDate.add(Calendar.DATE, -1);
 
 
                 // Set result
@@ -375,10 +371,6 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                 backToMain.putExtra("location", loc);
                 setResult(110, backToMain);
                 finish();
-
-                //CovidUtils.animateView(progressOverlay, View.VISIBLE, 0.4f, 200);
-                //LoadReportData(loc, startDate, diffD);
-                //updateProgressBar(diffD, 1);
             }
             catch (Exception ex)
             {

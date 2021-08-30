@@ -57,6 +57,15 @@ public class CovidService
     //private static final String COVID_19_STATISTICS_URL = "https://covid-19-statistics.p.rapidapi.com";
     //private static final String RAPID_KEY_COVID_19_STATISTICS = "2b0656f909mshf12452ea67727c5p1cdac2jsn392ca7d9ed82";
 
+    private static CovidService single_instance = null;
+    public static CovidService getInstance()
+    {
+        if (single_instance == null)
+            single_instance = new CovidService();
+
+        return single_instance;
+    }
+
     /**
      * Gets countries from service
      *

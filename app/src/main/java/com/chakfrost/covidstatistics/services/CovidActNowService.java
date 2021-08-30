@@ -25,11 +25,19 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 
 public class CovidActNowService
 {
+    private static CovidActNowService single_instance = null;
+    public static CovidActNowService getInstance()
+    {
+        if (single_instance == null)
+            single_instance = new CovidActNowService();
+
+        return single_instance;
+    }
+
     private static List<StateHistory> cachedData = new ArrayList<>();
     private static final String baseApi = "https://api.covidactnow.org/v2";
     private static final String apiKey = "4c5f2261093742f5b90b3e1ffb2cf621";
@@ -284,15 +292,20 @@ public class CovidActNowService
         result.setTotalDeaths(response.actuals.deaths);
         result.setNewDeaths(response.actuals.newDeaths);
 
-        result.setStatusDate(response.lastUpdatedDate);
+        result.setCdcTransmissionLevel(TranslateCdcTransmissionValue(response.cdcTransmissionLevel));
+        result.setCaseDensity(response.metrics.caseDensity);
+        result.setInfectionRate(response.metrics.infectionRate);
+        result.setTestPositivityPercentage(response.metrics.testPositivityRatio * 100);
+        result.setVaccinationsInitiatedPercentage(response.metrics.vaccinationsInitiatedRatio * 100);
+        result.setVaccinationsCompletedPercentage(response.metrics.vaccinationsCompletedRatio * 100);
 
         // TODO: Hospitalizations = hospitalBed.currentUsageCovid + icuBeds.currentUsageCovid
-        result.setHospitalizationsCurrent(null == response.actuals.hospitalBeds ? 0 : response.actuals.hospitalBeds.currentUsageCovid);
-        result.setICUCurrent(null == response.actuals.icuBeds ? 0 : response.actuals.icuBeds.currentUsageCovid);
+        result.setHospitalizationsCurrent(response.actuals.hospitalBeds.currentUsageCovid);
+        result.setICUCurrent(response.actuals.icuBeds.currentUsageCovid);
         result.setPositivityRate(response.metrics.testPositivityRatio * 100);
 
         result.setCaseDensity(response.metrics.caseDensity);
-        result.setCdcTransimssionLevel(response.cdcTransmissionLevel);
+        result.setCdcTransmissionLevel(TranslateCdcTransmissionValue(response.cdcTransmissionLevel));
 
         return result;
     }
@@ -328,13 +341,20 @@ public class CovidActNowService
             result.setNewDeaths(actual.newDeaths);
             result.setTotalDeaths(actual.deaths);
 
+            result.setCdcTransmissionLevel(TranslateCdcTransmissionValue(response.cdcTransmissionLevel));
+            result.setCaseDensity(metric.caseDensity);
+            result.setInfectionRate(metric.infectionRate);
+            result.setTestPositivityPercentage(metric.testPositivityRatio * 100);
+            result.setVaccinationsInitiatedPercentage(metric.vaccinationsInitiatedRatio * 100);
+            result.setVaccinationsCompletedPercentage(metric.vaccinationsCompletedRatio * 100);
+
             // TODO: Hospitalizations = hospitalBed.currentUsageCovid + icuBeds.currentUsageCovid
-            result.setHospitalizationsCurrent(null == actual.hospitalBeds ? 0 : actual.hospitalBeds.currentUsageCovid);
-            result.setICUCurrent(null == actual.icuBeds ? 0 : actual.icuBeds.currentUsageCovid);
+            result.setHospitalizationsCurrent(actual.hospitalBeds.currentUsageCovid);
+            result.setICUCurrent(actual.icuBeds.currentUsageCovid);
             result.setPositivityRate(metric.testPositivityRatio * 100);
 
             result.setCaseDensity(metric.caseDensity);
-            result.setCdcTransimssionLevel(-1);
+            result.setCdcTransmissionLevel(TranslateCdcTransmissionValue(response.cdcTransmissionLevel));
 
             metric = null;
             actual = null;
@@ -345,5 +365,38 @@ public class CovidActNowService
             Log.e("CovidActNowService.ProcessServiceResult()", "metric and/or actual not found");
             return null;
         }
+    }
+
+    /**
+     * Translates the value from service to a known text value
+     * @param cdcTransmissionValue
+     * @return
+     */
+    private static String TranslateCdcTransmissionValue(int cdcTransmissionValue)
+    {
+        String retValue;
+        switch (cdcTransmissionValue)
+        {
+            case 0:
+                retValue = "Low";
+                break;
+            case 1:
+                retValue = "Moderate";
+                break;
+            case 2:
+                retValue = "Substantial";
+                break;
+            case 3:
+                retValue = "High";
+                break;
+            case 4:
+                retValue = "Unknown";
+                break;
+            default:
+                retValue = "N/A";
+                break;
+        }
+
+        return retValue;
     }
 }

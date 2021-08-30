@@ -228,9 +228,9 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             Type type = new TypeToken<CopyOnWriteArrayList<Location>>(){}.getType();
             //String tempJson = gson.toJson(location).toString();
 
-            Log.d("LocationViewHolder.bind()::location", gson.toJson(location));
-            Log.d("LocationViewHolder.bind()::stat", gson.toJson(stat));
-            Log.d("LocationViewHolder.bind()::previous", gson.toJson(previousStat));
+//            Log.d("LocationViewHolder.bind()::location", gson.toJson(location));
+//            Log.d("LocationViewHolder.bind()::stat", gson.toJson(stat));
+//            Log.d("LocationViewHolder.bind()::previous", gson.toJson(previousStat));
 
             locationName.setText(CovidUtils.formatLocation(location));
 
