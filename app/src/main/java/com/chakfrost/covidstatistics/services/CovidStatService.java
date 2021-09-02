@@ -17,7 +17,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -219,7 +218,8 @@ public class CovidStatService
             {
                 stat.setDiffConfirmed(Math.abs(stat.getNewConfirmed()- previousStat.getNewConfirmed()));
                 stat.setDiffDeaths(Math.abs(stat.getNewDeaths() - previousStat.getNewDeaths()));
-                stat.setHospitalizationsDiff(Math.abs(stat.getHospitalizationsCurrent() - previousStat.getHospitalizationsCurrent()));
+                if (null != stat.getHospitalizationsCurrent() && null != previousStat.getHospitalizationsCurrent())
+                    stat.setHospitalizationsDiff(Math.abs(stat.getHospitalizationsCurrent() - previousStat.getHospitalizationsCurrent()));
             }
             else
             {

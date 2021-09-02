@@ -454,7 +454,7 @@ public class StatisticsFragment extends Fragment
                         locationRefreshComplete = true;
 
                         // Dismiss progress indicator
-                        clearProgressIndicators();
+                        //clearProgressIndicators();
 
                         // Save updated locations
                         CovidApplication.setLocations(updatedLocations);

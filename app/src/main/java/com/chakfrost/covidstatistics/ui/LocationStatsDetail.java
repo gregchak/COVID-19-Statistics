@@ -172,23 +172,30 @@ public class LocationStatsDetail extends AppCompatActivity
 
 
             // Set hospitalizations
-             if (statTemp.getHospitalizationsCurrent() == 0)
-                hospitalizationZeroCount++;
-            else if (statTemp.getHospitalizationsCurrent() != 0 && hospitalizationZeroCount < 10)
-                hospitalizationZeroCount = 0;
+            if (null != statTemp.getHospitalizationsCurrent())
+            {
+                if (statTemp.getHospitalizationsCurrent() == 0)
+                    hospitalizationZeroCount++;
+                else if (statTemp.getHospitalizationsCurrent() != 0 && hospitalizationZeroCount < 10)
+                    hospitalizationZeroCount = 0;
 
-            if (hospitalizationZeroCount < 10)
-                hospitalizations.addValue(statTemp.getStatusDate(), statTemp.getHospitalizationsCurrent());
+                if (hospitalizationZeroCount < 10)
+                    hospitalizations.addValue(statTemp.getStatusDate(), statTemp.getHospitalizationsCurrent());
+            }
 
 
             // Set ICU
-            if (statTemp.getICUCurrent() == 0)
-                icuZeroCount++;
-            else if (statTemp.getICUCurrent() != 0 && icuZeroCount < 10)
-                icuZeroCount = 0;
+            if (null != statTemp.getICUCurrent())
+            {
+                if (statTemp.getICUCurrent() == 0)
+                    icuZeroCount++;
+                else if (statTemp.getICUCurrent() != 0 && icuZeroCount < 10)
+                    icuZeroCount = 0;
 
-            if (icuZeroCount < 10)
-                icu.addValue(statTemp.getStatusDate(), statTemp.getICUCurrent());
+                if (icuZeroCount < 10)
+                    icu.addValue(statTemp.getStatusDate(), statTemp.getICUCurrent());
+            }
+
 
             // Set positivity rates
             if (positivityZeroCount < 3)
@@ -212,14 +219,17 @@ public class LocationStatsDetail extends AppCompatActivity
         locationStats.add(newDeaths);
 
         // Not all locations have hospitalization and ICU values, verify this has data
+
         StatDatePair findHospitalization = hospitalizations.getValues().stream()
                 .filter(s -> s.getValue() != 0)
+                .sorted(Collections.reverseOrder())
                 .findFirst()
                 .orElse(null);
 
         // Only add if hospitalizations have values
         if (null != findHospitalization)
         {
+
             Collections.reverse(hospitalizations.getValues());
             locationStats.add(hospitalizations);
         }

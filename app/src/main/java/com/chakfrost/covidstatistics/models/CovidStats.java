@@ -61,15 +61,15 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     private Date LastUpdate;
 
     @Expose(serialize = false)
-    private int hospitalizationsTotal;
+    private Integer hospitalizationsTotal;
     @Expose(serialize = false)
-    private int hospitalizationsDiff;
+    private Integer hospitalizationsDiff;
     @Expose(serialize = false)
-    private int hospitalizationsCurrent;
+    private Integer hospitalizationsCurrent;
     @Expose(serialize = false)
-    private int ICUTotal;
+    private Integer ICUTotal;
     @Expose(serialize = false)
-    private int ICUCurrent;
+    private Integer ICUCurrent;
     @Expose(serialize = false)
     private double PositivityRate;
 
@@ -161,23 +161,23 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     public double getTestPositivityPercentage() { return TestPositivityPercentage; }
     public double getVaccinationsInitiatedPercentage() { return VaccinationsInitiatedPercentage; }
     public double getVaccinationsCompletedPercentage() { return VaccinationsCompletedPercentage; }
-    public int getHospitalizationsTotal()
+    public Integer getHospitalizationsTotal()
     {
         return hospitalizationsTotal;
     }
-    public int getHospitalizationsDiff()
+    public Integer getHospitalizationsDiff()
     {
         return hospitalizationsDiff;
     }
-    public int getHospitalizationsCurrent()
+    public Integer getHospitalizationsCurrent()
     {
         return hospitalizationsCurrent;
     }
-    public int getICUTotal()
+    public Integer getICUTotal()
     {
         return ICUTotal;
     }
-    public int getICUCurrent()
+    public Integer getICUCurrent()
     {
         return ICUCurrent;
     }
@@ -204,14 +204,14 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     public void setVaccinationsCompletedPercentage(double vaccinationsCompletedPercentage) { VaccinationsCompletedPercentage = vaccinationsCompletedPercentage; }
     public void setVaccinationsInitiatedPercentage(double vaccinationsInitiatedPercentage) { VaccinationsInitiatedPercentage = vaccinationsInitiatedPercentage; }
     public void setTestPositivityPercentage(double testPositivityPercentage) { TestPositivityPercentage = testPositivityPercentage; }
-    public void setHospitalizationsTotal(int hospitalizationsTotal) { this.hospitalizationsTotal = hospitalizationsTotal; }
-    public void setHospitalizationsDiff(int hospitalizationsDiff) { this.hospitalizationsDiff = hospitalizationsDiff; }
-    public void setHospitalizationsCurrent(int hospitalizationsCurrent)  { this.hospitalizationsCurrent = hospitalizationsCurrent; }
-    public void setICUTotal(int ICUTotal)
+    public void setHospitalizationsTotal(Integer hospitalizationsTotal) { this.hospitalizationsTotal = hospitalizationsTotal; }
+    public void setHospitalizationsDiff(Integer hospitalizationsDiff) { this.hospitalizationsDiff = hospitalizationsDiff; }
+    public void setHospitalizationsCurrent(Integer hospitalizationsCurrent)  { this.hospitalizationsCurrent = hospitalizationsCurrent; }
+    public void setICUTotal(Integer ICUTotal)
     {
         this.ICUTotal = ICUTotal;
     }
-    public void setICUCurrent(int ICUCurrent)
+    public void setICUCurrent(Integer ICUCurrent)
     {
         this.ICUCurrent = ICUCurrent;
     }

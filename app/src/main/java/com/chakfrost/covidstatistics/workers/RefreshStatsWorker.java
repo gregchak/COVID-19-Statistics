@@ -141,7 +141,6 @@ public class RefreshStatsWorker extends Worker
         locations = CovidApplication.getLocations();
         List<Location> needsUpdate = new ArrayList<>();
 
-
         long diff;
         long hours;
         Date currentDate = new Date();
@@ -158,7 +157,7 @@ public class RefreshStatsWorker extends Worker
                 hours = TimeUnit.MILLISECONDS.toHours(diff);
             }
 
-            if (hours >= 6)
+            if (hours >= -1) // TODO: hours >= 6
             {
                 // Debugging
                 //List<CovidStats> c = loc.getStatistics();
@@ -184,22 +183,44 @@ public class RefreshStatsWorker extends Worker
             }
         }
 
-        covidStatService.updateLocations(needsUpdate, new IServiceCallbackGeneric()
+        if (needsUpdate.size() > 0)
         {
-            @Override
-            public <T> void onSuccess(T result)
+            covidStatService.updateLocations(needsUpdate, new IServiceCallbackGeneric()
             {
-                CovidApplication.setLocations((List<Location>)result);
-            }
+                @Override
+                public <T> void onSuccess(T result)
+                {
+                    // Update Locations with result
+                    List<Location> updated = (List<Location>) result;
+                    for (Location loc : updated)
+                    {
+                        Location found = locations.stream()
+                                .filter(l -> l.getCountry().equals(loc.getCountry())
+                                        && l.getProvince().equals(loc.getProvince())
+                                        && l.getMunicipality().equals(loc.getMunicipality()))
+                                .findFirst()
+                                .orElse(null);
+                        if (null != found)
+                        {
+                            locations.remove(found);
+                            locations.add(loc);
+                        } else
+                        {
+                            Log.w("RefreshStatWorker.RefreshLocationStats::updateLocations", "Updated location not found " + covidUtils.formatLocation(loc));
+                        }
+                    }
+                    CovidApplication.setLocations(locations);
+                }
 
-            @Override
-            public void onError(Error err)
-            {
-                Log.e("RefreshStatsWorker.RefreshLocationStats()",
-                        covidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+                @Override
+                public void onError(Error err)
+                {
+                    Log.e("RefreshStatsWorker.RefreshLocationStats()",
+                            covidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
 
-            }
-        });
+                }
+            });
+        }
     }
 
 /*    private void RefreshLocationStats(Location location, Calendar dateToCheck)

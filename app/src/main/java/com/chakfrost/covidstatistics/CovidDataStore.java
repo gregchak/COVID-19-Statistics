@@ -89,7 +89,7 @@ public class CovidDataStore
 
                 locations.forEach(l -> {
                     String tempJson = gson.toJson(l);
-                    Log.d("CovidDataStore.SaveLocations()", "json = " + tempJson);
+                    Log.d("CovidDataStore.retrieveLocations()", "json = " + tempJson);
                 });
             }
 

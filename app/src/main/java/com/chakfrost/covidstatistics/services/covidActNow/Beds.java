@@ -2,8 +2,8 @@ package com.chakfrost.covidstatistics.services.covidActNow;
 
 public class Beds
 {
-    public int capacity;
-    public int currentUsageTotal;
-    public int currentUsageCovid;
+    public Integer capacity;
+    public Integer currentUsageTotal;
+    public Integer currentUsageCovid;
     public double typicalUsageRate;
 }

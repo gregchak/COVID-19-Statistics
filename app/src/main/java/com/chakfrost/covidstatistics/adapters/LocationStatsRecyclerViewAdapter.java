@@ -255,28 +255,56 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
 
 
             // Hospitalization data
-            if (stat.getHospitalizationsCurrent() == 0)
-            {
-                hospitalization.setText("N/R");
-                hospitalizationDiff.setText("N/R");
-                hospitalizationImage.setImageResource(R.drawable.ic_remove_black_24dp);
-            }
-            else
-            {
-                hospitalization.setText(NumberFormat.getInstance().format(stat.getHospitalizationsCurrent()));
-                if (stat.getHospitalizationsDiff() == 0 && CovidUtils.isUSState(location))
+//            if (null == stat.getHospitalizationsCurrent() || stat.getHospitalizationsCurrent() == 0)
+//            {
+                List<CovidStats> hospitalizationStatsTemp = stats.stream()
+                        .filter(s -> s.getHospitalizationsCurrent() != null)
+                        .collect(Collectors.toList());
+
+
+                if (hospitalizationStatsTemp.size() > 1)
                 {
-                    if (stat.getHospitalizationsCurrent() == previousStat.getHospitalizationsCurrent())
-                        hospitalizationDiff.setText("0");
-                    else
-                        hospitalizationDiff.setText(NumberFormat.getInstance().format( (stat.getHospitalizationsCurrent() - previousStat.getHospitalizationsCurrent()) ));
+                    CovidStats cur = hospitalizationStatsTemp.get(0);
+                    CovidStats prev = hospitalizationStatsTemp.get(1);
+                    hospitalization.setText(NumberFormat.getInstance().format(cur.getHospitalizationsCurrent()));
+                    hospitalizationDiff.setText(NumberFormat.getInstance().format( (cur.getHospitalizationsCurrent() - prev.getHospitalizationsCurrent()) ));
+//                    if (cur.getHospitalizationsDiff() == 0 && CovidUtils.isUSState(location))
+//                    {
+//                        if (cur.getHospitalizationsCurrent() == prev.getHospitalizationsCurrent())
+//                            hospitalizationDiff.setText("0");
+//                        else
+//                            hospitalizationDiff.setText(NumberFormat.getInstance().format( (cur.getHospitalizationsCurrent() - prev.getHospitalizationsCurrent()) ));
+//                    }
+//                    else
+//                    {
+//                        hospitalizationDiff.setText(NumberFormat.getInstance().format(cur.getHospitalizationsDiff()));
+//                    }
+                    hospitalizationImage.setImageResource(CovidUtils.determineArrow(cur.getHospitalizationsCurrent(), prev.getHospitalizationsCurrent(), false));
                 }
                 else
                 {
-                    hospitalizationDiff.setText(NumberFormat.getInstance().format(stat.getHospitalizationsDiff()));
+                    hospitalization.setText("N/R");
+                    hospitalizationDiff.setText("N/R");
+                    hospitalizationImage.setImageResource(R.drawable.ic_remove_black_24dp);
                 }
-                hospitalizationImage.setImageResource(CovidUtils.determineArrow(stat.getHospitalizationsCurrent(), previousStat.getHospitalizationsCurrent(), false));
-            }
+
+//            }
+//            else
+//            {
+//                hospitalization.setText(NumberFormat.getInstance().format(stat.getHospitalizationsCurrent()));
+//                if (stat.getHospitalizationsDiff() == 0 && CovidUtils.isUSState(location))
+//                {
+//                    if (stat.getHospitalizationsCurrent() == previousStat.getHospitalizationsCurrent())
+//                        hospitalizationDiff.setText("0");
+//                    else
+//                        hospitalizationDiff.setText(NumberFormat.getInstance().format( (stat.getHospitalizationsCurrent() - previousStat.getHospitalizationsCurrent()) ));
+//                }
+//                else
+//                {
+//                    hospitalizationDiff.setText(NumberFormat.getInstance().format(stat.getHospitalizationsDiff()));
+//                }
+//                hospitalizationImage.setImageResource(CovidUtils.determineArrow(stat.getHospitalizationsCurrent(), previousStat.getHospitalizationsCurrent(), false));
+//            }
 
             // Active data
             if (stat.getTotalActive() == 0)
