@@ -1,7 +1,7 @@
 package com.chakfrost.covidstatistics.workers;
 
 import android.content.Context;
-import android.text.TextUtils;
+//import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -12,23 +12,23 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.chakfrost.covidstatistics.CovidApplication;
 import com.chakfrost.covidstatistics.CovidUtils;
-import com.chakfrost.covidstatistics.models.CovidStats;
+//import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
-import com.chakfrost.covidstatistics.models.HospitalizationStat;
+//import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.CovidStatService;
-import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
+//import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
 import com.chakfrost.covidstatistics.services.IServiceCallbackGeneric;
-import com.chakfrost.covidstatistics.services.IServiceCallbackList;
+//import com.chakfrost.covidstatistics.services.IServiceCallbackList;
 import com.chakfrost.covidstatistics.services.IServiceCallbackGlobalStats;
 
-import java.text.SimpleDateFormat;
+//import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+//import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -38,6 +38,7 @@ public class RefreshStatsWorker extends Worker
     private List<Location> locations;
     private List<Location> newData;
     private int locationQueue;
+    private boolean processingRefresh;
 
     private final static CovidUtils covidUtils = CovidUtils.getInstance();
     private final static CovidStatService covidStatService = CovidStatService.getInstance();
@@ -59,13 +60,14 @@ public class RefreshStatsWorker extends Worker
             // Instantiate collection of updated locations
             newData = new CopyOnWriteArrayList<>();
             locationQueue = 0;
+            processingRefresh = true;
 
             // Update stats
             RefreshGlobalStats();
             RefreshLocationStats();
 
             // Wait for RequestQueue to clear
-            while (locationQueue > 0);
+            while (locationQueue > 0 || processingRefresh);
 
             // If there are location updates, send notification
             Log.d("RefreshStatsWorker.doWork()", "number of changes found: " + newData.size());
@@ -91,6 +93,7 @@ public class RefreshStatsWorker extends Worker
 
     private void RefreshGlobalStats()
     {
+        processingRefresh = true;
         GlobalStats global = CovidApplication.getGlobalStats();
 
         if (null == global)
@@ -138,6 +141,7 @@ public class RefreshStatsWorker extends Worker
 
     private void RefreshLocationStats()
     {
+        processingRefresh = true;
         locations = CovidApplication.getLocations();
         List<Location> needsUpdate = new ArrayList<>();
 
@@ -157,7 +161,7 @@ public class RefreshStatsWorker extends Worker
                 hours = TimeUnit.MILLISECONDS.toHours(diff);
             }
 
-            if (hours >= -1) // TODO: hours >= 6
+            if (hours >= 6)     // TODO: hours >= 6
             {
                 // Debugging
                 //List<CovidStats> c = loc.getStatistics();
@@ -176,7 +180,6 @@ public class RefreshStatsWorker extends Worker
                     loc.setLastUpdated(new Date());
 
                     // Get new stats
-                    //RefreshLocationStats(loc, startDate);
                     needsUpdate.add(loc);
                     newData .add(loc);
                 }
@@ -209,7 +212,15 @@ public class RefreshStatsWorker extends Worker
                             Log.w("RefreshStatWorker.RefreshLocationStats::updateLocations", "Updated location not found " + covidUtils.formatLocation(loc));
                         }
                     }
+
+                    // Set the locations
                     CovidApplication.setLocations(locations);
+
+                    // Update the location queue count
+                    locationQueue = 0;
+
+                    // Location refresh complete
+                    processingRefresh = false;
                 }
 
                 @Override
@@ -220,6 +231,11 @@ public class RefreshStatsWorker extends Worker
 
                 }
             });
+        }
+        else
+        {
+            locationQueue = 0;
+            processingRefresh = false;
         }
     }
 
