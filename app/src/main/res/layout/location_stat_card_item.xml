@@ -99,6 +99,7 @@
                 <ImageView
                     android:id="@+id/stats_location_confirmed_image"
                     android:contentDescription="@string/arrow_content_description"
+                    android:adjustViewBounds="true"
                     app:srcCompat="@drawable/ic_arrow_drop_down_green_24dp" />
                 <TextView
                     android:id="@+id/stats_location_confirmed_diff"
@@ -123,6 +124,7 @@
                 <ImageView
                     android:id="@+id/stats_location_deaths_image"
                     android:contentDescription="@string/arrow_content_description"
+                    android:adjustViewBounds="true"
                     app:srcCompat="@drawable/ic_arrow_drop_down_yellow_24dp"/>
                 <TextView
                     android:id="@+id/stats_location_deaths_diff"
@@ -149,6 +151,7 @@
                 <ImageView
                     android:id="@+id/stats_location_hospitalization_image"
                     android:contentDescription="@string/arrow_content_description"
+                    android:adjustViewBounds="true"
                     app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"/>
                 <TextView
                     android:id="@+id/stats_location_hospitalization_diff"
@@ -173,6 +176,7 @@
                 <ImageView
                     android:id="@+id/stats_location_active_image"
                     android:contentDescription="@string/arrow_content_description"
+                    android:adjustViewBounds="true"
                     app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"/>
                 <TextView
                     android:id="@+id/stats_location_active_diff"
@@ -199,6 +203,7 @@
                 <ImageView
                     android:id="@+id/stats_location_fatality_image"
                     android:contentDescription="@string/arrow_content_description"
+                    android:adjustViewBounds="true"
                     app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"/>
                 <TextView
                     android:id="@+id/stats_location_fatality_diff"

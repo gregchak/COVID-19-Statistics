@@ -14,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
+import androidx.annotation.WorkerThread;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,25 +24,22 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.VolleyError;
 import com.chakfrost.covidstatistics.CovidApplication;
-import com.chakfrost.covidstatistics.CovidDataStore;
 import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.MainActivity;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.adapters.LocationStatsRecyclerViewAdapter;
-import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.GlobalStats;
-import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.CovidStatService;
-import com.chakfrost.covidstatistics.services.IServiceCallbackCovidStats;
 import com.chakfrost.covidstatistics.services.IServiceCallbackGeneric;
-import com.chakfrost.covidstatistics.services.IServiceCallbackList;
 import com.chakfrost.covidstatistics.services.IServiceCallbackGlobalStats;
 import com.chakfrost.covidstatistics.ui.LocationStatsDetail;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.techyourchance.threadposter.BackgroundThreadPoster;
+import com.techyourchance.threadposter.UiThreadPoster;
 
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -51,6 +50,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -92,10 +92,13 @@ public class StatisticsFragment extends Fragment
 
     private int locationRefreshCount;
 
+    private final BackgroundThreadPoster backgroundThread = new BackgroundThreadPoster();
+    private final UiThreadPoster uiThread = new UiThreadPoster();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         statisticsViewModel = ViewModelProviders.of(requireActivity()).get(StatisticsViewModel.class);
+        locations = new ArrayList<>();
 
         View root = inflater.inflate(R.layout.fragment_statistics, container, false);
 
@@ -144,12 +147,29 @@ public class StatisticsFragment extends Fragment
 
         // Load data
         loadGlobals();
-        loadLocations(locationsView, true);
+        initializeLocations();
 
         // Set parent refresh listener
         ((MainActivity)getActivity()).setFragmentRefreshListener(this::parentOnRefresh);
 
         return root;
+    }
+
+    private void initializeLocations()
+    {
+        showProgressIndicators(2);
+        backgroundThread.post(() -> getLocationsFromAppAsync());
+    }
+
+    @WorkerThread
+    private void getLocationsFromAppAsync()
+    {
+        CompletableFuture.runAsync(() -> {
+            locations.clear();
+            locations = CovidApplication.getLocations();
+        }).thenRun(() -> {
+            uiThread.post(() -> loadLocations(null, true));
+        });
     }
 
     private void refreshData()
@@ -306,6 +326,7 @@ public class StatisticsFragment extends Fragment
         });
     }
 
+    @UiThread
     private void loadLocations(RecyclerView recyclerView, boolean refreshLocations)
     {
         // Get saved locations
@@ -313,7 +334,7 @@ public class StatisticsFragment extends Fragment
         Collections.sort(locations);
 
         // Set the layout
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        locationsView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         // Check for Location Statistics
         List<Location> locationsForDisplay = locations.stream()
@@ -324,17 +345,21 @@ public class StatisticsFragment extends Fragment
         if (locationsForDisplay.size() > 0)
         {
             // Set adapter
-            locationsListAdapter = new LocationStatsRecyclerViewAdapter(getContext(), locationsForDisplay);
+            locationsListAdapter = new LocationStatsRecyclerViewAdapter(getContext(), locations);
             locationsListAdapter.setClickListener(this::locationListAdapterClick);
             locationsListAdapter.notifyDataSetChanged();
-            recyclerView.setAdapter(locationsListAdapter);
+            locationsView.setAdapter(locationsListAdapter);
         }
 
         // If there are Locations and refresh is true
         if (refreshLocations && locations.size() > 0)
         {
             new RefreshLocationStatistics().execute(false);
-            //RefreshLocations(false);
+            //RefreshLocations(true);
+        }
+        else
+        {
+            clearProgressIndicators();
         }
     }
 
@@ -483,6 +508,329 @@ public class StatisticsFragment extends Fragment
 //        }
     }
 
+
+    private void SetLocation(Location loc)
+    {
+        loc.setLastUpdated(new Date());
+        if (null == locations)
+            locations = CovidApplication.getLocations();
+
+        // Check if location is already part of the List
+        Location found = locations.stream()
+                .filter(l -> l.getCountry().equals(loc.getCountry())
+                        && l.getProvince().equals(loc.getProvince())
+                        && l.getMunicipality().equals(loc.getMunicipality()))
+                .findFirst()
+                .orElse(null);
+
+        if (null != found)
+        {
+            Log.d("removing updated location", CovidUtils.formatLocation(found));
+            // Location is being updated
+            locations.remove(found);
+        }
+
+        // Save Location
+        Log.d("adding updated location", "");
+        locations.add(loc);
+    }
+
+    private void saveLocations()
+    {
+        CompletableFuture.runAsync(() -> {
+           CovidApplication.setLocations(locations);
+        });
+    }
+
+    private void parentOnRefresh(int resultCode, Intent data)
+    {
+        // Adding Location
+        if (resultCode == 110)
+        {
+            // Get Location from Intent
+            Location loc = (Location)data.getSerializableExtra("location");
+
+            // Log statistics to Firebase
+            Bundle bundle = new Bundle();
+            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, CovidUtils.formatLocation(loc));
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "New Location");
+            firebaseAnalytics.logEvent("ADD_LOCATION", bundle);
+
+            // Notify
+            String[] texts = CovidUtils.getRandomLocationRetrieveCompletePair();
+            retrieveLocationStatsText = texts[0];
+            completeLocationStatsText = texts[1];
+
+            Snackbar.make(getView(),
+                    MessageFormat.format("{0}",
+                            retrieveLocationStatsText),
+                    Snackbar.LENGTH_SHORT)
+                    .setAction("Action", null).show();
+
+            // Set date to start getting report
+            Calendar startDate = Calendar.getInstance();
+            startDate.add(Calendar.DATE, -1);
+
+            // Set ProgressBar and refresh counter
+            if (progressBar.getVisibility() == View.VISIBLE)
+            {
+                locationRefreshCount++;
+            }
+            else
+            {
+                progressBar.setVisibility(View.VISIBLE);
+                locationRefreshCount = 1;
+            }
+
+            // Find 2 character state abbreviation, if applicable
+            loc.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(loc));
+
+            // Get stats
+            Log.d("StatisticsFragment.parentOnRefresh()", MessageFormat.format("Location: {0}", CovidUtils.formatLocation(loc)));
+
+            // Get location stats in background
+            backgroundThread.post(() ->  getAllStatsForLocation(loc));
+        }
+    }
+
+    @WorkerThread
+    private void getAllStatsForLocation(Location loc)
+    {
+        CovidStatService.getAllLocationStats(loc, new IServiceCallbackGeneric()
+        {
+            @Override
+            public <T> void onSuccess(T result)
+            {
+                Log.d("StatisticsFragment.parentOnRefresh()", MessageFormat.format("Location callback for: {0}", CovidUtils.formatLocation(loc)));
+                Location populatedLocation = (Location)result;
+                populatedLocation.setLastUpdated(new Date());
+                locationRefreshCount--;
+
+                // Update UI with new location
+                uiThread.post(() -> addLocationDataInView(populatedLocation));
+
+                if (locationRefreshCount == 0)
+                {
+                    locationRefreshComplete = true;
+
+                    // Dismiss progress indicator and start save
+                    uiThread.post(() -> {
+                        clearProgressIndicators();
+                        saveLocations();
+                    });
+                }
+
+                // Notify
+                uiThread.post(() -> {
+                    Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                });
+            }
+
+            @Override
+            public void onError(Error err)
+            {
+                Log.e("StatisticsFragment.parentOnRefresh()", err.toString());
+            }
+        });
+    }
+
+    private void clearProgressIndicators()
+    {
+        // Dismiss progress indicator
+        swipeContainer.setRefreshing(false);
+        manualRefresh = false;
+        progressBar.setVisibility(View.GONE);
+
+
+//        if (manualRefresh && globalRefreshComplete)
+//            swipeContainer.setRefreshing(false);
+//        else if (!manualRefresh)
+//            progressBar.setVisibility(View.GONE);
+    }
+
+    private void showProgressIndicators(int which)
+    {
+        switch(which)
+        {
+            case 1:
+                swipeContainer.setRefreshing(true);
+                break;
+            case 2:
+                progressBar.setVisibility(View.VISIBLE);
+                break;
+            default:
+                swipeContainer.setRefreshing(true);
+                progressBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Updates displayed location data
+     * @param updated Location object that has the updates
+     */
+    private void updateLocationDataInView(Location updated)
+    {
+        Location current = locations.stream()
+                .filter(l -> l.getCountry().equals(updated.getCountry())
+                        && l.getProvince().equals(updated.getProvince())
+                        && l.getMunicipality().equals(updated.getMunicipality()))
+                .findFirst()
+                .orElse(null);
+
+        if (null == current)
+        {
+            Log.w("updateLocationDataInView()", "Cannot find location to be updated");
+            addLocationDataInView(updated);
+            return;
+        }
+
+        int arrayIndex = locations.indexOf(current);
+        locations.set(arrayIndex, updated);
+        locationsListAdapter.notifyItemChanged(arrayIndex);
+    }
+
+    /**
+     * Adds a new Location to view
+     * @param added Location object to be added to view
+     */
+    private void addLocationDataInView(Location added)
+    {
+        Location current = locations.stream()
+                .filter(l -> l.getCountry().equals(added.getCountry())
+                        && l.getProvince().equals(added.getProvince())
+                        && l.getMunicipality().equals(added.getMunicipality()))
+                .findFirst()
+                .orElse(null);
+
+        if (null == current)
+        {
+            // Add to list
+            locations.add(added);
+        }
+
+        // Sort before getting index
+        Collections.sort(locations);
+        int arrayIndex = locations.indexOf(added);
+
+        locationsListAdapter.notifyItemInserted(arrayIndex);
+    }
+
+    /**
+     * Removes a Location from the view
+     * @param removed Location object to be removed from view
+     */
+    private void removeLocationDataInView(Location removed)
+    {
+        Location current = locations.stream()
+                .filter(l -> l.getCountry().equals(removed.getCountry())
+                        && l.getProvince().equals(removed.getProvince())
+                        && l.getMunicipality().equals(removed.getMunicipality()))
+                .findFirst()
+                .orElse(null);
+
+        if (null == current)
+        {
+            Log.w("removeLocationDataInView()", "Cannot find location to be removed");
+            return;
+        }
+
+        int arrayIndex = locations.indexOf(current);
+        locations.remove(arrayIndex);
+        locationsListAdapter.notifyItemRemoved(arrayIndex);
+    }
+
+
+    /**
+     * Class for handling the fetching of Location stats
+     * asynchronously, off the Main UI thread
+     */
+    public class RefreshLocationStatistics extends AsyncTask<Boolean, Integer, String>
+    {
+        @Override
+        protected void onPreExecute()
+        {
+            progressBar.setVisibility(View.VISIBLE);
+            locationsUpdated = false;
+        }
+
+        @Override
+        protected String doInBackground(Boolean... refresh)
+        {
+            for (int i = 0; i < refresh.length; i++)
+            {
+                RefreshLocations(refresh[i]);
+            }
+
+            // Wait for refresh to finish
+            while (locationRefreshCount != 0);
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            locationRefreshComplete = true;
+            //loadLocations(locationsView, false);
+
+            // Update the view with the updated data
+            for (Location updated: locations)
+            {
+                updateLocationDataInView(updated);
+            }
+
+            if (locationsUpdated && locationRefreshComplete)
+            {
+                // Notify
+                Snackbar.make(getView(), "Your statistical awesome-sauce has been updated", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null).show();
+            }
+
+
+            // Dismiss progress indicator
+            if (globalRefreshComplete)
+            {
+                clearProgressIndicators();
+            }
+        }
+    }
+
+    /**
+     * Class for handling the fetching of Global stats
+     * asynchronously, off the Main UI thread
+     */
+    public class RefreshGlobalStatistics extends AsyncTask<Boolean, Integer, String>
+    {
+        @Override
+        protected void onPreExecute()
+        {
+            progressBar.setVisibility(View.VISIBLE);
+            locationsUpdated = false;
+        }
+
+        @Override
+        protected String doInBackground(Boolean... refresh)
+        {
+            for (int i = 0; i < refresh.length; i++)
+                retrieveGlobalStatsData(refresh[i]);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            globalRefreshComplete = true;
+            if (locationRefreshComplete)
+            {
+                clearProgressIndicators();
+            }
+        }
+    }
+
+
 /*    private void ProcessCovidStat(Location loc, CovidStats stat, Calendar dateToCheck,
                                   List<HospitalizationStat> hospitalizationStats,
                                   boolean manualRefresh)
@@ -549,7 +897,7 @@ public class StatisticsFragment extends Fragment
             Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
                     .setAction("Action", null).show();
         }
-    }*/
+    }
 
     private void GetStatsForLocation(Location location, Calendar dateToCheck, List<HospitalizationStat> hospitalizationStats, boolean manualRefresh)
     {
@@ -561,6 +909,8 @@ public class StatisticsFragment extends Fragment
 
         GetCovidStat(location, dateToCheck, hospitalizationStats, manualRefresh);
     }
+
+
 
     private void GetCovidStat(Location location, Calendar dateToCheck, List<HospitalizationStat> hospitalizationStats, boolean manualRefresh)
     {
@@ -597,212 +947,5 @@ public class StatisticsFragment extends Fragment
             }
         });
     }
-
-    private void SetLocation(Location loc)
-    {
-        loc.setLastUpdated(new Date());
-        if (null == locations)
-            locations = CovidApplication.getLocations();
-
-        // Check if location is already part of the List
-        Location found = locations.stream()
-                .filter(l -> l.getCountry().equals(loc.getCountry())
-                        && l.getProvince().equals(loc.getProvince())
-                        && l.getMunicipality().equals(loc.getMunicipality()))
-                .findFirst()
-                .orElse(null);
-
-        if (null != found)
-        {
-            Log.d("removing updated location", CovidUtils.formatLocation(found));
-            // Location is being updated
-            locations.remove(found);
-        }
-
-        // Save Location
-        Log.d("adding updated location", "");
-        locations.add(loc);
-    }
-
-    private void parentOnRefresh(int resultCode, Intent data)
-    {
-        // Adding Location
-        if (resultCode == 110)
-        {
-            // Get Location from Intent
-            Location loc = (Location)data.getSerializableExtra("location");
-
-            // Log statistics to Firebase
-            Bundle bundle = new Bundle();
-            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, CovidUtils.formatLocation(loc));
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "New Location");
-            firebaseAnalytics.logEvent("ADD_LOCATION", bundle);
-
-            // Notify
-            String[] texts = CovidUtils.getRandomLocationRetrieveCompletePair();
-            retrieveLocationStatsText = texts[0];
-            completeLocationStatsText = texts[1];
-
-            Snackbar.make(getView(),
-                    MessageFormat.format("{0}",
-                            retrieveLocationStatsText),
-                    Snackbar.LENGTH_SHORT)
-                    .setAction("Action", null).show();
-
-            // Set date to start getting report
-            Calendar startDate = Calendar.getInstance();
-            startDate.add(Calendar.DATE, -1);
-
-            // Set ProgressBar and refresh counter
-            if (progressBar.getVisibility() == View.VISIBLE)
-            {
-                locationRefreshCount++;
-            }
-            else
-            {
-                progressBar.setVisibility(View.VISIBLE);
-                locationRefreshCount = 1;
-            }
-
-            // Find 2 character state abbreviation, if applicable
-            loc.setUsStateAbbreviation(CovidUtils.getUSStateAbbreviation(loc));
-
-            // Get stats
-            Log.d("StatisticsFragment.parentOnRefresh()", MessageFormat.format("Location: {0}", CovidUtils.formatLocation(loc)));
-            CovidStatService.getAllLocationStats(loc, new IServiceCallbackGeneric()
-            {
-                @Override
-                public <T> void onSuccess(T result)
-                {
-                    Log.d("StatisticsFragment.parentOnRefresh()", MessageFormat.format("Location callback for: {0}", CovidUtils.formatLocation(loc)));
-                    Location populatedLocation = (Location)result;
-                    populatedLocation.setLastUpdated(new Date());
-                    locationRefreshCount--;
-
-                    // Stat for next day found, stop
-                    SetLocation(populatedLocation);
-                    loadLocations(locationsView, false);
-
-
-                    if (locationRefreshCount == 0)
-                    {
-                        locationRefreshComplete = true;
-
-                        // Dismiss progress indicator
-                        clearProgressIndicators();
-                        progressBar.setVisibility(View.GONE);
-
-                        CovidApplication.setLocations(locations);
-                    }
-
-                    // Notify
-                    Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
-                }
-
-                @Override
-                public void onError(Error err)
-                {
-                    Log.e("StatisticsFragment.parentOnRefresh()", err.toString());
-                }
-            });
-        }
-    }
-
-    private void clearProgressIndicators()
-    {
-        // Dismiss progress indicator
-        swipeContainer.setRefreshing(false);
-        manualRefresh = false;
-        progressBar.setVisibility(View.GONE);
-
-
-//        if (manualRefresh && globalRefreshComplete)
-//            swipeContainer.setRefreshing(false);
-//        else if (!manualRefresh)
-//            progressBar.setVisibility(View.GONE);
-    }
-
-
-    /**
-     * Class for handling the fetching of Location stats
-     * asynchronously, off the Main UI thread
-     */
-    public class RefreshLocationStatistics extends AsyncTask<Boolean, Integer, String>
-    {
-        @Override
-        protected void onPreExecute()
-        {
-            progressBar.setVisibility(View.VISIBLE);
-            locationsUpdated = false;
-        }
-
-        @Override
-        protected String doInBackground(Boolean... refresh)
-        {
-            for (int i = 0; i < refresh.length; i++)
-            {
-                RefreshLocations(refresh[i]);
-            }
-
-            // Wait for refresh to finish
-            while (locationRefreshCount != 0);
-
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result)
-        {
-            locationRefreshComplete = true;
-            loadLocations(locationsView, false);
-            if (locationsUpdated && locationRefreshComplete)
-            {
-                // Notify
-                Snackbar.make(getView(), "Your statistical awesome-sauce has been updated", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
-            }
-
-
-            // Dismiss progress indicator
-            if (globalRefreshComplete)
-            {
-                clearProgressIndicators();
-            }
-        }
-    }
-
-    /**
-     * Class for handling the fetching of Global stats
-     * asynchronously, off the Main UI thread
-     */
-    public class RefreshGlobalStatistics extends AsyncTask<Boolean, Integer, String>
-    {
-        @Override
-        protected void onPreExecute()
-        {
-            progressBar.setVisibility(View.VISIBLE);
-            locationsUpdated = false;
-        }
-
-        @Override
-        protected String doInBackground(Boolean... refresh)
-        {
-            for (int i = 0; i < refresh.length; i++)
-                retrieveGlobalStatsData(refresh[i]);
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result)
-        {
-            globalRefreshComplete = true;
-            if (locationRefreshComplete)
-            {
-                clearProgressIndicators();
-            }
-        }
-    }
+ */
 }

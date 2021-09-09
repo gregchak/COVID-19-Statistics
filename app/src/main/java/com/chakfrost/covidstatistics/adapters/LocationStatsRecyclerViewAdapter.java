@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -354,8 +355,11 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
                 fatalityImage.setImageResource(CovidUtils.determineArrow(stat.getPositivityRate(), previousStat.getPositivityRate(), false));
             }
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US);
-            lastUpdated.setText(MessageFormat.format("as of {0}", dateFormat.format(stat.getLastUpdate())));
+            //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy hh:mm aa");
+            dateFormat.setTimeZone(TimeZone.getDefault());
+            lastUpdated.setText(MessageFormat.format("as of {0}", dateFormat.format(location.getLastUpdated())));
 
             buildChart(location.getStatistics());
         }

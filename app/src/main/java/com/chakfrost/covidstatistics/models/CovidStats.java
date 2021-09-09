@@ -67,9 +67,37 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     @Expose(serialize = false)
     private Integer hospitalizationsCurrent;
     @Expose(serialize = false)
+    private Integer hospitalizationsCovidTotal;
+    @Expose(serialize = false)
+    private Integer hospitalizationsCovidDiff;
+    @Expose(serialize = false)
+    private Integer hospitalizationsCovidCurrent;
+    @Expose(serialize = false)
+    private double hospitalizationsPercentCovid;
+    @Expose(serialize = false)
+    private double hospitalizationsPercentFull;
+    @Expose(serialize = false)
+    private Integer hospitalizationCapacity;
+
+    @Expose(serialize = false)
     private Integer ICUTotal;
     @Expose(serialize = false)
+    private Integer ICUDiff;
+    @Expose(serialize = false)
     private Integer ICUCurrent;
+    @Expose(serialize = false)
+    private Integer ICUCovidTotal;
+    @Expose(serialize = false)
+    private Integer ICUCovidDiff;
+    @Expose(serialize = false)
+    private Integer ICUCovidCurrent;
+    @Expose(serialize = false)
+    private double ICUPercentCovid;
+    @Expose(serialize = false)
+    private double ICUPercentFull;
+    @Expose(serialize = false)
+    private Integer ICUCapacity;
+
     @Expose(serialize = false)
     private double PositivityRate;
 
@@ -181,6 +209,17 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     {
         return ICUCurrent;
     }
+    public Integer getHospitalizationsCovidTotal() { return hospitalizationsCovidTotal; }
+    public Integer getHospitalizationsCovidDiff()  { return hospitalizationsCovidDiff; }
+    public Integer getHospitalizationsCovidCurrent() { return hospitalizationsCovidCurrent;  }
+    public Integer getICUDiff() { return ICUDiff; }
+    public Integer getICUCovidTotal() { return ICUCovidTotal; }
+    public Integer getICUCovidDiff() { return ICUCovidDiff; }
+    public Integer getICUCovidCurrent() { return ICUCovidCurrent; }
+    public double getHospitalizationsPercentCovid(){return hospitalizationsPercentCovid;}
+    public double getICUPercentCovid() { return ICUPercentCovid; }
+    public Integer getHospitalizationCapacity() {  return hospitalizationCapacity; }
+    public Integer getICUCapacity() { return ICUCapacity; }
 
 
     /* Setters */
@@ -222,4 +261,35 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     public void setCaseDensity(double caseDensity) { CaseDensity = caseDensity; }
     public void setCdcTransmissionLevel(String cdcTransmissionLevel) { CdcTransmissionLevel = cdcTransmissionLevel;  }
     public void setInfectionRate(double infectionRate) { InfectionRate = infectionRate;}
+    public void setHospitalizationsCovidTotal(Integer hospitalizationsCovidTotal) { this.hospitalizationsCovidTotal = hospitalizationsCovidTotal; }
+    public void setHospitalizationsCovidDiff(Integer hospitalizationsCovidDiff) { this.hospitalizationsCovidDiff = hospitalizationsCovidDiff; }
+    public void setHospitalizationsCovidCurrent(Integer hospitalizationsCovidCurrent) { this.hospitalizationsCovidCurrent = hospitalizationsCovidCurrent; }
+    public void setICUDiff(Integer ICUDiff) { this.ICUDiff = ICUDiff; }
+    public void setICUCovidTotal(Integer ICUCovidTotal) { this.ICUCovidTotal = ICUCovidTotal; }
+    public void setICUCovidDiff(Integer ICUCovidDiff) { this.ICUCovidDiff = ICUCovidDiff; }
+    public void setICUCovidCurrent(Integer ICUCovidCurrent) { this.ICUCovidCurrent = ICUCovidCurrent; }
+    public void setHospitalizationsPercentCovid(double hospitalizationsPercentCovid) { this.hospitalizationsPercentCovid = hospitalizationsPercentCovid; }
+    public void setICUPercentCovid(double ICUPercentCovid) { this.ICUPercentCovid = ICUPercentCovid; }
+    public void setHospitalizationCapacity(Integer hospitalizationCapacity) { this.hospitalizationCapacity = hospitalizationCapacity; }
+    public void setICUCapacity(Integer ICUCapacity) { this.ICUCapacity = ICUCapacity; }
+
+    public double getHospitalizationsPercentFull()
+    {
+        return hospitalizationsPercentFull;
+    }
+
+    public void setHospitalizationsPercentFull(double hospitalizationsPercentFull)
+    {
+        this.hospitalizationsPercentFull = hospitalizationsPercentFull;
+    }
+
+    public double getICUPercentFull()
+    {
+        return ICUPercentFull;
+    }
+
+    public void setICUPercentFull(double ICUPercentFull)
+    {
+        this.ICUPercentFull = ICUPercentFull;
+    }
 }
