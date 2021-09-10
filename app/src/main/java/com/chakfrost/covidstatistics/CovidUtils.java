@@ -6,13 +6,18 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.chakfrost.covidstatistics.models.CovidStats;
+import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
 import com.chakfrost.covidstatistics.services.CovidActNowService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -293,4 +298,22 @@ public class CovidUtils
 
         return retVal;
     }
+
+    public static String serializeLocations(List<Location> locations)
+    {
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+
+        return gson.toJson(locations);
+    }
+
+    public List<Location> deserializeLocations(String locations)
+    {
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+
+        Type type = new TypeToken<List<Location>>(){}.getType();
+        return gson.fromJson(locations, type);
+    }
+
 }

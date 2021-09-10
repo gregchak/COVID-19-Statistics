@@ -14,9 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,6 +37,7 @@ import com.chakfrost.covidstatistics.services.CovidStatService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackGeneric;
 import com.chakfrost.covidstatistics.services.IServiceCallbackGlobalStats;
 import com.chakfrost.covidstatistics.ui.LocationStatsDetail;
+import com.chakfrost.covidstatistics.covidObservables.LocationsRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -50,11 +53,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class StatisticsFragment extends Fragment
+public class StatisticsFragment extends Fragment implements Observer
 {
     private GlobalStats summary;
     private List<Location> locations;
@@ -92,12 +97,31 @@ public class StatisticsFragment extends Fragment
 
     private int locationRefreshCount;
 
+    private CovidUtils covidUtils = CovidUtils.getInstance();
+
     private final BackgroundThreadPoster backgroundThread = new BackgroundThreadPoster();
     private final UiThreadPoster uiThread = new UiThreadPoster();
+    private Observable locationsObservable;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        statisticsViewModel = ViewModelProviders.of(requireActivity()).get(StatisticsViewModel.class);
+        super.onCreateView(inflater, container, savedInstanceState);
+        // retain this fragment
+        //setRetainInstance(true);
+
+        //statisticsViewModel = ViewModelProviders.of(requireActivity()).get(StatisticsViewModel.class);
+//        statisticsViewModel = new ViewModelProvider(this).get(StatisticsViewModel.class);
+//
+//        if (savedInstanceState != null)
+//        {
+//            //locations = covidUtils.deserializeLocations(savedInstanceState.getString("LOCATIONS"));
+//
+//        }
+//        else
+//        {
+//            locations = new ArrayList<>();
+//        }
+
         locations = new ArrayList<>();
 
         View root = inflater.inflate(R.layout.fragment_statistics, container, false);
@@ -112,9 +136,9 @@ public class StatisticsFragment extends Fragment
         deathsDiff = root.findViewById(R.id.stats_global_deaths_diff);
         deathsArrow = root.findViewById(R.id.stats_global_deaths_image);
 
-        recoveredValue = root.findViewById(R.id.stats_global_recovered_value);
-        recoveredDiff = root.findViewById(R.id.stats_global_recovered_diff);
-        recoveredArrow = root.findViewById(R.id.stats_global_recovered_image);
+//        recoveredValue = root.findViewById(R.id.stats_global_recovered_value);
+//        recoveredDiff = root.findViewById(R.id.stats_global_recovered_diff);
+//        recoveredArrow = root.findViewById(R.id.stats_global_recovered_image);
 
         activeValue = root.findViewById(R.id.stats_global_active_value);
         activeDiff = root.findViewById(R.id.stats_global_active_diff);
@@ -129,6 +153,9 @@ public class StatisticsFragment extends Fragment
 
         swipeContainer = root.findViewById(R.id.stats_global_swipe_refresh_layout);
         swipeContainer.setOnRefreshListener(this::refreshData);
+
+        locationsObservable = LocationsRepository.getInstance();
+        //locationsObservable.addObserver(this);
 
         // Configure the refreshing colors
         swipeContainer.setColorSchemeResources(R.color.colorPrimaryDark);
@@ -146,19 +173,69 @@ public class StatisticsFragment extends Fragment
         locationRefreshComplete = true;
 
         // Load data
-        loadGlobals();
         initializeLocations();
+        initializeGlobals();
 
         // Set parent refresh listener
         ((MainActivity)getActivity()).setFragmentRefreshListener(this::parentOnRefresh);
 
+
         return root;
+    }
+
+    @Override
+    public void update(Observable o, Object arg)
+    {
+        if (o instanceof LocationsRepository)
+        {
+            uiThread.post(() -> showProgressIndicators(2));
+            //showProgressIndicators(2);
+            // if size is 0 then update as an initial load
+            if (locations.size() == 0)
+            {
+                uiThread.post(() -> {
+                    locations = (List<Location>)arg;
+                    loadLocations(null, false);
+                });
+            }
+            else
+            {
+                locations = (List<Location>)arg;
+
+                // Update locations in list
+                for (Location l: locations)
+                {
+                    //updateLocationDataInView(l);
+                    uiThread.post(() -> updateLocationDataInView(l));
+                }
+                uiThread.post(() -> locations = (List<Location>)arg);
+                //locations = (List<Location>)arg;
+            }
+        }
     }
 
     private void initializeLocations()
     {
         showProgressIndicators(2);
         backgroundThread.post(() -> getLocationsFromAppAsync());
+    }
+
+    private void initializeGlobals()
+    {
+        showProgressIndicators(2);
+        backgroundThread.post(() -> getGlobalStatsFromAppAsync());
+    }
+
+    @WorkerThread
+    private void getGlobalStatsFromAppAsync()
+    {
+        CompletableFuture.runAsync(() -> {
+            summary  = new GlobalStats();
+            summary = CovidApplication.getGlobalStats();
+        }).thenRun(() -> {
+            uiThread.post(() -> loadGlobals());
+            //LocationsRepository.getInstance().setLocations(locations);
+        });
     }
 
     @WorkerThread
@@ -169,6 +246,7 @@ public class StatisticsFragment extends Fragment
             locations = CovidApplication.getLocations();
         }).thenRun(() -> {
             uiThread.post(() -> loadLocations(null, true));
+            //LocationsRepository.getInstance().setLocations(locations);
         });
     }
 
@@ -186,13 +264,11 @@ public class StatisticsFragment extends Fragment
 
     private void loadGlobals()
     {
-        // Populate summary variable
-        summary = CovidApplication.getGlobalStats();
-
         // If summary is null, get it
         if (null == summary)
         {
-            new RefreshGlobalStatistics().execute(false);
+            //new RefreshGlobalStatistics().execute(false);
+            initializeGlobals();
         }
         else
         {
@@ -233,9 +309,9 @@ public class StatisticsFragment extends Fragment
         deathsArrow.setImageResource(CovidUtils.determineArrow(summary.getTotalDeaths(), summary.getNewDeaths(), false));
 
         // Recovered
-        recoveredValue.setText(NumberFormat.getInstance().format(summary.getTotalRecovered()));
-        recoveredDiff.setText(NumberFormat.getInstance().format(summary.getNewRecovered()));
-        recoveredArrow.setImageResource(CovidUtils.determineArrow(summary.getTotalRecovered(), summary.getNewRecovered(), true));
+//        recoveredValue.setText(NumberFormat.getInstance().format(summary.getTotalRecovered()));
+//        recoveredDiff.setText(NumberFormat.getInstance().format(summary.getNewRecovered()));
+//        recoveredArrow.setImageResource(CovidUtils.determineArrow(summary.getTotalRecovered(), summary.getNewRecovered(), true));
 
         // Active
         activeValue.setText(NumberFormat.getInstance().format(summary.getTotalActive()));
@@ -330,7 +406,6 @@ public class StatisticsFragment extends Fragment
     private void loadLocations(RecyclerView recyclerView, boolean refreshLocations)
     {
         // Get saved locations
-        locations = CovidApplication.getLocations();
         Collections.sort(locations);
 
         // Set the layout
@@ -366,9 +441,10 @@ public class StatisticsFragment extends Fragment
     private void locationListAdapterClick(Location selectedLocation)
     {
         // Set selected Location
-        statisticsViewModel.setSelectedLocation(selectedLocation);
+        //statisticsViewModel.setSelectedLocation(selectedLocation);
 
         // Build Intent for LocationStatDetail Activity
+        //CovidApplication.setCurrentLocation(selectedLocation);
         Intent details = new Intent(getActivity(), LocationStatsDetail.class);
         details.putExtra("location", selectedLocation);
 
@@ -513,7 +589,7 @@ public class StatisticsFragment extends Fragment
     {
         loc.setLastUpdated(new Date());
         if (null == locations)
-            locations = CovidApplication.getLocations();
+            locations = new ArrayList<>();
 
         // Check if location is already part of the List
         Location found = locations.stream()

@@ -163,29 +163,30 @@
                 <TextView/> <!-- placeholder needed for alignment -->
 
                 <!-- fourth row -->
-                <TextView
-                    android:id="@+id/stats_location_active_label"
-                    android:textColor="@color/textPrimary"
-                    android:text="@string/lbl_active"/>
-                <TextView
-                    android:id="@+id/stats_location_active_value"
-                    android:text="@string/number"
-                    android:textAlignment="textEnd"
-                    android:layout_gravity="end"
-                    android:textColor="@color/textPrimary" />
-                <ImageView
-                    android:id="@+id/stats_location_active_image"
-                    android:contentDescription="@string/arrow_content_description"
-                    android:adjustViewBounds="true"
-                    app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"/>
-                <TextView
-                    android:id="@+id/stats_location_active_diff"
-                    android:textColor="@color/textPrimary"
-                    android:textAlignment="textEnd"
-                    android:layout_gravity="end"
-                    android:text="@string/number"/>
+<!--                <TextView-->
+<!--                    android:id="@+id/stats_location_active_label"-->
+<!--                    android:textColor="@color/textPrimary"-->
+<!--                    android:text="@string/lbl_active"/>-->
+<!--                <TextView-->
+<!--                    android:id="@+id/stats_location_active_value"-->
+<!--                    android:text="@string/number"-->
+<!--                    android:textAlignment="textEnd"-->
+<!--                    android:layout_gravity="end"-->
+<!--                    android:textColor="@color/textPrimary" />-->
+<!--                <ImageView-->
+<!--                    android:id="@+id/stats_location_active_image"-->
+<!--                    android:contentDescription="@string/arrow_content_description"-->
+<!--                    android:adjustViewBounds="true"-->
+<!--                    app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"/>-->
+<!--                <TextView-->
+<!--                    android:id="@+id/stats_location_active_diff"-->
+<!--                    android:textColor="@color/textPrimary"-->
+<!--                    android:textAlignment="textEnd"-->
+<!--                    android:layout_gravity="end"-->
+<!--                    android:text="@string/number"/>-->
 
-                <TextView/> <!-- placeholder needed for alignment -->
+<!--                <TextView/> -->
+                <!-- placeholder needed for alignment -->
 
                 <!-- fifth row -->
                 <TextView

@@ -171,9 +171,9 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             hospitalization = itemView.findViewById(R.id.stats_location_hospitalization_value);
             hospitalizationDiff = itemView.findViewById(R.id.stats_location_hospitalization_diff);
             hospitalizationImage = itemView.findViewById(R.id.stats_location_hospitalization_image);
-            active = itemView.findViewById(R.id.stats_location_active_value);
-            activeDiff = itemView.findViewById(R.id.stats_location_active_diff);
-            activeImage = itemView.findViewById(R.id.stats_location_active_image);
+//            active = itemView.findViewById(R.id.stats_location_active_value);
+//            activeDiff = itemView.findViewById(R.id.stats_location_active_diff);
+//            activeImage = itemView.findViewById(R.id.stats_location_active_image);
             fatalityLabel = itemView.findViewById(R.id.stats_location_fatality_label);
             fatality = itemView.findViewById(R.id.stats_location_fatality_value);
             fatalityDiff = itemView.findViewById(R.id.stats_location_fatality_diff);
@@ -308,18 +308,18 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
 //            }
 
             // Active data
-            if (stat.getTotalActive() == 0)
-            {
-                active.setText("N/R");
-                activeDiff.setText("N/R");
-                activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
-            }
-            else
-            {
-                active.setText(NumberFormat.getInstance().format(stat.getTotalActive()));
-                activeDiff.setText(NumberFormat.getInstance().format(stat.getDiffActive()));
-                activeImage.setImageResource(CovidUtils.determineArrow(stat.getTotalActive(), previousStat.getTotalActive(), false));
-            }
+//            if (stat.getTotalActive() == 0)
+//            {
+//                active.setText("N/R");
+//                activeDiff.setText("N/R");
+//                activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
+//            }
+//            else
+//            {
+//                active.setText(NumberFormat.getInstance().format(stat.getTotalActive()));
+//                activeDiff.setText(NumberFormat.getInstance().format(stat.getDiffActive()));
+//                activeImage.setImageResource(CovidUtils.determineArrow(stat.getTotalActive(), previousStat.getTotalActive(), false));
+//            }
 
             // Fatality/Positivity rate
             if (stat.getPositivityRate() == 0)

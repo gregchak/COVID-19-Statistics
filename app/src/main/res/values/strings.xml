@@ -57,12 +57,13 @@
 
     <string name="about_text">
         All data for this application is supplied by COVID-19 Statistics API
-        (<a href="https://covid-api.com">https://covid-api.com/</a>).
-        Data is sourced from COVID-19 Data Repository by the Center for Systems Science and Engineering
+        (<a href="https://covid-api.com">https://covid-api.com/</a>) and COVID ActNow
+        (<a href="https://covidactnow.org/">https://covidactnow.org</a>).
+        Data from COVID-19 Statistics is sourced from COVID-19 Data Repository by the Center for Systems Science and Engineering
         (CSSE) at Johns Hopkins University (<a href="https://systems.jhu.edu/">https://systems.jhu.edu/</a>).
-        The Johns Hopkins University hereby disclaims any and all
-        representations and warranties with respect to the Website, including accuracy, fitness for use,
-        reliability, completeness, and non-infringement of third party rights.
+        Data from COVID ActNow is provided by Act Now Coalition, an independent 501(c)(3) nonprofit founded in March 2020.
+        They build data and storytelling products that are accurate and actionable, so that everyone can make informed decisions
+        during crises, whether COVID or climate change.
     </string>
 
     <string-array name="us_states">

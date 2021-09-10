@@ -7,6 +7,7 @@ import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.chakfrost.covidstatistics.CovidApplication;
 import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.models.CovidStats;
@@ -17,6 +18,8 @@ import com.chakfrost.covidstatistics.services.covidActNow.StateHistory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import org.json.JSONObject;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -50,6 +53,16 @@ public class CovidActNowService
         Log.d("CovidActNowService.getStateStat()", url);
 
         GetCurrent(url, callback);
+    }
+
+    public static void getStateHistoryStat(final String state, IServiceCallbackVolleyGeneric callback)
+    {
+        String url;
+        url = MessageFormat.format("{0}/state/{1}.timeseries.json?apiKey={2}",baseApi, state, apiKey);
+
+        Log.d("CovidActNowService.getStateHistoryStat()", url);
+
+        GetTimeseries(url, callback);
     }
 
     public static void getStateHistoryStat(final String state, Calendar dateToCheck, IServiceCallbackCovidStats callback)
@@ -89,6 +102,16 @@ public class CovidActNowService
         GetCurrent(url, callback);
     }
 
+    public static void getCountyHistoricalStat(final String countyFips, IServiceCallbackVolleyGeneric callback)
+    {
+        String url;
+        url = MessageFormat.format("{0}/county/{1}.timeseries.json?apiKey={2}",baseApi, countyFips, apiKey);
+
+        Log.d("CovidActNowService.getCountyHistoricalStat()", url);
+
+        GetTimeseries(url, callback);
+    }
+
     public static void getCountyHistoricalStat(final String countyFips, Calendar dateToCheck, IServiceCallbackCovidStats callback)
     {
         // Find cached data
@@ -124,6 +147,16 @@ public class CovidActNowService
         Log.d("CovidActNowService.getUSStats()", url);
 
         GetCurrent(url, callback);
+    }
+
+    public static void getUSHistoricalStats(IServiceCallbackVolleyGeneric callback)
+    {
+        String url;
+        url = MessageFormat.format("{0}/country/US.timeseries.json?apiKey={1}",baseApi, apiKey);
+
+        Log.d("CovidActNowService.getUSHistoricalStats()", url);
+
+        GetTimeseries(url, callback);
     }
 
     public static void getUSHistoricalStats(Calendar dateToCheck, IServiceCallbackCovidStats callback)
@@ -244,6 +277,39 @@ public class CovidActNowService
         CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
     }
 
+    private static void GetTimeseries(String url, IServiceCallbackVolleyGeneric callback)
+    {
+        JsonObjectRequest jor = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+                response ->
+                {
+                    // Transform response to service object
+                    Gson g = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+                    StateHistory r = g.fromJson(response.toString(), StateHistory.class);
+
+                    // Add to cache
+                    cachedData.add(r);
+
+                    // Set callback
+                    callback.onSuccess(r);
+                    return;
+                },
+                error ->
+                {
+                    if (!TextUtils.isEmpty(error.getMessage()))
+                        VolleyLog.e("CovidActNowService.getStateHistoryStat()", error.toString());
+                    else
+                        VolleyLog.e("CovidActNowService.getStateHistoryStat()", "Error occurred while executing CovidActNowService.getStateHistoryStat()");
+
+                    Log.e("CovidActNowService.getStateHistoryStat()", CovidUtils.formatError(error.getMessage(), error.getStackTrace().toString()));
+                    callback.onError(error);
+                }
+        );
+
+        // Add request to queue
+        CovidRequestQueue.getInstance(CovidApplication.getContext()).addToRequestQueue(jor);
+    }
+
     private static void GetTimeseries(String url, Calendar dateToCheck, IServiceCallbackCovidStats callback)
     {
         JsonObjectRequest jor = new JsonObjectRequest(
@@ -332,7 +398,7 @@ public class CovidActNowService
         return result;
     }
 
-    private static CovidStats ProcessServiceResult(StateHistory response, Calendar dateToCheck)
+    public static CovidStats ProcessServiceResult(StateHistory response, Calendar dateToCheck)
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 

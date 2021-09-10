@@ -6,9 +6,13 @@ import android.util.Log;
 import com.android.volley.VolleyError;
 import com.chakfrost.covidstatistics.CovidApplication;
 import com.chakfrost.covidstatistics.CovidUtils;
+import com.chakfrost.covidstatistics.covidObservables.LocationObservable;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
+import com.chakfrost.covidstatistics.services.covidActNow.ActualTimeseries;
+import com.chakfrost.covidstatistics.services.covidActNow.MetricTimeseries;
+import com.chakfrost.covidstatistics.services.covidActNow.StateHistory;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -106,23 +111,25 @@ public class CovidStatService
                     {
                         newLocation.setFips((String)result);
 
-                        GetLocationStats(newLocation, startDate, true, new IServiceCallbackGeneric()
-                        {
-                            @Override
-                            public <T> void onSuccess(T result)
-                            {
-                                callback.onSuccess(result);
-                            }
+                        GetLocationStatsTimeseries(newLocation, startDate,  callback);
 
-                            @Override
-                            public void onError(Error err)
-                            {
-                                Log.e("CovidStatService.refreshLocationStats()",
-                                        CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
-
-                                callback.onError(new Error(err));
-                            }
-                        });
+//                        GetLocationStats(newLocation, startDate, true, new IServiceCallbackGeneric()
+//                        {
+//                            @Override
+//                            public <T> void onSuccess(T result)
+//                            {
+//                                callback.onSuccess(result);
+//                            }
+//
+//                            @Override
+//                            public void onError(Error err)
+//                            {
+//                                Log.e("CovidStatService.refreshLocationStats()",
+//                                        CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+//
+//                                callback.onError(new Error(err));
+//                            }
+//                        });
                     }
 
                     @Override
@@ -137,23 +144,25 @@ public class CovidStatService
                 });
             }
 
-            GetLocationStats(newLocation, startDate, true, new IServiceCallbackGeneric()
-            {
-                @Override
-                public <T> void onSuccess(T result)
-                {
-                    callback.onSuccess(result);
-                }
+            GetLocationStatsTimeseries(newLocation, startDate,  callback);
 
-                @Override
-                public void onError(Error err)
-                {
-                    Log.e("CovidStatService.refreshLocationStats()",
-                            CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
-
-                    callback.onError(new Error(err));
-                }
-            });
+//            GetLocationStats(newLocation, startDate, true, new IServiceCallbackGeneric()
+//            {
+//                @Override
+//                public <T> void onSuccess(T result)
+//                {
+//                    callback.onSuccess(result);
+//                }
+//
+//                @Override
+//                public void onError(Error err)
+//                {
+//                    Log.e("CovidStatService.refreshLocationStats()",
+//                            CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+//
+//                    callback.onError(new Error(err));
+//                }
+//            });
         }
         else
         {
@@ -195,6 +204,46 @@ public class CovidStatService
                 callback.onError(new Error(err));
             }
         });
+    }
+
+    private static CovidStats ProcessCovidStat(Location loc, CovidStats stat, Calendar dateToCheck)
+    {
+        Calendar current = Calendar.getInstance();
+        current.add(Calendar.DAY_OF_YEAR, -1);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
+        if (null != stat)
+        {
+            Calendar previousDate = Calendar.getInstance();
+            previousDate.setTime(dateToCheck.getTime());
+            previousDate.add(Calendar.DATE, -1);
+
+            CovidStats previousStat = loc.getStatistics().stream()
+                    .filter(s -> dateFormat.format(s.getStatusDate().getTime()).equals(dateFormat.format(previousDate.getTimeInMillis())))
+                    .findFirst()
+                    .orElse(null);
+
+            // Populate "diff" properties for CovidStat
+            if (null != previousStat)
+            {
+                stat.setDiffConfirmed(Math.abs(stat.getNewConfirmed()- previousStat.getNewConfirmed()));
+                stat.setDiffDeaths(Math.abs(stat.getNewDeaths() - previousStat.getNewDeaths()));
+
+                if (null != stat.getHospitalizationsCurrent() && null != previousStat.getHospitalizationsCurrent())
+                    stat.setHospitalizationsDiff(Math.abs(stat.getHospitalizationsCurrent() - previousStat.getHospitalizationsCurrent()));
+            }
+            else
+            {
+                stat.setDiffConfirmed(0);
+                stat.setDiffDeaths(0);
+                stat.setHospitalizationsDiff(0);
+            }
+
+            // Add CovidStat to Location
+            //loc.AddStatistic(stat);
+        }
+
+        return stat;
     }
 
     private static void ProcessCovidStat(Location loc, CovidStats stat, Calendar dateToCheck, boolean timeseries, IServiceCallbackGeneric callback)
@@ -362,6 +411,29 @@ public class CovidStatService
         }
     }
 
+    private static void ProcessTimeseriesResult(@NotNull Location location, @NotNull StateHistory history, @NotNull Calendar dateToCheck, @NotNull IServiceCallbackGeneric callback)
+    {
+        Calendar current = Calendar.getInstance();
+        current.add(Calendar.DAY_OF_YEAR, -1);
+        final Calendar lastDate = current;
+
+        while (dateToCheck.before(lastDate))
+        {
+            CovidStats stat = covidActNowServiceLocal.ProcessServiceResult(history, dateToCheck);
+
+            // Make sure the date has a valid CovidStats
+            if (null != stat)
+            {
+                location.AddStatistic(ProcessCovidStat(location, stat, dateToCheck));
+            }
+
+            // Get next date to check
+            dateToCheck.add(Calendar.DATE, 1);
+        }
+
+        callback.onSuccess(location);
+    }
+
     private static void GetLocationStats(@NotNull Location location, Calendar dateToCheck, @NotNull boolean timeseries, @NotNull IServiceCallbackGeneric callback)
     {
         // If date is not passed set to current date
@@ -371,6 +443,10 @@ public class CovidStatService
             Calendar startDate = Calendar.getInstance();
             dateToCheck = startDate;
         }
+
+        Calendar current = Calendar.getInstance();
+        current.add(Calendar.DAY_OF_YEAR, -1);
+
 
         final Calendar dateToUse = dateToCheck;
 
@@ -522,6 +598,109 @@ public class CovidStatService
         }
     }
 
+    private static void GetLocationStatsTimeseries(@NotNull Location location, Calendar dateToCheck, @NotNull IServiceCallbackGeneric callback)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        Calendar current = Calendar.getInstance();
+        current.add(Calendar.DAY_OF_YEAR, -1);
+        final Calendar lastDate = current;
+        final Calendar dateToUse = dateToCheck;
+
+        if (CovidUtils.isUSMunicipality(location))
+        {
+            covidActNowServiceLocal.getCountyHistoricalStat(location.getFips(), new IServiceCallbackVolleyGeneric()
+            {
+                @Override
+                public <T> void onSuccess(T result)
+                {
+                    ProcessTimeseriesResult(location, (StateHistory)result, dateToCheck, callback);
+                }
+
+                @Override
+                public void onError(VolleyError err)
+                {
+                    Log.d("CovidStatService.GetLocationStats()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+
+                    callback.onError(new Error(err));
+                }
+            });
+        }
+        else if (CovidUtils.isUSState(location))
+        {
+            covidActNowServiceLocal.getStateHistoryStat(location.getUsStateAbbreviation(), new IServiceCallbackVolleyGeneric()
+            {
+                @Override
+                public <T> void onSuccess(T result)
+                {
+                    ProcessTimeseriesResult(location, (StateHistory)result, dateToCheck, callback);
+                }
+
+                @Override
+                public void onError(VolleyError err)
+                {
+                    Log.d("CovidStatService.GetLocationStats()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+
+                    callback.onError(new Error(err));
+                }
+            });
+        }
+        else if (CovidUtils.isUS(location))
+        {
+            covidActNowServiceLocal.getUSHistoricalStats(new IServiceCallbackVolleyGeneric()
+            {
+                @Override
+                public <T> void onSuccess(T result)
+                {
+                    ProcessTimeseriesResult(location, (StateHistory)result, dateToCheck, callback);
+                }
+
+                @Override
+                public void onError(VolleyError err)
+                {
+                    Log.d("CovidStatService.GetLocationStats()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+
+                    callback.onError(new Error(err));
+                }
+            });
+        }
+    }
+
+    public static void addLocation(@NotNull Location location)
+    {
+        getAllLocationStats(location, new IServiceCallbackGeneric()
+        {
+            @Override
+            public <T> void onSuccess(T result)
+            {
+                LocationObservable.getInstance().locationAdded((Location)result);
+            }
+
+            @Override
+            public void onError(Error err)
+            {
+                Log.e("CovidStatService.addLocation()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+            }
+        });
+    }
+
+    public static void refreshLocation(@NotNull Location location)
+    {
+        getAllLocationStats(location, new IServiceCallbackGeneric()
+        {
+            @Override
+            public <T> void onSuccess(T result)
+            {
+                LocationObservable.getInstance().locationUpdated((Location)result);
+            }
+
+            @Override
+            public void onError(Error err)
+            {
+                Log.e("CovidStatService.refreshLocation()", CovidUtils.formatError(err.getMessage(), err.getStackTrace().toString()));
+            }
+        });
+    }
+
     public static void updateLocation(@NotNull Location location, @NotNull Date currentDate, @NotNull CovidStats locStat, @NotNull IServiceCallbackGeneric callback)
     {
 
@@ -534,7 +713,14 @@ public class CovidStatService
         cal.setTime(locStat.getStatusDate());
 
         // Get stats needed for location
-        GetLocationStats(location, cal, true, callback);
+        if (CovidUtils.isUSMunicipality(location) || CovidUtils.isUSState(location) ||CovidUtils.isUS(location))
+        {
+            GetLocationStatsTimeseries(location, cal, callback);
+        }
+        else
+        {
+            GetLocationStats(location, cal, true, callback);
+        }
     }
 
     public static void updateLocations(@NotNull List<Location> locations, @NotNull IServiceCallbackGeneric callback)
