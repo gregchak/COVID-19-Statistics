@@ -9,7 +9,7 @@ To create an app to show summary COVID-19 data from various places from all over
 This appis not available in any android store so it must be sideloaded.  There is a setting in Android Security settings to allow installation of apps from unknown sources.  This must be enabled to install.  On most Android devices, if you try to install this app it will prompt you about the setting and give you an option to go directly to the setting and change it. Opening the `.apk` file on an Android device will start the installation process.
 
 # Sources
-Locations can be as broad as a country or as specific as a municipality depending on the area's reporting.  This application takes COVID-19 statistics from COVID-19 Statistics API (https://covid-api.com/) which is based on public data by Johns Hopkins CSSE (https://github.com/CSSEGISandData/COVID-19). Hospitalization and ICU stats come from The Covid Tracking Project (https://covidtracking.com/).  
+Locations can be as broad as a country or as specific as a municipality depending on the area's reporting.  This application takes COVID-19 statistics from COVID-19 Statistics API (https://covid-api.com/) which is based on public data by Johns Hopkins CSSE (https://github.com/CSSEGISandData/COVID-19). U.S. statistics taken from COVID Act Now (https://covidactnow.org/)
 
 
 Color scheme recommendations from:   
@@ -17,6 +17,9 @@ https://www.schemecolor.com/coronavirus-covid-19-color-scheme.php
 https://www.seas.harvard.edu/office-communications/brand-style-guide/color-palette  
 
 # Version History
+
+**1.6.4.1** - 2021-09-23 
+Lots of updates under the hood.  Better handling of UI vs. background threads. Added more info to detail view.  Changed data source for US and its locations to use COVID Act Now.  
 
 **1.4.1.1** - 2020-07-31  
 Resolved Issues 15 and 17.  Other clean-up tasks.
