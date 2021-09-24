@@ -380,7 +380,9 @@ public class StatisticsFragment extends Fragment implements Observer
                  // Dismiss progress indicator
                  //Log.d("refreshGlobals()", "manualRefresh: " + String.valueOf(manualRefresh) + "; locationRefreshComplete: " + String.valueOf(locationRefreshComplete));
                  globalRefreshComplete = true;
-                 clearProgressIndicators();
+
+                 if (locationRefreshComplete)
+                    clearProgressIndicators();
              }
 
              @Override
@@ -397,7 +399,8 @@ public class StatisticsFragment extends Fragment implements Observer
                  firebaseAnalytics.logEvent("ERROR", bundle);
 
                  // Dismiss progress indicator
-                 clearProgressIndicators();
+                 if (locationRefreshComplete)
+                     clearProgressIndicators();
              }
         });
     }
@@ -434,7 +437,8 @@ public class StatisticsFragment extends Fragment implements Observer
         }
         else
         {
-            clearProgressIndicators();
+            if (globalRefreshComplete)
+                clearProgressIndicators();
         }
     }
 

@@ -12,6 +12,7 @@ import com.chakfrost.covidstatistics.CovidApplication;
 import com.chakfrost.covidstatistics.CovidUtils;
 import com.chakfrost.covidstatistics.models.CovidStats;
 import com.chakfrost.covidstatistics.services.covidActNow.ActualTimeseries;
+import com.chakfrost.covidstatistics.services.covidActNow.CdcTransmissionLevelTimeseries;
 import com.chakfrost.covidstatistics.services.covidActNow.MetricTimeseries;
 import com.chakfrost.covidstatistics.services.covidActNow.State;
 import com.chakfrost.covidstatistics.services.covidActNow.StateHistory;
@@ -364,6 +365,8 @@ public class CovidActNowService
         result.setTestPositivityPercentage(response.metrics.testPositivityRatio * 100);
         result.setVaccinationsInitiatedPercentage(response.metrics.vaccinationsInitiatedRatio * 100);
         result.setVaccinationsCompletedPercentage(response.metrics.vaccinationsCompletedRatio * 100);
+        result.setVaccinationsInitiated(response.actuals.vaccinationsInitiated);
+        result.setVaccinationsCompleted(response.actuals.vaccinationsCompleted);
 
         // TODO: Hospitalizations = hospitalBed.currentUsageCovid + icuBeds.currentUsageCovid
         result.setHospitalizationsCurrent(response.actuals.hospitalBeds.currentUsageTotal);
@@ -371,11 +374,11 @@ public class CovidActNowService
         result.setHospitalizationCapacity(response.actuals.hospitalBeds.capacity);
         if (null != response.actuals.hospitalBeds.currentUsageTotal && null != response.actuals.hospitalBeds.currentUsageCovid)
         {
-            result.setHospitalizationsPercentCovid((response.actuals.hospitalBeds.currentUsageTotal / response.actuals.hospitalBeds.currentUsageCovid) * 100);
+            result.setHospitalizationsPercentCovid((double)response.actuals.hospitalBeds.currentUsageTotal / response.actuals.hospitalBeds.currentUsageCovid * 100);
         }
         if (null != response.actuals.hospitalBeds.capacity && null != response.actuals.hospitalBeds.currentUsageTotal)
         {
-            result.setHospitalizationsPercentFull((response.actuals.hospitalBeds.capacity / response.actuals.hospitalBeds.currentUsageTotal) * 100);
+            result.setHospitalizationsPercentFull((double)response.actuals.hospitalBeds.capacity / response.actuals.hospitalBeds.currentUsageTotal * 100);
         }
 
         result.setICUCurrent(response.actuals.icuBeds.currentUsageTotal);
@@ -383,11 +386,11 @@ public class CovidActNowService
         result.setICUCapacity(response.actuals.icuBeds.capacity);
         if (null != response.actuals.icuBeds.currentUsageTotal && null != response.actuals.icuBeds.currentUsageCovid)
         {
-            result.setICUPercentCovid((response.actuals.icuBeds.currentUsageTotal / response.actuals.icuBeds.currentUsageCovid) * 100);
+            result.setICUPercentCovid((double)response.actuals.icuBeds.currentUsageTotal / response.actuals.icuBeds.currentUsageCovid * 100);
         }
         if (null != response.actuals.icuBeds.capacity && null != response.actuals.icuBeds.currentUsageTotal)
         {
-            result.setICUPercentFull((response.actuals.icuBeds.capacity / response.actuals.icuBeds.currentUsageTotal) *100);
+            result.setICUPercentFull((double)response.actuals.icuBeds.capacity / response.actuals.icuBeds.currentUsageTotal *100);
         }
 
         result.setPositivityRate(response.metrics.testPositivityRatio * 100);
@@ -414,8 +417,13 @@ public class CovidActNowService
                 .findFirst()
                 .orElse(null);
 
+        CdcTransmissionLevelTimeseries cdc = response.cdcTransmissionLevelTimeseries.stream()
+                .filter(m -> dateFormat.format(m.transmissionLevelDate.getTime()).equals(dateFormat.format(dateToCheck.getTimeInMillis())))
+                .findFirst()
+                .orElse(null);
+
         // Confirm a Metric and Actual were found
-        if (null != metric && null != actual)
+        if (null != metric && null != actual && null != cdc)
         {
             Log.d("CovidActionNowService.ProcessServiceResults()", MessageFormat.format("Processing {0} on {1}", response.state, dateFormat.format(dateToCheck.getTimeInMillis())));
             // Set local list
@@ -429,12 +437,14 @@ public class CovidActNowService
             result.setNewDeaths(actual.newDeaths);
             result.setTotalDeaths(actual.deaths);
 
-            result.setCdcTransmissionLevel(TranslateCdcTransmissionValue(response.cdcTransmissionLevel));
+            result.setCdcTransmissionLevel(TranslateCdcTransmissionValue(cdc.cdcTransmissionLevel));
             result.setCaseDensity(metric.caseDensity);
             result.setInfectionRate(metric.infectionRate);
             result.setTestPositivityPercentage(metric.testPositivityRatio * 100);
             result.setVaccinationsInitiatedPercentage(metric.vaccinationsInitiatedRatio * 100);
             result.setVaccinationsCompletedPercentage(metric.vaccinationsCompletedRatio * 100);
+            result.setVaccinationsInitiated(actual.vaccinationsInitiated);
+            result.setVaccinationsCompleted(actual.vaccinationsCompleted);
 
             // TODO: Hospitalizations = hospitalBed.currentUsageCovid + icuBeds.currentUsageCovid
             result.setHospitalizationsCurrent(actual.hospitalBeds.currentUsageTotal);
@@ -442,11 +452,25 @@ public class CovidActNowService
             result.setHospitalizationCapacity(actual.hospitalBeds.capacity);
             if (null != actual.hospitalBeds.currentUsageTotal && null != actual.hospitalBeds.currentUsageCovid)
             {
-                result.setHospitalizationsPercentCovid((actual.hospitalBeds.currentUsageTotal / actual.hospitalBeds.currentUsageCovid) * 100);
+                if (actual.hospitalBeds.currentUsageTotal == 0)
+                {
+                    result.setHospitalizationsPercentCovid(0);
+                }
+                else
+                {
+                    result.setHospitalizationsPercentCovid((double)actual.hospitalBeds.currentUsageCovid / actual.hospitalBeds.currentUsageTotal  * 100);
+                }
             }
             if (null != actual.hospitalBeds.capacity && null != actual.hospitalBeds.currentUsageTotal)
             {
-                result.setHospitalizationsPercentFull((actual.hospitalBeds.capacity / actual.hospitalBeds.currentUsageTotal) * 100);
+                if (actual.hospitalBeds.capacity == 0)
+                {
+                    result.setHospitalizationsPercentFull(0);
+                }
+                else
+                {
+                    result.setHospitalizationsPercentFull((double)actual.hospitalBeds.currentUsageTotal / actual.hospitalBeds.capacity * 100);
+                }
             }
 
             result.setICUCurrent(actual.icuBeds.currentUsageTotal);
@@ -454,11 +478,25 @@ public class CovidActNowService
             result.setICUCapacity(actual.icuBeds.capacity);
             if (null != actual.icuBeds.currentUsageTotal && null != actual.icuBeds.currentUsageCovid)
             {
-                result.setICUPercentCovid((actual.icuBeds.currentUsageTotal / actual.icuBeds.currentUsageCovid) * 100);
+                if (actual.icuBeds.currentUsageTotal == 0)
+                {
+                    result.setICUPercentCovid(0);
+                }
+                else
+                {
+                    result.setICUPercentCovid((double)actual.icuBeds.currentUsageCovid / actual.icuBeds.currentUsageTotal * 100);
+                }
             }
             if (null != actual.icuBeds.capacity && null != actual.icuBeds.currentUsageTotal)
             {
-                result.setICUPercentFull((actual.icuBeds.capacity / actual.icuBeds.currentUsageTotal) * 100);
+                if (actual.icuBeds.currentUsageTotal == 0)
+                {
+                    result.setICUPercentFull(0);
+                }
+                else
+                {
+                    result.setICUPercentFull((double)actual.icuBeds.capacity / actual.icuBeds.currentUsageTotal * 100);
+                }
             }
 
             result.setPositivityRate(metric.testPositivityRatio * 100);

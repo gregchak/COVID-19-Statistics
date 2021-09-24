@@ -4,9 +4,13 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/Leon/AndroidStudioProjects/ChakFrost/COVID-19-Statistics/app/src/main/res/layout/about_fragment.xml" value="0.2265625" />
+        <entry key="..\:/Users/Leon/AndroidStudioProjects/ChakFrost/COVID-19-Statistics/app/src/main/res/layout/activity_location_stats_detail.xml" value="0.3365036231884058" />
         <entry key="..\:/Users/Leon/AndroidStudioProjects/ChakFrost/COVID-19-Statistics/app/src/main/res/layout/activity_main.xml" value="0.26458333333333334" />
+        <entry key="..\:/Users/Leon/AndroidStudioProjects/ChakFrost/COVID-19-Statistics/app/src/main/res/layout/fragment_locations.xml" value="0.3365036231884058" />
         <entry key="..\:/Users/Leon/AndroidStudioProjects/ChakFrost/COVID-19-Statistics/app/src/main/res/layout/fragment_statistics.xml" value="0.34601449275362317" />
-        <entry key="..\:/Users/Leon/AndroidStudioProjects/ChakFrost/COVID-19-Statistics/app/src/main/res/layout/location_stat_card_item.xml" value="0.25729166666666664" />
+        <entry key="..\:/Users/Leon/AndroidStudioProjects/ChakFrost/COVID-19-Statistics/app/src/main/res/layout/location_stat_card_item.xml" value="0.25" />
+        <entry key="..\:/Users/Leon/AndroidStudioProjects/ChakFrost/COVID-19-Statistics/app/src/main/res/layout/location_stat_detail_card.xml" value="0.3365036231884058" />
+        <entry key="..\:/Users/Leon/AndroidStudioProjects/ChakFrost/COVID-19-Statistics/app/src/main/res/layout/location_stat_detail_info_card.xml" value="0.2776268115942029" />
       </map>
     </option>
   </component>

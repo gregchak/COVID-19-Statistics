@@ -16,11 +16,17 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     @SerializedName("TotalConfirmed")
     private int TotalConfirmed;
     @Expose
+    @SerializedName("AverageConfirmed")
+    private int AverageConfirmed;
+    @Expose
     @SerializedName("NewDeaths")
     private int NewDeaths;
     @Expose
     @SerializedName("TotalDeaths")
     private int TotalDeaths;
+    @Expose
+    @SerializedName("AverageDeaths")
+    private int AverageDeaths;
     @Expose
     @SerializedName("NewRecovered")
     private int NewRecovered;
@@ -110,13 +116,21 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     private String CdcTransmissionLevel;
     @Expose(serialize = false)
     private double InfectionRate;
+    @Expose(serialize = false)
+    private double InfectionRateDiff;
 
     @Expose(serialize = false)
     private double TestPositivityPercentage;
     @Expose(serialize = false)
+    private double TestPositivityPercentageDiff;
+    @Expose(serialize = false)
     private double VaccinationsInitiatedPercentage;
     @Expose(serialize = false)
     private double VaccinationsCompletedPercentage;
+    @Expose(serialize = false)
+    private Integer VaccinationsInitiated;
+    @Expose(serialize = false)
+    private Integer VaccinationsCompleted;
 
     public CovidStats()
     {
@@ -291,5 +305,65 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     public void setICUPercentFull(double ICUPercentFull)
     {
         this.ICUPercentFull = ICUPercentFull;
+    }
+
+    public double getInfectionRateDiff()
+    {
+        return InfectionRateDiff;
+    }
+
+    public void setInfectionRateDiff(double infectionRateDiff)
+    {
+        InfectionRateDiff = infectionRateDiff;
+    }
+
+    public double getTestPositivityPercentageDiff()
+    {
+        return TestPositivityPercentageDiff;
+    }
+
+    public void setTestPositivityPercentageDiff(double testPositivityPercentageDiff)
+    {
+        TestPositivityPercentageDiff = testPositivityPercentageDiff;
+    }
+
+    public Integer getVaccinationsInitiated()
+    {
+        return VaccinationsInitiated;
+    }
+
+    public void setVaccinationsInitiated(Integer vaccinationsInitiated)
+    {
+        VaccinationsInitiated = vaccinationsInitiated;
+    }
+
+    public Integer getVaccinationsCompleted()
+    {
+        return VaccinationsCompleted;
+    }
+
+    public void setVaccinationsCompleted(Integer vaccinationsCompleted)
+    {
+        VaccinationsCompleted = vaccinationsCompleted;
+    }
+
+    public int getAverageConfirmed()
+    {
+        return AverageConfirmed;
+    }
+
+    public void setAverageConfirmed(int averageConfirmed)
+    {
+        AverageConfirmed = averageConfirmed;
+    }
+
+    public int getAverageDeaths()
+    {
+        return AverageDeaths;
+    }
+
+    public void setAverageDeaths(int averageDeaths)
+    {
+        AverageDeaths = averageDeaths;
     }
 }

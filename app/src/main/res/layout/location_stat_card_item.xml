@@ -73,6 +73,16 @@
                 app:layout_constraintRight_toRightOf="parent"
                 tools:ignore="SmallSp" />
 
+            <TextView
+                android:id="@+id/stats_location_latest_data"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textStyle="italic"
+                app:layout_constraintTop_toBottomOf="@+id/stats_location_grid_layout"
+                app:layout_constraintLeft_toLeftOf="parent"
+                tools:ignore="SmallSp" />
+
             <!-- GridLayout for showing numeric stats -->
             <GridLayout
                 android:id="@+id/stats_location_grid_layout"
@@ -163,32 +173,59 @@
                 <TextView/> <!-- placeholder needed for alignment -->
 
                 <!-- fourth row -->
-<!--                <TextView-->
-<!--                    android:id="@+id/stats_location_active_label"-->
-<!--                    android:textColor="@color/textPrimary"-->
-<!--                    android:text="@string/lbl_active"/>-->
-<!--                <TextView-->
-<!--                    android:id="@+id/stats_location_active_value"-->
-<!--                    android:text="@string/number"-->
-<!--                    android:textAlignment="textEnd"-->
-<!--                    android:layout_gravity="end"-->
-<!--                    android:textColor="@color/textPrimary" />-->
-<!--                <ImageView-->
-<!--                    android:id="@+id/stats_location_active_image"-->
-<!--                    android:contentDescription="@string/arrow_content_description"-->
-<!--                    android:adjustViewBounds="true"-->
-<!--                    app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"/>-->
-<!--                <TextView-->
-<!--                    android:id="@+id/stats_location_active_diff"-->
-<!--                    android:textColor="@color/textPrimary"-->
-<!--                    android:textAlignment="textEnd"-->
-<!--                    android:layout_gravity="end"-->
-<!--                    android:text="@string/number"/>-->
+                <TextView
+                    android:id="@+id/stats_location_infection_label"
+                    android:textColor="@color/textPrimary"
+                    android:text="@string/lbl_infection"/>
+                <TextView
+                    android:id="@+id/stats_location_infection_value"
+                    android:text="@string/number"
+                    android:textAlignment="textEnd"
+                    android:layout_gravity="end"
+                    android:textColor="@color/textPrimary" />
+                <ImageView
+                    android:id="@+id/stats_location_infection_image"
+                    android:contentDescription="@string/arrow_content_description"
+                    android:adjustViewBounds="true"
+                    app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"/>
+                <TextView
+                    android:id="@+id/stats_location_infection_diff"
+                    android:textColor="@color/textPrimary"
+                    android:textAlignment="textEnd"
+                    android:layout_gravity="end"
+                    android:text="@string/number"/>
 
-<!--                <TextView/> -->
-                <!-- placeholder needed for alignment -->
+                <TextView/>
+                 placeholder needed for alignment
 
                 <!-- fifth row -->
+                <TextView
+                    android:id="@+id/stats_location_positivity_label"
+                    android:textColor="@color/textPrimary"
+                    android:paddingRight="4dp"
+                    android:paddingLeft="0dp"
+                    android:text="@string/lbl_case_density"/>
+                <TextView
+                    android:id="@+id/stats_location_positivity_value"
+                    android:text="@string/number"
+                    android:textAlignment="textEnd"
+                    android:layout_gravity="end"
+                    android:textColor="@color/textPrimary" />
+                <ImageView
+                    android:id="@+id/stats_location_positivity_image"
+                    android:contentDescription="@string/arrow_content_description"
+                    android:adjustViewBounds="true"
+                    app:srcCompat="@drawable/ic_arrow_drop_up_green_24dp"/>
+                <TextView
+                    android:id="@+id/stats_location_positivity_diff"
+                    android:textColor="@color/textPrimary"
+                    android:textAlignment="textEnd"
+                    android:layout_gravity="end"
+                    android:text="@string/number"/>
+
+                <TextView/> <!-- placeholder needed for alignment -->
+
+                <!-- sixth row -->
                 <TextView
                     android:id="@+id/stats_location_fatality_label"
                     android:textColor="@color/textPrimary"

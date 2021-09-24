@@ -51,9 +51,12 @@
     <string name="lbl_active">Active:</string>
     <string name="lbl_fatality">Fatality Rate:</string>
     <string name="lbl_positivity">Positivity Rate:</string>
-    <string name="lbl_seven_day_trend">7 day trend of confirmed cases</string>
+    <string name="lbl_seven_day_trend">7 day trend of new cases</string>
     <string name="lbl_hospitalizations">Hospitalizations:</string>
     <string name="lbl_icu">ICU:</string>
+    <string name="lbl_infection">Infection Rate:</string>
+    <string name="lbl_test_positivity">Test Positivity:</string>
+    <string name="lbl_case_density">Case Density:</string>
 
     <string name="about_text">
         All data for this application is supplied by COVID-19 Statistics API

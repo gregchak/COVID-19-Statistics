@@ -2,7 +2,6 @@ package com.chakfrost.covidstatistics.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -143,18 +142,24 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
         private TextView deathsDiff;
         private TextView hospitalization;
         private TextView hospitalizationDiff;
-        private TextView active;
-        private TextView activeDiff;
+        private TextView infection;
+        private TextView infectionDiff;
         private TextView lastUpdated;
         private TextView fatalityLabel;
         private TextView fatality;
         private TextView fatalityDiff;
+        private TextView positivityLabel;
+        private TextView positivity;
+        private TextView positivityDiff;
+
+        private TextView latestData;
 
         private ImageView confirmedImage;
         private ImageView deathsImage;
         private ImageView hospitalizationImage;
-        private ImageView activeImage;
+        private ImageView infectionImage;
         private ImageView fatalityImage;
+        private ImageView positivityImage;
 
         private LineChartView lineChartView;
 
@@ -171,15 +176,21 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             hospitalization = itemView.findViewById(R.id.stats_location_hospitalization_value);
             hospitalizationDiff = itemView.findViewById(R.id.stats_location_hospitalization_diff);
             hospitalizationImage = itemView.findViewById(R.id.stats_location_hospitalization_image);
-//            active = itemView.findViewById(R.id.stats_location_active_value);
-//            activeDiff = itemView.findViewById(R.id.stats_location_active_diff);
-//            activeImage = itemView.findViewById(R.id.stats_location_active_image);
+            infection = itemView.findViewById(R.id.stats_location_infection_value);
+            infectionDiff = itemView.findViewById(R.id.stats_location_infection_diff);
+            infectionImage = itemView.findViewById(R.id.stats_location_infection_image);
             fatalityLabel = itemView.findViewById(R.id.stats_location_fatality_label);
             fatality = itemView.findViewById(R.id.stats_location_fatality_value);
             fatalityDiff = itemView.findViewById(R.id.stats_location_fatality_diff);
             fatalityImage = itemView.findViewById(R.id.stats_location_fatality_image);
 
+            positivityLabel = itemView.findViewById(R.id.stats_location_positivity_label);
+            positivity = itemView.findViewById(R.id.stats_location_positivity_value);
+            positivityDiff = itemView.findViewById(R.id.stats_location_positivity_diff);
+            positivityImage = itemView.findViewById(R.id.stats_location_positivity_image);
+
             lastUpdated = itemView.findViewById(R.id.stats_location_last_updated);
+            latestData = itemView.findViewById(R.id.stats_location_latest_data);
 
             lineChartView = itemView.findViewById(R.id.stats_location_chart);
 
@@ -256,70 +267,54 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
 
 
             // Hospitalization data
-//            if (null == stat.getHospitalizationsCurrent() || stat.getHospitalizationsCurrent() == 0)
-//            {
-                List<CovidStats> hospitalizationStatsTemp = stats.stream()
-                        .filter(s -> s.getHospitalizationsCurrent() != null)
-                        .collect(Collectors.toList());
+            List<CovidStats> hospitalizationStatsTemp = stats.stream()
+                    .filter(s -> s.getHospitalizationsCurrent() != null)
+                    .collect(Collectors.toList());
 
 
-                if (hospitalizationStatsTemp.size() > 1)
-                {
-                    CovidStats cur = hospitalizationStatsTemp.get(0);
-                    CovidStats prev = hospitalizationStatsTemp.get(1);
-                    hospitalization.setText(NumberFormat.getInstance().format(cur.getHospitalizationsCurrent()));
-                    hospitalizationDiff.setText(NumberFormat.getInstance().format( (cur.getHospitalizationsCurrent() - prev.getHospitalizationsCurrent()) ));
-//                    if (cur.getHospitalizationsDiff() == 0 && CovidUtils.isUSState(location))
-//                    {
-//                        if (cur.getHospitalizationsCurrent() == prev.getHospitalizationsCurrent())
-//                            hospitalizationDiff.setText("0");
-//                        else
-//                            hospitalizationDiff.setText(NumberFormat.getInstance().format( (cur.getHospitalizationsCurrent() - prev.getHospitalizationsCurrent()) ));
-//                    }
-//                    else
-//                    {
-//                        hospitalizationDiff.setText(NumberFormat.getInstance().format(cur.getHospitalizationsDiff()));
-//                    }
-                    hospitalizationImage.setImageResource(CovidUtils.determineArrow(cur.getHospitalizationsCurrent(), prev.getHospitalizationsCurrent(), false));
-                }
-                else
-                {
-                    hospitalization.setText("N/R");
-                    hospitalizationDiff.setText("N/R");
-                    hospitalizationImage.setImageResource(R.drawable.ic_remove_black_24dp);
-                }
+            if (hospitalizationStatsTemp.size() > 1)
+            {
+                CovidStats cur = hospitalizationStatsTemp.get(0);
+                CovidStats prev = hospitalizationStatsTemp.get(1);
+                hospitalization.setText(NumberFormat.getInstance().format(cur.getHospitalizationsCovidCurrent()));
+                hospitalizationDiff.setText(NumberFormat.getInstance().format( (cur.getHospitalizationsCovidCurrent() - prev.getHospitalizationsCovidCurrent()) ));
+                hospitalizationImage.setImageResource(CovidUtils.determineArrow(cur.getHospitalizationsCovidCurrent(), prev.getHospitalizationsCovidCurrent(), false));
+            }
+            else
+            {
+                hospitalization.setText("N/R");
+                hospitalizationDiff.setText("N/R");
+                hospitalizationImage.setImageResource(R.drawable.ic_remove_black_24dp);
+            }
 
-//            }
-//            else
-//            {
-//                hospitalization.setText(NumberFormat.getInstance().format(stat.getHospitalizationsCurrent()));
-//                if (stat.getHospitalizationsDiff() == 0 && CovidUtils.isUSState(location))
-//                {
-//                    if (stat.getHospitalizationsCurrent() == previousStat.getHospitalizationsCurrent())
-//                        hospitalizationDiff.setText("0");
-//                    else
-//                        hospitalizationDiff.setText(NumberFormat.getInstance().format( (stat.getHospitalizationsCurrent() - previousStat.getHospitalizationsCurrent()) ));
-//                }
-//                else
-//                {
-//                    hospitalizationDiff.setText(NumberFormat.getInstance().format(stat.getHospitalizationsDiff()));
-//                }
-//                hospitalizationImage.setImageResource(CovidUtils.determineArrow(stat.getHospitalizationsCurrent(), previousStat.getHospitalizationsCurrent(), false));
-//            }
 
-            // Active data
-//            if (stat.getTotalActive() == 0)
-//            {
-//                active.setText("N/R");
-//                activeDiff.setText("N/R");
-//                activeImage.setImageResource(R.drawable.ic_remove_black_24dp);
-//            }
-//            else
-//            {
-//                active.setText(NumberFormat.getInstance().format(stat.getTotalActive()));
-//                activeDiff.setText(NumberFormat.getInstance().format(stat.getDiffActive()));
-//                activeImage.setImageResource(CovidUtils.determineArrow(stat.getTotalActive(), previousStat.getTotalActive(), false));
-//            }
+            // Infection Rate data
+            if (stat.getInfectionRate() == 0)
+            {
+                infection.setText("N/R");
+                infectionDiff.setText("N/R");
+                infectionImage.setImageResource(R.drawable.ic_remove_black_24dp);
+            }
+            else
+            {
+                infection.setText(NumberFormat.getInstance().format(stat.getInfectionRate()));
+                infectionDiff.setText(NumberFormat.getInstance().format(stat.getInfectionRate() - previousStat.getInfectionRate()));
+                infectionImage.setImageResource(CovidUtils.determineArrow(stat.getInfectionRate(), previousStat.getInfectionRate(), false));
+            }
+
+            // Test positivity data
+            if (stat.getCaseDensity() == 0)
+            {
+                positivity.setText("N/R");
+                positivityDiff.setText("N/R");
+                positivityImage.setImageResource(R.drawable.ic_remove_black_24dp);
+            }
+            else
+            {
+                positivity.setText(NumberFormat.getInstance().format(stat.getCaseDensity()));
+                positivityDiff.setText(NumberFormat.getInstance().format(stat.getCaseDensity() - previousStat.getCaseDensity()));
+                positivityImage.setImageResource(CovidUtils.determineArrow(stat.getCaseDensity(), previousStat.getCaseDensity(), false));
+            }
 
             // Fatality/Positivity rate
             if (stat.getPositivityRate() == 0)
@@ -358,8 +353,11 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US);
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy hh:mm aa");
+            SimpleDateFormat statusDateFormat = new SimpleDateFormat("MM/dd/yy");
             dateFormat.setTimeZone(TimeZone.getDefault());
-            lastUpdated.setText(MessageFormat.format("as of {0}", dateFormat.format(location.getLastUpdated())));
+
+            lastUpdated.setText(MessageFormat.format("Last Updated {0}", dateFormat.format(location.getLastUpdated())));
+            latestData.setText(MessageFormat.format("Stats as of {0}", statusDateFormat.format(stat.getStatusDate())));
 
             buildChart(location.getStatistics());
         }
@@ -389,7 +387,7 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             {
                 stat = stats.get(i);
                 axisData[i] = dayAbv.format(stat.getStatusDate());
-                yAxisData[i] = stat.getDiffConfirmed();
+                yAxisData[i] = stat.getAverageConfirmed();
             }
 
             List yAxisValues = new ArrayList();

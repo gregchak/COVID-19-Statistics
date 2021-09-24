@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -214,6 +215,30 @@ public class CovidStatService
 
         if (null != stat)
         {
+            int count = 0;
+            int confirmTotal = 0;
+            int deathTotal = 0;
+            Calendar sevenDays = Calendar.getInstance();
+            sevenDays.setTime(dateToCheck.getTime());
+            sevenDays.add(Calendar.DAY_OF_YEAR, -7);
+
+            List<CovidStats> lastSeven = loc.getStatistics().stream()
+                    .filter(s -> s.getStatusDate().getTime() > sevenDays.getTime().getTime())
+                    .collect(Collectors.toList());
+
+            for (CovidStats s: lastSeven)
+            {
+                count++;
+                confirmTotal += s.getNewConfirmed();
+                deathTotal += s.getNewDeaths();
+            }
+
+            double sevenDayAverage = (double)confirmTotal / count;
+            stat.setAverageConfirmed((int)sevenDayAverage);
+            sevenDayAverage = (double)deathTotal / count;
+            stat.setAverageDeaths((int)sevenDayAverage);
+                    //.map(s -> total += s.getNewConfirmed())
+
             Calendar previousDate = Calendar.getInstance();
             previousDate.setTime(dateToCheck.getTime());
             previousDate.add(Calendar.DATE, -1);
@@ -267,6 +292,8 @@ public class CovidStatService
             {
                 stat.setDiffConfirmed(Math.abs(stat.getNewConfirmed()- previousStat.getNewConfirmed()));
                 stat.setDiffDeaths(Math.abs(stat.getNewDeaths() - previousStat.getNewDeaths()));
+                stat.setInfectionRateDiff(Math.abs(stat.getInfectionRate() - previousStat.getInfectionRate()));
+                stat.setTestPositivityPercentageDiff(Math.abs(stat.getTestPositivityPercentage() - previousStat.getTestPositivityPercentage()));
                 if (null != stat.getHospitalizationsCurrent() && null != previousStat.getHospitalizationsCurrent())
                     stat.setHospitalizationsDiff(Math.abs(stat.getHospitalizationsCurrent() - previousStat.getHospitalizationsCurrent()));
             }
