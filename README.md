@@ -18,7 +18,7 @@ https://www.seas.harvard.edu/office-communications/brand-style-guide/color-palet
 
 # Version History
 
-**1.6.4.1** - 2021-09-23 
+**1.6.4.1** - 2021-09-23  
 Lots of updates under the hood.  Better handling of UI vs. background threads. Added more info to detail view.  Changed data source for US and its locations to use COVID Act Now.  
 
 **1.4.1.1** - 2020-07-31  
