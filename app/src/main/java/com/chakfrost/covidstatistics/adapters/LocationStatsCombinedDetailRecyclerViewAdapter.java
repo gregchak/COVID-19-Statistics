@@ -8,10 +8,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chakfrost.covidstatistics.CovidApplication;
 import com.chakfrost.covidstatistics.R;
+import com.chakfrost.covidstatistics.models.LocationInfoStat;
 import com.chakfrost.covidstatistics.models.LocationStats;
 import com.chakfrost.covidstatistics.models.StatDatePair;
 
@@ -29,32 +31,48 @@ import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.model.SubcolumnValue;
-import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.ColumnChartView;
 import lecho.lib.hellocharts.view.LineChartView;
 
-public class LocationStatsDetailRecyclerViewAdapter
-        extends RecyclerView.Adapter<LocationStatsDetailRecyclerViewAdapter.LocationStatsDetailHolder>
+public class LocationStatsCombinedDetailRecyclerViewAdapter  extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     //private Context context;
-    private List<LocationStats> data;
+    private List<Object> data;
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    public LocationStatsDetailRecyclerViewAdapter(List<LocationStats> data)
+    public LocationStatsCombinedDetailRecyclerViewAdapter(List<Object> data)
     {
         this.data = data;
     }
 
     @NonNull
     @Override
-    public LocationStatsDetailHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.location_stat_detail_card, parent, false);
+        View v = null;
+        RecyclerView.ViewHolder vh = null;
+
+        switch (viewType)
+        {
+            case 1:
+                v = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.location_stat_detail_info_card, parent, false);
+                vh = new LocationStatsDetailInfoHolder(v);
+                break;
+            case 2:
+                v = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.location_stat_detail_card, parent, false);
+                vh = new LocationStatsDetailHolder(v);
+                break;
+        }
+
+        return vh;
+//        View view = LayoutInflater.from(parent.getContext())
+//                .inflate(R.layout.location_stat_detail_info_card, parent, false);
 
         //View view = mInflater.inflate(R.layout.location_statistics_row, parent, false);
-        return new LocationStatsDetailHolder(view);
+        //return new LocationStatsDetailInfoHolder(view);
 
         /*
         NOTE: This method could return simply VieHolder as new VieHolder(view) as implemented
@@ -62,18 +80,40 @@ public class LocationStatsDetailRecyclerViewAdapter
          */
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull LocationStatsDetailHolder holder, int position)
-    {
-        LocationStats location = data.get(position);
 
-        try
+    @Override
+    public int getItemViewType(int position)
+    {
+        Object toBind = data.get(position);
+
+        if (toBind instanceof LocationInfoStat)
         {
-            holder.bind(location);
+            return 1;
         }
-        catch (Exception ex)
+        else if (toBind instanceof LocationStats)
         {
-            Log.e("onBindViewHolder()", ex.getStackTrace().toString());
+            return 2;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
+    {
+        switch(holder.getItemViewType())
+        {
+            case 1:
+                LocationStatsDetailInfoHolder info = (LocationStatsDetailInfoHolder)holder;
+                info.bind((LocationInfoStat)data.get(position));
+
+                break;
+            case 2:
+                LocationStatsDetailHolder chart = (LocationStatsDetailHolder)holder;
+                chart.bind((LocationStats)data.get(position));
+                break;
         }
 
         holder.getAdapterPosition();
@@ -87,7 +127,7 @@ public class LocationStatsDetailRecyclerViewAdapter
 
 
     // convenience method for getting data at click position
-    public LocationStats getItem(int id)
+    public Object getItem(int id)
     {
         return data.get(id);
     }
@@ -102,9 +142,92 @@ public class LocationStatsDetailRecyclerViewAdapter
     public interface ItemClickListener
     {
         //void onItemClick(View view, int position);
-        void onItemClick(LocationStats location);
+        void onItemClick(LocationInfoStat location);
     }
 
+
+    /**
+     * CLASS DECLARATION:
+     * To store and recycle views as they are scrolled off screen
+     * for LocationStatsDetailInfoRecyclerViewAdapter.
+     * Extends: RecyclerView.ViewHolder
+     * Implements: View.OnClickListener
+     */
+    public class LocationStatsDetailInfoHolder extends RecyclerView.ViewHolder
+    {
+        private TextView statName;
+        private ConstraintLayout constraintLayout;
+
+        private TextView label1;
+        private TextView value1;
+        private TextView label2;
+        private TextView value2;
+
+
+        public LocationStatsDetailInfoHolder(View itemView)
+        {
+            super(itemView);
+            statName = itemView.findViewById(R.id.location_stat_info_header);
+            constraintLayout = itemView.findViewById(R.id.location_stat_detail_info_constraint_view);
+
+            label1 = itemView.findViewById(R.id.location_stat_header_label1);
+            value1 = itemView.findViewById(R.id.location_stat_header_value1);
+            label2 = itemView.findViewById(R.id.location_stat_header_label2);
+            value2 = itemView.findViewById(R.id.location_stat_header_value2);
+
+            //itemView.setOnClickListener(this);
+        }
+
+//        @Override
+//        public void onClick(View view)
+//        {
+//            // Get position of row tapped
+//            //int position = getAdapterPosition();
+//
+//            //Location loc = data.get(position);
+//
+//            // Add dialog?
+//
+//
+//            if (mClickListener != null)
+//                mClickListener.onItemClick(data.get(getAdapterPosition()));
+//                //mClickListener.onItemClick(view, getAdapterPosition());
+//        }
+
+        /**
+         * Binds a Location object to the view
+         *
+         * @param infoStat  Location object to bind to view
+         */
+        public void bind(LocationInfoStat infoStat)
+        {
+            statName.setText(infoStat.getName());
+
+            label1.setText(infoStat.getMetrics().get(0).getLabel());
+            value1.setText(infoStat.getMetrics().get(0).getValue());
+            label2.setText(infoStat.getMetrics().get(1).getLabel());
+            value2.setText(infoStat.getMetrics().get(1).getValue());
+
+//            ConstraintSet set = new ConstraintSet();
+//            set.clone(constraintLayout);
+//
+//            List<String> viewIds = new ArrayList<>();
+//
+//            for (LocationMetric metric : infoStat.getMetrics())
+//            {
+//                TextView testView = new TextView(CovidApplication.getContext());
+//                testView.setText("HELLO WOLD!!!!!!!!");
+//                testView.setId(View.generateViewId());
+//                constraintLayout.addView(testView);
+//
+//                set.connect(testView.getId(), ConstraintSet.TOP, statName.getId(), ConstraintSet.TOP, 16);
+//                set.connect(testView.getId(),ConstraintSet.RIGHT,ConstraintSet.PARENT_ID,ConstraintSet.RIGHT,0);
+//                set.connect(testView.getId(),ConstraintSet.LEFT,ConstraintSet.PARENT_ID,ConstraintSet.LEFT,0);
+//            }
+//            set.applyTo(constraintLayout);
+        }
+
+    }
 
     /**
      * CLASS DECLARATION:
@@ -113,7 +236,7 @@ public class LocationStatsDetailRecyclerViewAdapter
      * Extends: RecyclerView.ViewHolder
      * Implements: View.OnClickListener
      */
-    public class LocationStatsDetailHolder extends RecyclerView.ViewHolder implements View.OnClickListener
+    public class LocationStatsDetailHolder extends RecyclerView.ViewHolder
     {
         private TextView statName;
         private LineChartView lineChartView;
@@ -127,24 +250,24 @@ public class LocationStatsDetailRecyclerViewAdapter
             lineChartView = itemView.findViewById(R.id.location_stat_line_chart);
             columnChartView = itemView.findViewById(R.id.location_stat_bar_chart);
 
-            itemView.setOnClickListener(this);
+            //itemView.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View view)
-        {
-            // Get position of row tapped
-            //int position = getAdapterPosition();
-
-            //Location loc = data.get(position);
-
-            // Add dialog?
-
-
-            if (mClickListener != null)
-                mClickListener.onItemClick(data.get(getAdapterPosition()));
-                //mClickListener.onItemClick(view, getAdapterPosition());
-        }
+//        @Override
+//        public void onClick(View view)
+//        {
+//            // Get position of row tapped
+//            //int position = getAdapterPosition();
+//
+//            //Location loc = data.get(position);
+//
+//            // Add dialog?
+//
+//
+//            if (mClickListener != null)
+//                mClickListener.onItemClick(data.get(getAdapterPosition()));
+//            //mClickListener.onItemClick(view, getAdapterPosition());
+//        }
 
         /**
          * Binds a Location object to the view
@@ -164,9 +287,9 @@ public class LocationStatsDetailRecyclerViewAdapter
             //}
             //else
             //{
-                lineChartView.setVisibility(View.INVISIBLE);
-                columnChartView.setVisibility(View.VISIBLE);
-                buildColumnChart(locationStat.getValues());
+            lineChartView.setVisibility(View.INVISIBLE);
+            columnChartView.setVisibility(View.VISIBLE);
+            buildColumnChart(locationStat.getValues());
             //}
         }
 
@@ -341,5 +464,4 @@ public class LocationStatsDetailRecyclerViewAdapter
             //columnChartView.setViewportCalculationEnabled(false);
         }
     }
-
 }

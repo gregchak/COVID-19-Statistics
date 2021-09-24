@@ -21,6 +21,7 @@ public class StateStat
     public String dateModified;
     public Integer death;
     public Integer deathIncrease;
+    public Integer deathProbable;
     public String fips;
 
     @Deprecated
@@ -47,6 +48,8 @@ public class StateStat
 
     @Deprecated
     public Integer negativeScore;
+    public Integer negativeTestsAntibody;
+    public Integer negativeTestsPeopleAntibody;
     public Integer negativeTestsViral;
     public Integer onVentilatorCumulative;
     public Integer onVentilatorCurrently;
@@ -60,6 +63,10 @@ public class StateStat
 
     @Deprecated
     public Integer positiveScore;
+    public Integer positiveTestsAntibody;
+    public Integer positiveTestsAntigen;
+    public Integer positiveTestsPeopleAntibody;
+    public Integer positiveTestsPeopleAntigen;
     public Integer positiveTestsViral;
     public Integer recovered;
 
@@ -69,9 +76,13 @@ public class StateStat
 
     @Deprecated
     public Integer total;
+    public Integer totalTestEncountersViral;
     public Integer totalTestResults;
     public Integer totalTestResultsIncrease;
-
-    @Deprecated
+    public Integer totalTestsAntibody;
+    public Integer totalTestsAntigen;
+    public Integer totalTestsPeopleAntibody;
+    public Integer totalTestsPeopleAntigen;
+    public Integer totalTestsPeopleViral;
     public Integer totalTestsViral;
 }

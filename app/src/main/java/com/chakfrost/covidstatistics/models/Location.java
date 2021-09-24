@@ -8,12 +8,13 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.w3c.dom.Text;
-
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class Location implements Comparable<Location>, Serializable, Cloneable
 {
@@ -27,6 +28,7 @@ public class Location implements Comparable<Location>, Serializable, Cloneable
     private String region;
     private List<CovidStats> statistics;
     private Date lastUpdated;
+    private String fips;
 
     public Location() {}
 
@@ -51,6 +53,15 @@ public class Location implements Comparable<Location>, Serializable, Cloneable
         statistics = new ArrayList<>();
     }
 
+    public Location (String _country, String _province, String _municipality, String _fips)
+    {
+        country = _country;
+        province = _province;
+        municipality = _municipality;
+        fips = _fips;
+        statistics = new ArrayList<>();
+    }
+
     public Location (String _country, String _province, List<CovidStats> _statistics)
     {
         country = _country;
@@ -66,16 +77,22 @@ public class Location implements Comparable<Location>, Serializable, Cloneable
         statistics = _statistics;
     }
 
+    public Location (String _country, String _province, String _municipality, List<CovidStats> _statistics, String _fips)
+    {
+        country = _country;
+        province = _province;
+        municipality = _municipality;
+        fips = _fips;
+        statistics = _statistics;
+    }
+
     /**
      * Determines if the Location is a Country
      * @return  True if Location is a Country, false if not
      */
     public boolean isCountry()
     {
-        if (TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
-            return true;
-        else
-            return false;
+        return TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality);
     }
 
     /**
@@ -84,10 +101,7 @@ public class Location implements Comparable<Location>, Serializable, Cloneable
      */
     public boolean isProvince()
     {
-        if (!TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality))
-            return true;
-        else
-            return false;
+        return !TextUtils.isEmpty(province) && TextUtils.isEmpty(municipality);
     }
 
     /**
@@ -96,10 +110,30 @@ public class Location implements Comparable<Location>, Serializable, Cloneable
      */
     public boolean isMunicipality()
     {
-        if (!TextUtils.isEmpty(province) && !TextUtils.isEmpty(municipality))
-            return true;
-        else
-            return false;
+        return !TextUtils.isEmpty(province) && !TextUtils.isEmpty(municipality);
+    }
+
+    /**
+     * Adds a stat to this location.  Will replace stat if its StatusDate is the same
+     * as an existing statistic, otherwise it will add CovidStat to statistics
+     * @param stat  CovidStat to add to Location Statistics
+     */
+    public void AddStatistic(CovidStats stat)
+    {
+        // Get next date to check
+        SimpleDateFormat ymdFormatter = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
+        // Check if we already have stats for stat StatusDate
+        CovidStats found = statistics.stream()
+                .filter(s -> ymdFormatter.format(s.getStatusDate().getTime()).equals(ymdFormatter.format(stat.getStatusDate().getTime())))
+                .findFirst()
+                .orElse(null);
+
+        // If there's an existing stat, remove it before adding parameter stat
+        if (null != found)
+            statistics.remove(found);
+
+        statistics.add(stat);
     }
 
     @Override
@@ -168,6 +202,7 @@ public class Location implements Comparable<Location>, Serializable, Cloneable
     public String getUsStateAbbreviation() { return usStateAbbreviation; }
     public List<CovidStats> getStatistics() { return statistics; }
     public Date getLastUpdated() { return lastUpdated; }
+    public String getFips() { return fips; }
 
     /* Setters */
     public void setCountry(String val) { country = val; }
@@ -178,6 +213,7 @@ public class Location implements Comparable<Location>, Serializable, Cloneable
     public void setUsStateAbbreviation(String val) { usStateAbbreviation = val; }
     public void setStatistics(List<CovidStats> val) { statistics = val; }
     public void setLastUpdated(Date val) { lastUpdated = val; }
+    public void setFips(String val) { fips = val; }
 
 
 }

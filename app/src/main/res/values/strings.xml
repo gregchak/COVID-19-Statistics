@@ -50,18 +50,23 @@
     <string name="lbl_recovered">Recovered:</string>
     <string name="lbl_active">Active:</string>
     <string name="lbl_fatality">Fatality Rate:</string>
-    <string name="lbl_seven_day_trend">7 day trend of confirmed cases</string>
+    <string name="lbl_positivity">Positivity Rate:</string>
+    <string name="lbl_seven_day_trend">7 day trend of new cases</string>
     <string name="lbl_hospitalizations">Hospitalizations:</string>
     <string name="lbl_icu">ICU:</string>
+    <string name="lbl_infection">Infection Rate:</string>
+    <string name="lbl_test_positivity">Test Positivity:</string>
+    <string name="lbl_case_density">Case Density:</string>
 
     <string name="about_text">
         All data for this application is supplied by COVID-19 Statistics API
-        (<a href="https://covid-api.com">https://covid-api.com/</a>).
-        Data is sourced from COVID-19 Data Repository by the Center for Systems Science and Engineering
+        (<a href="https://covid-api.com">https://covid-api.com/</a>) and COVID ActNow
+        (<a href="https://covidactnow.org/">https://covidactnow.org</a>).
+        Data from COVID-19 Statistics is sourced from COVID-19 Data Repository by the Center for Systems Science and Engineering
         (CSSE) at Johns Hopkins University (<a href="https://systems.jhu.edu/">https://systems.jhu.edu/</a>).
-        The Johns Hopkins University hereby disclaims any and all
-        representations and warranties with respect to the Website, including accuracy, fitness for use,
-        reliability, completeness, and non-infringement of third party rights.
+        Data from COVID ActNow is provided by Act Now Coalition, an independent 501(c)(3) nonprofit founded in March 2020.
+        They build data and storytelling products that are accurate and actionable, so that everyone can make informed decisions
+        during crises, whether COVID or climate change.
     </string>
 
     <string-array name="us_states">
@@ -119,12 +124,12 @@
     </string-array>
 
     <string-array name="location_retrieve_complete">
-        <item>Beep... Bop... Boop... Computing...|Beep... Bop... Boop... Complete!</item>
-        <item>Generating awesome-sauce...|New awesome-sauce added to list!</item>
-        <item>We\'re workin\'... We\'re workin\'... We\'re workin\'|Workin\' complete!</item>
-        <item>Techno-wizardry in process, please stand by...|Wizardry complete!</item>
-        <item>I wonder how long it takes to get stats...|About that long :)</item>
-        <item>Caf-Pow ingestion starting...|Processing complete!</item>
+        <item>Beep Bop Boop Computing|Beep Bop Boop Complete!</item>
+        <item>Generating awesome-sauce|New awesome-sauce added to list!</item>
+        <item>We\'re workin\' We\'re workin\' We\'re workin\'|Workin\' complete!</item>
+        <item>Techno-wizardry in process, please stand by|Wizardry complete!</item>
+        <item>I wonder how long it takes to get stats|About that long :)</item>
+        <item>Caf-Pow ingestion starting|Processing complete!</item>
         <item>Better make some popcorn, this one may take a while|Just kidding, all done!</item>
     </string-array>
 </resources>

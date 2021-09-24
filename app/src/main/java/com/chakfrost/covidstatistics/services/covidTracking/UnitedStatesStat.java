@@ -7,10 +7,10 @@ package com.chakfrost.covidstatistics.services.covidTracking;
 public class UnitedStatesStat
 {
     public int date;
-    public String dateChecked;
-    public Integer death;
 
     @Deprecated
+    public String dateChecked;
+    public Integer death;
     public Integer deathIncrease;
     public String hash;
 
@@ -18,8 +18,6 @@ public class UnitedStatesStat
     public Integer hospitalized;
     public Integer hospitalizedCumulative;
     public Integer hospitalizedCurrently;
-
-    @Deprecated
     public Integer hospitalizedIncrease;
     public Integer inIcuCumulative;
     public Integer inIcuCurrently;
@@ -27,8 +25,6 @@ public class UnitedStatesStat
     @Deprecated
     public String lastModified;
     public Integer negative;
-
-    @Deprecated
     public Integer negativeIncrease;
     public Integer onVentilatorCumulative;
     public Integer onVentilatorCurrently;
@@ -37,18 +33,12 @@ public class UnitedStatesStat
     @Deprecated
     public Integer posNeg;
     public Integer positive;
-
-    @Deprecated
     public Integer positiveIncrease;
     public Integer recovered;
     public int states;
 
     @Deprecated
     public Integer total;
-
-    @Deprecated
     public Integer totalTestResults;
-
-    @Deprecated
     public Integer totalTestResultsIncrease;
 }

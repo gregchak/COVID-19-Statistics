@@ -6,20 +6,35 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.chakfrost.covidstatistics.models.CovidStats;
+import com.chakfrost.covidstatistics.models.GlobalStats;
 import com.chakfrost.covidstatistics.models.HospitalizationStat;
 import com.chakfrost.covidstatistics.models.Location;
+import com.chakfrost.covidstatistics.services.CovidActNowService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class CovidUtils
 {
+    private static CovidUtils single_instance = null;
+    public static CovidUtils getInstance()
+    {
+        if (single_instance == null)
+            single_instance = new CovidUtils();
+
+        return single_instance;
+    }
 
     /**
      * Shows/hides loading indicator
@@ -85,8 +100,53 @@ public class CovidUtils
         cal.add(Calendar.DATE, -1);
         Date dte = cal.getTime();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         String dateString = dateFormat.format(dte);
+
+        CovidStats found = stats.stream()
+                .filter(s -> dateFormat.format(s.getStatusDate()).equals(dateString))
+                .findFirst()
+                .orElse(null);
+
+        return !(null == found);
+    }
+
+    /**
+     * Checks if a CovidStat exists in the list for today
+     * @param location Location to check
+     * @return boolean true if CovidStat exists for today - 1, false if not
+     */
+    public static boolean statExists(@NotNull Location location)
+    {
+        Calendar cal = Calendar.getInstance();
+
+        // Only decrease the date by 1 if outside US
+        if (!isUS(location) && !isUSState(location) && !isUSMunicipality(location))
+            cal.add(Calendar.DATE, -1);
+        Date dte = cal.getTime();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        String dateString = dateFormat.format(dte);
+
+        CovidStats found = location.getStatistics().stream()
+                .filter(s -> dateFormat.format(s.getStatusDate()).equals(dateString))
+                .findFirst()
+                .orElse(null);
+
+        return !(null == found);
+    }
+
+    /**
+     * Checks if a CovidStat exists in the list for a given date
+     *
+     * @param stats List<> of CovidStat objects
+     * @param dateToCheck Date to check to see if stats are present
+     * @return boolean true if CovidStat exists for today - 1, false if not
+     */
+    public static boolean statExists(@NotNull List<CovidStats> stats, Date dateToCheck)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        String dateString = dateFormat.format(dateToCheck);
 
         CovidStats found = stats.stream()
                 .filter(s -> dateFormat.format(s.getStatusDate()).equals(dateString))
@@ -128,10 +188,7 @@ public class CovidUtils
      */
     public static boolean isUS(@NotNull Location location)
     {
-        if (location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() == "")
-            return true;
-        else
-            return false;
+        return location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() == "";
     }
 
     /**
@@ -141,10 +198,18 @@ public class CovidUtils
      */
     public static boolean isUSState(@NotNull Location location)
     {
-        if (location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() != "")
-            return true;
-        else
-            return false;
+        return location.getIso().equals("USA") && location.getMunicipality() == "" && location.getProvince() != "";
+    }
+
+    /**
+     * Determines if Location is a US Municipality
+     * i.e. metro area or county
+     * @param location  Location to check
+     * @return          Boolean true if Location is US Municipality, false if not
+     */
+    public static boolean isUSMunicipality(@NotNull Location location)
+    {
+        return location.getIso().equals("USA") && location.getMunicipality() != "" && location.getProvince() != "";
     }
 
     /**
@@ -156,7 +221,7 @@ public class CovidUtils
     @Nullable
     public static CovidStats findCovidStat(@NotNull List<CovidStats> stats, @NotNull Calendar dateToCheck)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
         CovidStats stat = stats.stream()
                 .filter(s -> dateFormat.format(s.getStatusDate().getTime()).equals(dateFormat.format(dateToCheck.getTimeInMillis())))
@@ -233,4 +298,22 @@ public class CovidUtils
 
         return retVal;
     }
+
+    public static String serializeLocations(List<Location> locations)
+    {
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+
+        return gson.toJson(locations);
+    }
+
+    public List<Location> deserializeLocations(String locations)
+    {
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+
+        Type type = new TypeToken<List<Location>>(){}.getType();
+        return gson.fromJson(locations, type);
+    }
+
 }

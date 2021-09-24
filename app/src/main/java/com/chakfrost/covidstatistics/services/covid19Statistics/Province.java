@@ -16,7 +16,7 @@ public class Province
     public String Province;
 
     @SerializedName("lat")
-    public String Lattitude;
+    public String Latitude;
 
     @SerializedName("long")
     public String Longitude;

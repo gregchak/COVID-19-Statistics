@@ -39,6 +39,7 @@ public class CovidApplication extends Application
     private static BooleanPreference receiveNotifications;
     private static String[] usStates;
     private static String[][] locationRetrieveComplete;
+    private static Location currentLocation;
 
     private final static String CHANNEL_ID = "COVID_STATISTICS";
     private final static String UNIQUE_WORK = "STATUS_REFRESH";
@@ -210,6 +211,7 @@ public class CovidApplication extends Application
     public static Context getContext() { return instance.getBaseContext(); }
     public static List<Country> getCountries() { return countries; }
     public static List<Province> getProvinces() { return provinces; }
+    public static Location getCurrentLocation() { return currentLocation; }
     public static List<Location> getLocations()
     {
         if (null == locations)
@@ -234,12 +236,13 @@ public class CovidApplication extends Application
             else
                 receiveNotifications = BooleanPreference.no;
         }
-        return receiveNotifications == BooleanPreference.no ? false : true;
+        return receiveNotifications != BooleanPreference.no;
     }
 
     /* Setters */
     public static void setCountries(List<Country> val) { countries = val; }
     public static void setProvinces(List<Province> val) { provinces = val; }
+    public static void setCurrentLocation(Location val) { currentLocation = val; }
     public static void setLocations(List<Location> val)
     {
         locations = val;

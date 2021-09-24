@@ -21,17 +21,21 @@ import com.chakfrost.covidstatistics.MainActivity;
 import com.chakfrost.covidstatistics.R;
 import com.chakfrost.covidstatistics.models.Country;
 import com.chakfrost.covidstatistics.models.Location;
+import com.chakfrost.covidstatistics.models.Municipality;
 import com.chakfrost.covidstatistics.models.Province;
 import com.chakfrost.covidstatistics.services.CovidService;
 import com.chakfrost.covidstatistics.services.IServiceCallbackList;
 import com.google.android.material.button.MaterialButton;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -41,12 +45,14 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
     private List<Province> provinces;
     private List<String> emptyMunicipalityList;
     private List<String> municipalities;
+    private List<Municipality> municipalitiesObj;
     private Country selectedCountry;
     private Spinner countrySpinner;
     private Province selectedProvince;
     private Spinner provinceSpinner;
     private String selectedMunicipality;
     private Spinner municipalitySpinner;
+    private String selectedMunicipalityFips;
     private MaterialButton addLocation;
 
     private final String ALL_VALUE = "-ALL-";
@@ -224,7 +230,12 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                         if (null == list)
                             municipalities = new ArrayList<>();
                         else
-                            municipalities = (ArrayList<String>)list;
+                            municipalitiesObj = (ArrayList<Municipality>)list;
+
+                        // Populate municipalities array for spinner
+                        municipalities = new ArrayList<>();
+                        for (Municipality m: municipalitiesObj)
+                            municipalities.add(m.getName());
 
                         // Add ALL value
                         municipalities.add(ALL_VALUE);
@@ -300,14 +311,30 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
 
         // Initialize report data
         Location loc = new Location(selectedCountry.getName());
-        loc.setLastUpdated(new Date());
         loc.setIso(selectedCountry.getISO2());
         loc.setRegion(selectedCountry.getName());
 
         if (!selectedProvince.getName().equals(ALL_VALUE))
             loc.setProvince(selectedProvince.getName());
+
         if (!selectedMunicipality.equals(ALL_VALUE))
+        {
             loc.setMunicipality(selectedMunicipality);
+
+            // Get Fips value
+            Optional<Municipality> municipality = municipalitiesObj.stream()
+                    .filter(m -> m.getName().equals(selectedMunicipality))
+                    .findFirst();
+
+            if (municipality.isPresent())
+            {
+                //String formatted = String.format("%07s", municipality.get().getFips());
+                String formatted = ("00000" + municipality.get().getFips()).substring(municipality.get().getFips().length());
+                loc.setFips(formatted);
+                Log.d("LocationAdd.SaveLocation()", MessageFormat.format("Municipality: {0}; fips: {1}", loc.getMunicipality(), loc.getFips()));
+
+            }
+        }
 
         // Check if specified Location is already saved
         List<Location> locations = CovidApplication.getLocations();
@@ -325,21 +352,18 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
         }
         else
         {
-            SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd");
-            //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MM yyyy");
-            String inputString1 = "2020-01-01";
-            String inputString2 = "27 04 1997";
+//            SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+//            String inputString1 = "2020-01-01";
 
             try
             {
-                Date end = dtf.parse(inputString1);
-                Date now = new Date();
-                long diffMs = now.getTime() - end.getTime();
-                long diffD = TimeUnit.MILLISECONDS.toDays(diffMs);
-
-                // Populate report information
-                Calendar startDate = Calendar.getInstance();
-                startDate.add(Calendar.DATE, -1);
+//                Date end = dtf.parse(inputString1);
+//                Date now = new Date();
+//                long diffMs = now.getTime() - end.getTime();
+//
+//                // Populate report information
+//                Calendar startDate = Calendar.getInstance();
+//                startDate.add(Calendar.DATE, -1);
 
 
                 // Set result
@@ -347,10 +371,6 @@ public class LocationAdd extends AppCompatActivity implements AdapterView.OnItem
                 backToMain.putExtra("location", loc);
                 setResult(110, backToMain);
                 finish();
-
-                //CovidUtils.animateView(progressOverlay, View.VISIBLE, 0.4f, 200);
-                //LoadReportData(loc, startDate, diffD);
-                //updateProgressBar(diffD, 1);
             }
             catch (Exception ex)
             {

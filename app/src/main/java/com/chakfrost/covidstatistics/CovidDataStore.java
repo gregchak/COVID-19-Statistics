@@ -33,6 +33,7 @@ public class CovidDataStore
     private final static String LOCATION_FILENAME = "locations";
     private final static String SUMMARY_FILENAME = "summary";
     private static Context context;
+    private final static CovidUtils covidUtils = CovidUtils.getInstance();
 
     public CovidDataStore() { }
 
@@ -49,7 +50,11 @@ public class CovidDataStore
 
         Gson gson = new Gson();
         String json = gson.toJson(locations);
-        Log.d("CovidDataStore.SaveLocations()", "json = " + json);
+        locations.forEach(l -> {
+            String tempJson = gson.toJson(l);
+            Log.d("CovidDataStore.SaveLocations()", "json = " + tempJson);
+        });
+        //Log.d("CovidDataStore.SaveLocations()", "json = " + json);
 
         // Write contents
         WriteToFileSystemParams param = new WriteToFileSystemParams(json, StatType.Locations);
@@ -81,6 +86,11 @@ public class CovidDataStore
                 Gson gson = new Gson();
                 Type type = new TypeToken<CopyOnWriteArrayList<Location>>(){}.getType();
                 locations = gson.fromJson(fileContents, type);
+
+                locations.forEach(l -> {
+                    String tempJson = gson.toJson(l);
+                    Log.d("CovidDataStore.retrieveLocations()", "json = " + tempJson);
+                });
             }
 
 /*            ObjectMapper mapper = new ObjectMapper();
@@ -110,7 +120,7 @@ public class CovidDataStore
         catch(Exception e)
         {
             Log.e("CovidDataStore.RetrieveLocations()",
-                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
+                    covidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
         finally
         {
@@ -165,7 +175,7 @@ public class CovidDataStore
         catch(Exception e)
         {
             Log.e("CovidDataStore.RetrieveGlobalStats()",
-                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
+                    covidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
         finally
         {
@@ -194,7 +204,7 @@ public class CovidDataStore
         catch (Exception e)
         {
             Log.e("CovidDataStore.writeToDisk()",
-                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
+                    covidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
     }
 
@@ -234,7 +244,7 @@ public class CovidDataStore
         catch(Exception e)
         {
             Log.e("CovidDataStore.readFileFromDisk()",
-                    CovidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
+                    covidUtils.formatError(e.getMessage(), e.getStackTrace().toString()));
         }
         finally
         {
