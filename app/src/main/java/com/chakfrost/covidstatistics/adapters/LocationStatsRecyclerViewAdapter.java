@@ -248,8 +248,8 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
 
             // Confirmed data
             confirmed.setText(NumberFormat.getInstance().format(stat.getTotalConfirmed()));
-            confirmedDiff.setText(NumberFormat.getInstance().format(stat.getDiffConfirmed()));
-            confirmedImage.setImageResource(CovidUtils.determineArrow(stat.getDiffConfirmed(), previousStat.getDiffConfirmed(), false));
+            confirmedDiff.setText(NumberFormat.getInstance().format(stat.getDiffAverageConfirmede()));
+            confirmedImage.setImageResource(CovidUtils.determineArrow(stat.getDiffAverageConfirmede(), previousStat.getDiffAverageConfirmede(), false));
 //            Log.d("Confirm comparison", MessageFormat.format("{0} -> current: {1}; previous: {2}",
 //                    CovidUtils.formatLocation(location),
 //                    stat.getDiffConfirmed(),
