@@ -177,7 +177,8 @@ public class LocationStatsDetail extends AppCompatActivity
                 message = MessageFormat.format("{0}, {1}% COVID", message, String.format("%.0f", percentage));
             }
 
-            if (null != infoStat.get().getICUCapacity() && infoStat.get().getICUCapacity() != 0)
+            if ((null != infoStat.get().getICUCapacity() && infoStat.get().getICUCapacity() != 0)
+            && (null != infoStat.get().getICUCovidCurrent() && infoStat.get().getICUCovidCurrent() != 0))
             {
                 percentage = (double)infoStat.get().getICUCovidCurrent() / infoStat.get().getICUCapacity() * 100;
                 message = MessageFormat.format("{0}, {1}% full", message, String.format("%.0f", percentage));

@@ -253,6 +253,7 @@ public class CovidStatService
             {
                 stat.setDiffConfirmed(Math.abs(stat.getNewConfirmed()- previousStat.getNewConfirmed()));
                 stat.setDiffDeaths(Math.abs(stat.getNewDeaths() - previousStat.getNewDeaths()));
+                stat.setDiffAverageConfirmed(Math.abs(stat.getAverageConfirmed() - previousStat.getAverageConfirmed()));
 
                 if (null != stat.getHospitalizationsCurrent() && null != previousStat.getHospitalizationsCurrent())
                     stat.setHospitalizationsDiff(Math.abs(stat.getHospitalizationsCurrent() - previousStat.getHospitalizationsCurrent()));

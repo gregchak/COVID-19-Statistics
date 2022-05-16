@@ -2,16 +2,15 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '30.0.2'
+    compileSdkVersion 30
     archivesBaseName = "COVID-19 Statistics"
 
     defaultConfig {
         applicationId "com.chakfrost.covidstatistics"
         minSdkVersion 24
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
-        versionName '1.6.4.1'
+        versionName '1.6.5.1'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

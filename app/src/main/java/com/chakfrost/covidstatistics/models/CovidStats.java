@@ -38,6 +38,9 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     @SerializedName("diffConfirmed")
     private int DiffConfirmed;
     @Expose
+    @SerializedName("diffAverageConfirmed")
+    private int DiffAverageConfirmed;
+    @Expose
     @SerializedName("diffDeaths")
     private int DiffDeaths;
     @Expose
@@ -365,5 +368,15 @@ public class CovidStats implements Comparable<CovidStats>, Serializable
     public void setAverageDeaths(int averageDeaths)
     {
         AverageDeaths = averageDeaths;
+    }
+
+    public int getDiffAverageConfirmed()
+    {
+        return DiffAverageConfirmed;
+    }
+
+    public void setDiffAverageConfirmed(int diffAverageConfirmed)
+    {
+        DiffAverageConfirmed = diffAverageConfirmed;
     }
 }
