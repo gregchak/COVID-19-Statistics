@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -152,6 +154,7 @@ public class LocationFragment extends Fragment
 
     }
 
+    @WorkerThread
     private void getLocationStats(Location location)
     {
         locationRefreshCount++;
@@ -202,6 +205,7 @@ public class LocationFragment extends Fragment
         });
     }
 
+    @UiThread
     private void showRefreshResult(boolean success, Location location)
     {
         if (success)
@@ -230,152 +234,4 @@ public class LocationFragment extends Fragment
         // Hide progressBar
         locationsProgressBar.setVisibility(View.GONE);
     }
-
-/*    public void setProgressDialog()
-    {
-
-        int llPadding = 30;
-        LinearLayout ll = new LinearLayout(this.getActivity());
-        ll.setOrientation(LinearLayout.HORIZONTAL);
-        ll.setPadding(llPadding, llPadding, llPadding, llPadding);
-        ll.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams llParam = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        llParam.gravity = Gravity.CENTER;
-        ll.setLayoutParams(llParam);
-
-        ProgressBar progressBar = new ProgressBar(this.getActivity());
-        progressBar.setIndeterminate(true);
-        progressBar.setPadding(0, 0, llPadding, 0);
-        progressBar.setLayoutParams(llParam);
-
-        llParam = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        llParam.gravity = Gravity.CENTER;
-        TextView tvText = new TextView(this.getActivity());
-        tvText.setText("Loading ...");
-        tvText.setTextColor(Color.parseColor("#000000"));
-        tvText.setTextSize(20);
-        tvText.setLayoutParams(llParam);
-
-        ll.addView(progressBar);
-        ll.addView(tvText);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
-        builder.setCancelable(true);
-        builder.setView(ll);
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        Window window = dialog.getWindow();
-        if (window != null) {
-            WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-            layoutParams.copyFrom(dialog.getWindow().getAttributes());
-            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-            layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-            dialog.getWindow().setAttributes(layoutParams);
-        }
-    }*/
-
-    /**
-     * Class for handling the fetching of Location stats
-     * asynchronously, off the Main UI thread
-     */
-//    public class RefreshLocationStatistics extends AsyncTask<Location, Integer, Boolean>
-//    {
-//        private boolean isComplete;
-//        private Boolean isSuccessful;
-//        private Location currentLocation;
-//
-//        @Override
-//        protected void onPreExecute()
-//        {
-//            // Show progressBar
-//            locationsProgressBar.setVisibility(View.VISIBLE);
-//
-//            // Set progress variables
-//            isComplete = false;
-//            isSuccessful = false;
-//        }
-//
-//        @Override
-//        protected Boolean doInBackground(Location... location)
-//        {
-//            for (int i = 0; i < location.length; i++)
-//            {
-//                currentLocation = location[i];
-//                CovidStatService.getAllLocationStats(currentLocation, new IServiceCallbackGeneric()
-//                {
-//                    @Override
-//                    public <T> void onSuccess(T result)
-//                    {
-//                        Location updatedLocation = (Location)result;
-//                        updatedLocation.setLastUpdated(new Date());
-//
-//                        Location found = locations.stream()
-//                                .filter(l -> l.getCountry().equals(currentLocation.getCountry())
-//                                        && l.getProvince().equals(currentLocation.getProvince())
-//                                        && l.getMunicipality().equals(currentLocation.getMunicipality()))
-//                                .findFirst()
-//                                .orElse(null);
-//
-//                        if (null != found)
-//                        {
-//                            // Location is being updated
-//                            locations.remove(found);
-//                        }
-//
-//                        // Save Location
-//                        locations.add(updatedLocation);
-//
-//                        // Save to local storage
-//                        CovidApplication.setLocations(locations);
-//
-//                        isSuccessful = true;
-//                        isComplete = true;
-//                    }
-//
-//                    @Override
-//                    public void onError(Error err)
-//                    {
-//                        isSuccessful = false;
-//                        isComplete = true;
-//                    }
-//                });
-//            }
-//
-//            while (!isComplete) {}
-//
-//            return isSuccessful;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Boolean result)
-//        {
-//            // Hide progressBar
-//            locationsProgressBar.setVisibility(View.GONE);
-//
-//            if (result)
-//            {
-//                if(null != getView())
-//                {
-//                    // Notify
-//                    Snackbar.make(getView(), "Location stats updated ", Snackbar.LENGTH_SHORT)
-//                            .setAction("Action", null).show();
-//                }
-//            }
-//            else
-//            {
-//                if(null != getView())
-//                {
-//                    // Notify
-//                    Snackbar.make(getView(),
-//                            MessageFormat.format("Errors occurred while updating {0}", CovidUtils.formatLocation(currentLocation)),
-//                            Snackbar.LENGTH_SHORT)
-//                            .setAction("Action", null).show();
-//                }
-//            }
-//        }
-//    }
 }

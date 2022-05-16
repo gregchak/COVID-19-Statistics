@@ -3,6 +3,9 @@
     package="com.chakfrost.covidstatistics">
 
     <uses-permission android:name="android.permission.INTERNET" />
+<!--    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
+
+
 
     <application
         android:name=".CovidApplication"
@@ -29,6 +32,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+<!--        <service-->
+<!--            android:name="MyNavigationService"-->
+<!--            android:foregroundServiceType="location" ... >-->
+<!--        &lt;!&ndash; Any inner elements would go here. &ndash;&gt;-->
+<!--        </service>-->
     </application>
 
 </manifest>

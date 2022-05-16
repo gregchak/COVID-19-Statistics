@@ -232,7 +232,7 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
             double previousFatalityRateCalculation;
             double fatalityDifference;
 
-            if (stats.size() > 0)
+            if (stats.size() > 1)
                 previousStat = stats.get(1);
 
             // For debugging
@@ -248,8 +248,8 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
 
             // Confirmed data
             confirmed.setText(NumberFormat.getInstance().format(stat.getTotalConfirmed()));
-            confirmedDiff.setText(NumberFormat.getInstance().format(stat.getDiffConfirmed()));
-            confirmedImage.setImageResource(CovidUtils.determineArrow(stat.getDiffConfirmed(), previousStat.getDiffConfirmed(), false));
+            confirmedDiff.setText(NumberFormat.getInstance().format(stat.getNewConfirmed()));
+            confirmedImage.setImageResource(CovidUtils.determineArrow(stat.getDiffAverageConfirmed(), previousStat.getDiffAverageConfirmed(), false));
 //            Log.d("Confirm comparison", MessageFormat.format("{0} -> current: {1}; previous: {2}",
 //                    CovidUtils.formatLocation(location),
 //                    stat.getDiffConfirmed(),
@@ -258,7 +258,7 @@ public class LocationStatsRecyclerViewAdapter extends RecyclerView.Adapter<Locat
 
             // Death data
             deaths.setText(NumberFormat.getInstance().format(stat.getTotalDeaths()));
-            deathsDiff.setText(NumberFormat.getInstance().format(stat.getDiffDeaths()));
+            deathsDiff.setText(NumberFormat.getInstance().format(stat.getNewDeaths()));
             deathsImage.setImageResource(CovidUtils.determineArrow(stat.getDiffDeaths(), previousStat.getDiffDeaths(), false));
 //            Log.d("Death comparison", MessageFormat.format("{0} -> current: {1}; previous: {2}",
 //                    CovidUtils.formatLocation(location),
